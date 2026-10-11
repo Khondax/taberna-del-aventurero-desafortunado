@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.env
+*.db
+D-D-2024-Manual-Jugador-ESP.pdf

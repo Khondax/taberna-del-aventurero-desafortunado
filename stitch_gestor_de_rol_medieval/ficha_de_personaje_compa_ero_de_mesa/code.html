@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+
+<html lang="es" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&amp;family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-container":"#764e00","secondary-fixed-dim":"#f8bc64","error-container":"#ffdad6","secondary-fixed":"#ffddb2","primary-container":"#7a1c1c","error":"#ba1a1a","surface-dim":"#ded9d1","surface-bright":"#fef9f0","surface-container-highest":"#e7e2d9","primary":"#5b0309","on-tertiary-fixed-variant":"#653d14","inverse-primary":"#ffb3ad","surface-container-high":"#ece8df","secondary-container":"#fec169","surface":"#fef9f0","on-secondary-fixed-variant":"#624000","primary-fixed-dim":"#ffb3ad","surface-variant":"#e7e2d9","inverse-surface":"#32302a","surface-container-low":"#f8f3ea","on-secondary-fixed":"#291800","on-tertiary-container":"#d8a06e","outline-variant":"#ddc0bd","tertiary-container":"#5d370e","outline":"#8a716f","tertiary":"#422200","on-surface-variant":"#574240","surface-tint":"#a43b37","on-primary-container":"#ff8981","on-error":"#ffffff","tertiary-fixed":"#ffdcc0","inverse-on-surface":"#f5f0e7","on-primary-fixed":"#410004","on-tertiary-fixed":"#2d1600","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","on-error-container":"#93000a","primary-fixed":"#ffdad7","background":"#fef9f0","secondary":"#815500","on-primary":"#ffffff","on-surface":"#1d1c16","surface-container":"#f2ede4","tertiary-fixed-dim":"#f6bb87","on-background":"#1d1c16","on-tertiary":"#ffffff","on-primary-fixed-variant":"#842322"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-2xl":"3rem","space-xl":"2rem","space-lg":"1.5rem","space-sm":"0.5rem","space-3xl":"4rem","grid-margin-mobile":"1rem","space-2xs":"0.125rem","grid-margin-desktop":"2.5rem","grid-gutter":"1rem","space-xs":"0.25rem","space-md":"1rem"},"fontFamily":{"headline-sm":["EB Garamond"],"stat-value":["JetBrains Mono"],"title-md":["Hanken Grotesk"],"body-lg":["Hanken Grotesk"],"body-sm":["Hanken Grotesk"],"headline-lg":["EB Garamond"],"headline-lg-mobile":["EB Garamond"],"label-md":["JetBrains Mono"],"body-md":["Hanken Grotesk"],"display-mobile":["EB Garamond"],"title-lg":["Hanken Grotesk"],"display":["EB Garamond"],"headline-md":["EB Garamond"],"label-sm":["JetBrains Mono"]},"fontSize":{"headline-sm":["20px",{"lineHeight":"26px","fontWeight":"500"}],"stat-value":["22px",{"lineHeight":"24px","fontWeight":"700"}],"title-md":["16px",{"lineHeight":"22px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","letterSpacing":"0em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"display-mobile":["36px",{"lineHeight":"42px","letterSpacing":"-0.01em","fontWeight":"600"}],"title-lg":["18px",{"lineHeight":"24px","fontWeight":"600"}],"display":["48px",{"lineHeight":"56px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"30px","fontWeight":"500"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"500"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md shadow-[0_2px_12px_rgba(45,30,15,0.06)]"><div class="h-16 w-full px-grid-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm"><img alt="Grimorio &amp; Crónicas Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa-phFOLeBXDCIRlExXmf_Alp8NcKApSSSvQcvJrLu0AH3AMGQEe_gP5R4TvB5Br8R7jYB89hoB96MoeslI8_Ikma035Mf3mTdQbFUf_eBrG054DESrMQNDL5DKNZ-Id-qwealBnHouxjqAuTmoqoKwxiSA67wkZWFS0bCKhAb6XFAhDxdl_muLxhn5wMA_rxU6Fge-XxPa0FP-V3TddgYAmHHpMJ1XrTXFde_O0ac5XMGEzSL6qPE"/><span class="font-headline-sm text-headline-sm text-primary tracking-wide hidden sm:inline">Taberna del aventurero desafortunado</span></div><div class="h-6 w-px bg-surface-container-highest hidden md:block"></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-title-md rounded"><a class="px-space-md py-space-xs rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="panel-del-director" href="#">Panel del Director</a><a aria-current="page" class="px-space-md py-space-xs transition-colors bg-primary-container text-on-primary font-title-md rounded" data-path="ficha-de-personaje" href="#">Ficha de Personaje</a><a class="px-space-md py-space-xs rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="grimorio-e-inventario" href="#">Grimorio &amp; Inventario</a><a class="px-space-md py-space-xs rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="selector-de-campanas" href="#">Selector de Campañas</a></nav></div></header><aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-low z-40 hidden md:flex flex-col py-space-md shadow-[2px_0_12px_rgba(45,30,15,0.03)]"><div class="px-space-md mb-space-sm flex items-center justify-between"><span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Navegación Activa</span><span class="font-label-sm text-label-sm text-secondary">Mesa v3.4</span></div><nav class="flex-1 px-space-sm space-y-space-xs" data-active-classes="bg-primary-container text-on-primary font-title-md rounded"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="panel-del-director" href="#"><span class="material-symbols-outlined text-lg">shield</span>Panel del Director</a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-primary-container text-on-primary font-title-md rounded" data-path="ficha-de-personaje" href="#"><span class="material-symbols-outlined text-lg">person</span>Ficha de Personaje</a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="grimorio-e-inventario" href="#"><span class="material-symbols-outlined text-lg">auto_stories</span>Grimorio &amp; Inventario</a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="selector-de-campanas" href="#"><span class="material-symbols-outlined text-lg">map</span>Selector de Campañas</a><div class="pt-space-md border-t border-surface-container-high my-space-sm"></div><div class="px-space-md py-space-xs font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Herramientas de Mesa</div><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bitacora-de-campana" href="#"><span class="material-symbols-outlined text-lg">menu_book</span>Bitácora de Sesión</a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="bestiario-y-npcs" href="#"><span class="material-symbols-outlined text-lg">pest_control</span>Bestiario &amp; NPCs</a></nav></aside><div class="md:pl-64"><main class="relative pt-16 bg-background min-h-screen w-full"><div class="flex flex-col w-full">
+<!-- Interactive Character Sheet Canvas -->
+<div class="w-full px-grid-margin-mobile md:px-grid-margin-desktop py-space-lg space-y-space-lg">
+<!-- Top Character Header Banner -->
+<section class="relative bg-surface-container-low rounded-xl shadow-md p-space-md lg:p-space-xl overflow-hidden">
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-secondary-container/20 blur-3xl pointer-events-none"></div>
+<div class="absolute right-1/3 bottom-0 w-64 h-64 rounded-full bg-primary/5 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col xl:flex-row gap-space-lg items-start xl:items-center justify-between">
+<!-- Hero Identity Block with Portrait -->
+<div class="flex items-center gap-space-md lg:gap-space-lg">
+<div class="relative group">
+<div class="w-24 h-24 lg:w-28 lg:h-28 rounded-xl overflow-hidden bg-surface-container shadow-md ring-2 ring-secondary/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A stoic human male paladin with weathered noble features, warm piercing brown eyes, short trimmed dark hair, donning antique polished steel plate armor with brass filigree details, warm natural illuminated rim lighting on parchment toned background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjhPGLo-uCy-RRbow1WE6jtIUpue1zJ4ZVd3xU11cfdWNom9QIY-7xPzzy89L5KdJ8uq7NeK4pbzd-k4eRl8fKXBB3ZZhFkhvUqiK4S153kLVqcysV8xmQgM95aHk6vMNHZJ9ezWRjaFXch6JHrjqY8IWIqg0cM8yhdJ8AxNmh4WBCz8n9YJZy1gsKDGlT__NJ2v5s9UR85ZH-7vF3qtTkAwKCy1d6q3oQ8CLuJfxXuzM_swkYAc8Q"/>
+</div>
+<span class="absolute -bottom-2 -right-2 bg-primary text-on-primary font-label-sm text-label-sm px-space-xs py-space-2xs rounded shadow uppercase font-bold tracking-wider">Nv. 5</span>
+</div>
+<div class="space-y-space-xs"><div class="flex flex-wrap items-center gap-space-xs"><span class="bg-surface-container-high text-secondary px-space-sm py-space-2xs rounded font-label-sm text-label-sm uppercase font-semibold">Paladín (Juramento de Devoción)</span><span class="text-on-surface-variant font-label-sm text-label-sm">•</span><span class="bg-surface-container-high text-on-surface px-space-sm py-space-2xs rounded font-label-sm text-label-sm">Humano</span><span class="text-on-surface-variant font-label-sm text-label-sm">•</span><span class="bg-surface-container-high text-on-surface-variant px-space-sm py-space-2xs rounded font-label-sm text-label-sm">Noble de Cormyr</span><span class="bg-primary/10 text-primary border border-primary/20 px-space-sm py-space-2xs rounded-full font-label-sm text-label-sm font-semibold flex items-center gap-space-2xs ml-auto sm:ml-0"><span class="material-symbols-outlined text-xs">casino</span>Modo Compañero de Mesa</span></div><div class="flex flex-col sm:flex-row sm:items-baseline gap-space-sm"><h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Sir Valerius de Oakhaven</h1><p class="font-body-md text-body-md text-on-surface-variant italic">"La espada guarda la promesa; la devoción enciende la aurora."</p></div><div class="flex flex-wrap items-center gap-space-sm pt-space-xs"><button class="px-space-md py-space-xs rounded bg-surface hover:bg-surface-container-high text-secondary font-label-md text-label-md border border-secondary/30 flex items-center gap-space-xs transition-colors shadow-sm active:scale-95" onclick="alert('Descanso Corto completado: Se recupera Canalizar Divinidad y se pueden gastar Dados de Golpe en papel.');" title="Recupera Canalizar Divinidad"><span class="material-symbols-outlined text-base text-secondary">hourglass_bottom</span>Descanso Corto</button><button class="px-space-md py-space-xs rounded bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md flex items-center gap-space-xs transition-colors shadow active:scale-95" onclick="resetHands(); adjustHP(42); alert('Descanso Largo completado: PV restablecidos (42/42), Imposición de Manos al máximo (25 PV) y Espacios de Conjuro renovados.');" title="Restaura PV totales, Imposición de Manos y Espacios de Conjuro"><span class="material-symbols-outlined text-base">nights_stay</span>Descanso Largo (Restaurar Todo)</button></div></div>
+</div>
+<!-- Experience & Progression Gauges -->
+<div class="w-full xl:w-80 bg-surface-container rounded-lg p-space-md shadow-sm space-y-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Progreso de Nivel</span>
+<span class="font-stat-value text-stat-value text-secondary font-bold">6.500 <span class="font-label-md text-label-md text-on-surface-variant font-normal">/ 14.000 XP</span></span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5">
+<div class="h-full bg-secondary rounded-full" style="width: 46.4%;"></div>
+</div>
+<div class="flex justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Nv. 5 Alcanzado</span>
+<span class="">7.500 XP restante para Nv. 6</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Key Vital Metrics Row -->
+<section class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-space-sm lg:gap-space-md">
+<!-- Armor Class -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-secondary text-2xl mb-space-2xs">shield</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Clase de Armadura</span>
+<div class="flex items-baseline gap-space-2xs mt-space-2xs">
+<span class="font-stat-value text-stat-value text-on-surface">18</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Placas + Escudo</span>
+</div>
+<!-- Initiative -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-secondary text-2xl mb-space-2xs">timer</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Iniciativa</span>
+<span class="font-stat-value text-stat-value text-primary font-bold mt-space-2xs">+1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mod. Destreza</span>
+</div>
+<!-- Speed -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-secondary text-2xl mb-space-2xs">directions_run</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Velocidad</span>
+<span class="font-stat-value text-stat-value text-on-surface mt-space-2xs">9m</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">30 pies / asalto</span>
+</div>
+<!-- Hit Points -->
+<div class="col-span-2 md:col-span-2 lg:col-span-2 bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-base text-primary">favorite</span> Puntos de Golpe
+          </span>
+<span class="bg-secondary-container text-on-secondary-container px-space-xs py-space-2xs rounded font-label-sm text-label-sm font-semibold">+5 Temp</span>
+</div>
+<div class="flex items-center justify-between mt-space-xs">
+<div class="flex items-baseline gap-space-2xs">
+<span class="font-stat-value text-stat-value text-primary" id="current-hp">38</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ 42 Max</span>
+</div>
+<!-- Quick HP Adjusters -->
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded bg-surface-container-high text-primary hover:bg-surface-container-highest flex items-center justify-center font-bold text-lg leading-none transition-colors" onclick="adjustHP(-1)" title="Restar 1 PV">-</button>
+<button class="w-8 h-8 rounded bg-surface-container-high text-primary hover:bg-surface-container-highest flex items-center justify-center font-bold text-lg leading-none transition-colors" onclick="adjustHP(1)" title="Sumar 1 PV">+</button>
+</div>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden mt-space-xs">
+<div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 90.4%;"></div>
+</div>
+</div>
+<!-- Hit Dice & Death Saves -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Dados Golpe</span>
+<span class="font-stat-value text-stat-value text-on-surface">4<span class="font-label-sm text-label-sm text-on-surface-variant">/5d10</span></span>
+</div>
+</div>
+<div class="pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant block mb-space-2xs uppercase tracking-wider">Salvación Muerte</span>
+<div class="flex items-center justify-between">
+<!-- Successes -->
+<div class="flex items-center gap-space-2xs" title="Éxitos">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+</div>
+<span class="text-on-surface-variant font-label-sm text-label-sm">|</span>
+<!-- Failures -->
+<div class="flex items-center gap-space-2xs" title="Fallos">
+<span class="w-3 h-3 rounded-full bg-surface-container-highest"></span>
+<span class="w-3 h-3 rounded-full bg-surface-container-highest"></span>
+<span class="w-3 h-3 rounded-full bg-surface-container-highest"></span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core 6 Ability Scores Bar -->
+<section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-space-sm lg:gap-space-md">
+<!-- STR -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Fuerza</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-primary font-bold">+3</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 16</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium mt-space-2xs">Salvación: +6 ◆</span>
+</div>
+<!-- DEX -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Destreza</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-on-surface font-bold">+1</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 12</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs">Salvación: +1</span>
+</div>
+<!-- CON -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Constitución</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-on-surface font-bold">+2</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 15</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs">Salvación: +2</span>
+</div>
+<!-- INT -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Inteligencia</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-on-surface font-bold">+0</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 10</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs">Salvación: +0</span>
+</div>
+<!-- WIS -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Sabiduría</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-secondary font-bold">+1</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 13</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium mt-space-2xs">Salvación: +4 ◆</span>
+</div>
+<!-- CHA -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex flex-col items-center justify-center text-center relative hover:shadow-md transition-all">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Carisma</span>
+<div class="my-space-xs w-14 h-14 rounded-lg bg-surface flex flex-col items-center justify-center shadow-inner">
+<span class="font-stat-value text-stat-value text-primary font-bold">+3</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface bg-surface-container px-space-xs py-space-2xs rounded">Puntuación: 16</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium mt-space-2xs">Salvación: +6 ◆</span>
+</div>
+</section>
+<!-- Main Asymmetric Workbench: Skills & Attacks -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Column: Skills & Proficiencies (4 cols) -->
+<section class="lg:col-span-4 bg-surface-container-low rounded-xl p-space-md lg:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="text-secondary font-headline-sm">◆</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Habilidades</h2>
+</div>
+<span class="bg-surface-container text-on-surface-variant px-space-sm py-space-2xs rounded font-label-sm text-label-sm">Bonus Comp.: +3</span>
+</div>
+<!-- Skills List -->
+<div class="space-y-space-xs">
+<!-- Skill Items -->
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-secondary flex items-center justify-center text-on-secondary text-xs" title="Doble Competencia (Maestría)">★</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Atletismo</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">FUE</span>
+</div>
+<span class="font-stat-value text-label-md text-primary font-bold">+6</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Acrobacias</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">DES</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">+1</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Engaño</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">CAR</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">+3</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Historia</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">INT</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">+0</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Intimidación</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">CAR</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">+3</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs" title="Competencia">✓</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Medicina</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">SAB</span>
+</div>
+<span class="font-stat-value text-label-md text-primary font-bold">+4</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Percepción Pasiva</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">SAB</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">11</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs" title="Competencia">✓</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Persuasión</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">CAR</span>
+</div>
+<span class="font-stat-value text-label-md text-primary font-bold">+6</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs" title="Competencia">✓</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Religión</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">INT</span>
+</div>
+<span class="font-stat-value text-label-md text-primary font-bold">+3</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="w-4 h-4 rounded-full bg-surface-container-highest"></span>
+<span class="font-body-md text-body-md text-on-surface">Trato con Animales</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">SAB</span>
+</div>
+<span class="font-stat-value text-label-md text-on-surface">+1</span>
+</div>
+</div>
+<!-- Passive & Proficiencies Footer -->
+<div class="pt-space-sm bg-surface p-space-sm rounded-lg space-y-space-2xs text-on-surface-variant">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="">Idiomas conocidos:</span>
+<span class="font-semibold text-on-surface">Común, Celestial</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="">Armaduras:</span>
+<span class="font-semibold text-on-surface">Todas, Escudos</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="">Armas:</span>
+<span class="font-semibold text-on-surface">Simples, Marciales</span>
+</div>
+</div>
+</section>
+<!-- Right Column: Attacks, Divine Actions & Spell Slots (8 cols) -->
+<section class="lg:col-span-8 space-y-space-md">
+<!-- Attacks & Arsenal Table -->
+<div class="bg-surface-container-low rounded-xl p-space-md lg:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="text-secondary font-headline-sm">◆</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Acciones y Ataques Principales</h2>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="">2 Ataques por Acción</span>
+</div>
+</div>
+<!-- Attacks Grid Cards -->
+<div class="space-y-space-sm">
+<!-- Weapon: Longsword +1 -->
+<div class="bg-surface rounded-lg p-space-md shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">swords</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<h3 class="font-title-lg text-title-lg text-on-surface font-semibold">Espada Larga +1</h3>
+<span class="bg-secondary/15 text-secondary px-space-xs py-space-2xs rounded font-label-sm text-label-sm font-semibold">Mágica</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Cuerpo a cuerpo • Alcance 1.5m • Versátil (1d10 a dos manos)</p>
+</div>
+</div>
+<div class="flex items-center gap-space-md w-full md:w-auto justify-between md:justify-end">
+<div class="text-center px-space-sm py-space-2xs bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Ataque</span>
+<span class="font-stat-value text-stat-value text-primary font-bold">+7</span>
+</div>
+<div class="text-center px-space-sm py-space-2xs bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Daño</span>
+<span class="font-stat-value text-title-md text-on-surface font-bold">1d8+4 <span class="font-body-sm text-body-sm text-on-surface-variant">cort.</span></span>
+</div>
+<button class="px-space-md py-space-xs rounded bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-space-2xs transition-colors shadow" onclick="triggerRoll('Espada Larga +1', '1d20 + 7', '1d8 + 4 Cortante')">
+<span class="material-symbols-outlined text-base">casino</span> Atacar
+                </button>
+</div>
+</div>
+<!-- Smite / Divine Strike -->
+<div class="bg-surface rounded-lg p-space-md shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-2xl">flare</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<h3 class="font-title-lg text-title-lg text-on-surface font-semibold">Castigo Divino (Divine Smite)</h3>
+<span class="bg-primary/10 text-primary px-space-xs py-space-2xs rounded font-label-sm text-label-sm font-semibold">Conjuro Nv.1+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Instantáneo al impactar • +1d8 extra vs No-muertos o Infernales</p>
+</div>
+</div>
+<div class="flex items-center gap-space-md w-full md:w-auto justify-between md:justify-end">
+<div class="text-center px-space-sm py-space-2xs bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Gasto</span>
+<span class="font-stat-value text-label-md text-secondary font-bold">1 Espacio</span>
+</div>
+<div class="text-center px-space-sm py-space-2xs bg-surface-container-low rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Daño Base</span>
+<span class="font-stat-value text-title-md text-secondary font-bold">+2d8 <span class="font-body-sm text-body-sm text-on-surface-variant">rad.</span></span>
+</div>
+<button class="px-space-md py-space-xs rounded bg-surface-container-high hover:bg-secondary hover:text-on-secondary text-secondary font-label-md text-label-md uppercase tracking-wider flex items-center gap-space-2xs transition-colors" onclick="triggerRoll('Castigo Divino', 'Ranura Nivel 1', '+2d8 Radiante')">
+<span class="material-symbols-outlined text-base">auto_fix_high</span> Descargar
+                </button>
+</div>
+</div>
+<!-- Lay on Hands Tracker -->
+<div class="bg-surface rounded-lg p-space-md shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">healing</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<h3 class="font-title-lg text-title-lg text-on-surface font-semibold">Imposición de Manos</h3>
+<span class="bg-surface-container-high text-on-surface-variant px-space-xs py-space-2xs rounded font-label-sm text-label-sm">Recurso Sagrado</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Acción táctil • Gasta 5 PV de la reserva para curar una enfermedad o veneno</p>
+</div>
+</div>
+<div class="flex items-center gap-space-md w-full md:w-auto justify-between md:justify-end">
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase block">Reserva Disponible</span>
+<div class="flex items-baseline gap-space-2xs justify-end">
+<span class="font-stat-value text-stat-value text-primary font-bold" id="lay-hands-counter">20</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ 25 PV</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-sm text-label-sm font-semibold transition-colors" onclick="useHands(5)">-5 PV</button>
+<button class="p-space-xs rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant transition-colors" onclick="resetHands()" title="Restablecer tras Descanso Largo">
+<span class="material-symbols-outlined text-base">restart_alt</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Spell Slot & Resource Tracker Bento -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Spell Slots -->
+<div class="bg-surface-container-low rounded-xl p-space-md shadow-sm space-y-space-sm">
+<div class="flex justify-between items-center">
+<span class="font-title-md text-title-md text-primary font-semibold">Espacios de Conjuro (Paladín)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">CD Salvación: 14</span>
+</div>
+<!-- Tier 1 -->
+<div class="flex items-center justify-between p-space-xs rounded bg-surface">
+<div>
+<span class="font-title-md text-title-md font-semibold text-on-surface">Nivel 1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">4 espacios máx.</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-6 h-6 rounded-sm bg-primary text-on-primary flex items-center justify-center text-xs shadow-sm hover:opacity-90" onclick="toggleSlot(this)">◆</button>
+<button class="w-6 h-6 rounded-sm bg-primary text-on-primary flex items-center justify-center text-xs shadow-sm hover:opacity-90" onclick="toggleSlot(this)">◆</button>
+<button class="w-6 h-6 rounded-sm bg-primary text-on-primary flex items-center justify-center text-xs shadow-sm hover:opacity-90" onclick="toggleSlot(this)">◆</button>
+<button class="w-6 h-6 rounded-sm bg-surface-container-highest text-on-surface-variant/40 flex items-center justify-center text-xs" onclick="toggleSlot(this)">◇</button>
+</div>
+</div>
+<!-- Tier 2 -->
+<div class="flex items-center justify-between p-space-xs rounded bg-surface">
+<div>
+<span class="font-title-md text-title-md font-semibold text-on-surface">Nivel 2</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">2 espacios máx.</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-6 h-6 rounded-sm bg-secondary text-on-secondary flex items-center justify-center text-xs shadow-sm hover:opacity-90" onclick="toggleSlot(this)">◆</button>
+<button class="w-6 h-6 rounded-sm bg-secondary text-on-secondary flex items-center justify-center text-xs shadow-sm hover:opacity-90" onclick="toggleSlot(this)">◆</button>
+</div>
+</div>
+</div>
+<!-- Channel Divinity / Sagrado -->
+<div class="bg-surface-container-low rounded-xl p-space-md shadow-sm space-y-space-sm flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center mb-space-2xs">
+<span class="font-title-md text-title-md text-primary font-semibold">Canalizar Divinidad</span>
+<span class="font-label-sm text-label-sm bg-secondary/15 text-secondary px-space-xs py-space-2xs rounded font-semibold">1 / Descanso Corto</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Elige una de las invocaciones del Juramento de Devoción por descanso:</p>
+</div>
+<div class="space-y-space-xs">
+<div class="p-space-xs bg-surface rounded flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-medium">Arma Sagrada</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Suma +3 (Carisma) a tiradas de ataque y emite luz brillante.</span>
+</div>
+<button class="px-space-sm py-space-xs bg-surface-container hover:bg-surface-container-high rounded text-on-surface font-label-sm text-label-sm font-semibold transition-colors">Activar</button>
+</div>
+<div class="p-space-xs bg-surface rounded flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-on-surface font-medium">Expulsar lo Impío</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Infernals y No-muertos a 9m deben superar tirada de SAB CD 14.</span>
+</div>
+<button class="px-space-sm py-space-xs bg-surface-container hover:bg-surface-container-high rounded text-on-surface font-label-sm text-label-sm font-semibold transition-colors">Activar</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Live Roll Notification Toast Inset -->
+<div class="hidden bg-surface-container p-space-md rounded-xl shadow-lg border-l-4 border-primary transition-all duration-300" id="roll-toast">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">casino</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant" id="roll-title">Resultado de Tirada</span>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-stat-value text-stat-value text-primary" id="roll-result">19</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="roll-formula">1d20 [12] + 7</span>
+</div>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface" onclick="document.getElementById('roll-toast').classList.add('hidden')">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+</div>
+<!-- Internal Navigation Tabs & Deep Dossier -->
+<section class="bg-surface-container-low rounded-xl shadow-sm overflow-hidden">
+<!-- Tabs Bar -->
+<div class="flex flex-wrap border-b border-surface-container-highest bg-surface-container px-space-md pt-space-xs gap-space-xs">
+<button class="px-space-md py-space-sm font-title-md text-title-md text-primary font-semibold border-b-2 border-primary transition-all flex items-center gap-space-2xs" id="tab-btn-traits" onclick="switchTab('traits')">
+<span class="material-symbols-outlined text-lg">military_tech</span> Rasgos de Clase &amp; Juramento
+        </button>
+<button class="px-space-md py-space-sm font-title-md text-title-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-space-2xs" id="tab-btn-feats" onclick="switchTab('feats')">
+<span class="material-symbols-outlined text-lg">workspace_premium</span> Dotes &amp; Trasfondo ('Noble')
+        </button>
+<button class="px-space-md py-space-sm font-title-md text-title-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-space-2xs" id="tab-btn-notes" onclick="switchTab('notes')">
+<span class="material-symbols-outlined text-lg">edit_note</span> Bitácora &amp; Notas de Campaña
+        </button>
+</div>
+<!-- Tab Panels -->
+<div class="p-space-md lg:p-space-xl">
+<!-- Tab: Class Traits -->
+<div class="space-y-space-md" id="tab-traits">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-xl">visibility</span>
+<h4 class="font-title-md text-title-md">Sentido Divino (Divine Sense)</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Como acción, detectas la presencia de celestiales, infernales o no-muertos a menos de 18m que no estén tras cobertura total. Usos por descanso: 4 (1 + Mod Carisma).</p>
+</div>
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-xl">shield_moon</span>
+<h4 class="font-title-md text-title-md">Aura de Protección (Próxima)</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Se desbloqueará al Nivel 6. Sumarás tu bono de Carisma (+3) a todas las tiradas de salvación que realices tú y tus aliados situados a menos de 3 metros.</p>
+</div>
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-xl">health_and_safety</span>
+<h4 class="font-title-md text-title-md">Salud Divina</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">La magia sagrada que fluye por tu sangre te otorga inmunidad total contra toda clase de enfermedades y afecciones virulentas.</p>
+</div>
+</div>
+<!-- Tenets of Devotion Box -->
+<div class="bg-surface-container p-space-md rounded-lg border-l-2 border-secondary space-y-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">Mandamientos del Juramento de Devoción</span>
+<p class="font-body-md text-body-md text-on-surface italic">
+<strong>Honestidad:</strong> No mientas ni engañes; que tu palabra sea una promesa inquebrantable.<br/>
+<strong>Coraje:</strong> Nunca temas actuar, aunque la cautela sea sabia frente al mal implacable.<br/>
+<strong>Compasión:</strong> Ayuda a los desamparados y ejerce misericordia con tus enemigos rendidos, pero castiga sin dudar a quienes abusan del débil.
+            </p>
+</div>
+</div>
+<!-- Tab: Feats & Background -->
+<div class="hidden space-y-space-md" id="tab-feats">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Feat: Sentinel -->
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex items-center justify-between">
+<h4 class="font-title-lg text-title-lg text-primary font-semibold">Dote: Centinela (Sentinel)</h4>
+<span class="bg-surface-container px-space-xs py-space-2xs rounded font-label-sm text-label-sm text-on-surface-variant">Adquirida Nv. 4</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                • Cuando impactas a una criatura con un ataque de oportunidad, su velocidad se reduce a 0 durante el resto del turno.<br/>
+                • Las criaturas provocan ataques de oportunidad incluso si usan la acción de Destrabarse.<br/>
+                • Si un enemigo a 1.5m ataca a un aliado distinto a ti, puedes usar tu reacción para atacarlo de inmediato.
+              </p>
+</div>
+<!-- Background: Noble -->
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex items-center justify-between">
+<h4 class="font-title-lg text-title-lg text-primary font-semibold">Trasfondo: Noble (Posición y Privilegio)</h4>
+<span class="bg-secondary/15 text-secondary px-space-xs py-space-2xs rounded font-label-sm text-label-sm font-semibold">Herencia</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Gracias a tu noble linaje de Oakhaven, la alta sociedad reconoce tu escudo y alcurnia. Tienes bienvenida asegurada en cortes, castillos y mansiones feudales; la gente común asume tu estatus y evita faltarte al respeto.
+              </p>
+<div class="pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<strong>Sello Dinástico:</strong> Anillo con el Roble Coronado de Valoria y carta de salvoconducto rubricada.
+              </div>
+</div>
+</div>
+</div>
+<!-- Tab: Campaign Notes -->
+<div class="hidden space-y-space-md" id="tab-notes">
+<div class="flex justify-between items-center">
+<h3 class="font-title-lg text-title-lg text-primary font-semibold">Anotaciones de la Campaña: Capítulo III</h3>
+<button class="px-space-sm py-space-xs bg-surface-container-high hover:bg-surface-container-highest rounded text-on-surface font-label-sm text-label-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-base">add</span> Nueva Entrada
+            </button>
+</div>
+<div class="space-y-space-sm">
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Sesión 14 • 12 de Flamerule, 1492 CV</span>
+<span class="text-secondary font-semibold">Prioridad Alta</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">El Culto de las Sombras de Ébano</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Descubrimos que el canciller Morvath portaba un medallón profanado en las catacumbas bajo la catedral de Santa Elira. Dejamos a 3 prisioneros bajo custodia de la guardia capitular. Debemos hablar con el Maestre Jonás antes del amanecer.
+              </p>
+</div>
+<div class="bg-surface p-space-md rounded-lg shadow-sm space-y-space-xs">
+<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Sesión 13 • 8 de Flamerule, 1492 CV</span>
+<span class="text-on-surface-variant">Información de Equipo</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Reparto del Botín de las Minas Grises</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Custodio 45 piezas de oro, 2 gemas de cornalina sin tallar y la Espada Larga +1 otorgada por la Baronesa en recompensa por asegurar los caminos septentrionales.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Interactive Logic (Vanilla JS) -->
+<script>
+    function adjustHP(delta) {
+      const hpEl = document.getElementById('current-hp');
+      let current = parseInt(hpEl.textContent, 10);
+      current = Math.max(0, Math.min(42, current + delta));
+      hpEl.textContent = current;
+    }
+
+    function useHands(amount) {
+      const el = document.getElementById('lay-hands-counter');
+      let current = parseInt(el.textContent, 10);
+      current = Math.max(0, current - amount);
+      el.textContent = current;
+    }
+
+    function resetHands() {
+      const el = document.getElementById('lay-hands-counter');
+      el.textContent = '25';
+    }
+
+    function toggleSlot(button) {
+      if (button.textContent === '◆') {
+        button.textContent = '◇';
+        button.classList.remove('bg-primary', 'bg-secondary', 'text-on-primary', 'text-on-secondary');
+        button.classList.add('bg-surface-container-highest', 'text-on-surface-variant/40');
+      } else {
+        button.textContent = '◆';
+        button.classList.remove('bg-surface-container-highest', 'text-on-surface-variant/40');
+        button.classList.add('bg-primary', 'text-on-primary');
+      }
+    }
+
+    function switchTab(tabId) {
+      const tabs = ['traits', 'feats', 'notes'];
+      tabs.forEach(t => {
+        const panel = document.getElementById('tab-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (t === tabId) {
+          panel.classList.remove('hidden');
+          btn.classList.remove('text-on-surface-variant');
+          btn.classList.add('text-primary', 'font-semibold', 'border-b-2', 'border-primary');
+        } else {
+          panel.classList.add('hidden');
+          btn.classList.remove('text-primary', 'font-semibold', 'border-b-2', 'border-primary');
+          btn.classList.add('text-on-surface-variant');
+        }
+      });
+    }
+
+    function triggerRoll(name, formula, note) {
+      const toast = document.getElementById('roll-toast');
+      const title = document.getElementById('roll-title');
+      const res = document.getElementById('roll-result');
+      const form = document.getElementById('roll-formula');
+
+      // Simple pseudo random d20
+      const d20 = Math.floor(Math.random() * 20) + 1;
+      const total = d20 + 7;
+
+      title.textContent = 'Ataque: ' + name;
+      res.textContent = total;
+      form.textContent = `1d20 [${d20}] + 7 • (${note})`;
+
+      toast.classList.remove('hidden');
+      toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+</div></main></div>
+</body></html>
