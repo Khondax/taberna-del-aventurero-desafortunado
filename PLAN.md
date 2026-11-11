@@ -2,32 +2,33 @@
 
 ## Resumen
 
-Crear una aplicación web en español para D&D 2024 (5.5e), centrada en fichas personales, creación guiada, subida de nivel, grimorio/inventario y consulta rápida durante la partida. Los jugadores comparten fichas concretas con su director mediante una mesa con invitación; el director consulta y deja notas privadas, sin editar personajes.
+Aplicación web en español para una partida de D&D 2024 (5.5e) entre amigos. Se centra en la consulta y el seguimiento durante la sesión: fichas, recursos, grimorio, inventario, descansos y subida de nivel. Las fichas son públicas dentro de la mesa y el máster tiene una vista con el resumen de todas. No hay cuentas ni roles.
 
-La interfaz seguirá el proyecto de Stitch “Gestor de Rol Medieval”: estética de manuscrito funcional, pergamino/granate/latón, EB Garamond para narrativa, Hanken Grotesk para lectura y JetBrains Mono para valores de juego.
+La interfaz sigue el proyecto de Stitch “Gestor de Rol Medieval”: estética de manuscrito funcional, pergamino/granate/latón, EB Garamond para narrativa, Hanken Grotesk para lectura y JetBrains Mono para valores de juego.
 
-## Implementación
+## Decisiones
 
-- Base técnica: Astro + TypeScript + Tailwind, desplegado en Vercel; Supabase proporcionará PostgreSQL, autenticación por correo y contraseña, y políticas de acceso por fila.
-- Entidades principales: usuario, mesa, invitación, ficha, progreso de nivel, recursos, inventario, conjuros, tiradas, notas de director y biblioteca de reglas por mesa.
-- Crear el asistente de personaje de nivel 1: atributos por matriz estándar, compra de puntos o tiradas; especie, trasfondo, clase, equipo, conjuros y elección de opciones correspondientes. La ficha resultante seguirá siendo totalmente editable.
-- Construir un asistente de subida de nivel que presente elecciones y mejoras derivadas de clase/subclase, las confirme y guarde un historial. El jugador podrá corregir cualquier resultado manualmente.
-- Implementar la ficha en tres áreas: navegación de personajes/mesa, ficha activa con estadísticas y recursos, y panel contextual de rasgos, conjuros e inventario. En móvil, convertirlo en un flujo único con una barra de acciones rápidas.
-- Añadir grimorio e inventario buscables, con detalle de reglas contextual; control de puntos de golpe, dados de golpe, espacios de conjuro y usos; tiradas rápidas con historial personal; y descansos corto/largo guiados, confirmables y reversibles.
-- Normalizar el PDF aportado como biblioteca privada de reglas: clases, subclases, especies, trasfondos, dotes, equipo, objetos, conjuros y progresiones. Director y propietario de la mesa podrán crear o modificar contenido casero compartido.
-- Exponer rutas protegidas para autenticación, fichas, mesas/invitaciones, biblioteca, recursos, tiradas y notas. Aplicar permisos: propietario edita su ficha; director invitado solo la lee y crea notas privadas; contenido de mesa solo lo modifica director/propietario.
+- Astro con `@astrojs/node`, servido desde mint-node solo por red local o Tailscale.
+- Persistencia en un archivo JSON por personaje, sin base de datos. El formato de exportación es el mismo que el de disco.
+- Sin autenticación: puede editar cualquiera con acceso a la red. Si algún día se expone fuera, habrá que añadir al menos una contraseña de mesa.
+- JavaScript sin framework en cliente. Si la ficha crece mucho en interactividad, valorar un componente Svelte para ella.
 
-## Pruebas
+## Hecho
 
-- Registro, inicio de sesión, creación de mesa, invitación y revocación de acceso.
-- Restricciones de permisos: un director no puede editar fichas; un jugador no accede a otra mesa ni a notas privadas.
-- Creación de personaje con los tres métodos de atributos y validación de elecciones requeridas.
-- Subidas de nivel, edición posterior, historial y selección de conjuros/rasgos.
-- Inventario, recursos, tiradas y descansos, incluyendo confirmación, reversión y valores límite.
-- Búsqueda de biblioteca, contenido casero y adaptación visual/escalabilidad en escritorio y móvil.
+- Vista del máster con refresco automático e importación.
+- Ficha editable en el sitio: identidad, nivel, PX, características, CA, velocidad, PG, dados de golpe, competencias en salvaciones y habilidades, aptitud mágica y espacios.
+- Armas, conjuros, objetos y rasgos desde los listados del SRD 5.2 o personalizados, con diálogo de edición y tooltip con desglose de cada número.
+- Tiradas de características, salvaciones, habilidades, ataques y conjuros. Recursos, descansos, subida de nivel, deshacer, exportación y guardado automático con detección de conflictos.
+- Formato v2 con migración automática desde v1.
+
+## Pendiente
+
+- Crear personajes de nivel 1 con asistente (matriz estándar, compra de puntos o tiradas).
+- Espacios de lanzadores medios y de brujo al subir de nivel. Hoy solo se automatizan los lanzadores completos; el resto se ajusta a mano en el grimorio.
+- Calcular la CA a partir de la armadura equipada. Hoy es un campo editable.
+- Ampliar los listados: conjuros de nivel 6 a 9 y rasgos de clase.
 
 ## Suposiciones
 
-- La v1 no administra encuentros, turnos ni progreso de campaña; las pantallas de director de Stitch se reducen a consulta de mesa y notas.
-- Las reglas se limitan a D&D 2024 en español; excepciones y compatibilidad se modelan como contenido casero.
-- El PDF se usará únicamente como fuente para la biblioteca privada de las mesas autorizadas, no como contenido público.
+- La v1 no administra encuentros ni turnos.
+- Las reglas se limitan a D&D 2024 en español. Las excepciones se modelan como contenido casero dentro de la ficha.

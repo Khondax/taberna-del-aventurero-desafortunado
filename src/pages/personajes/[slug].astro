@@ -1,0 +1,328 @@
+---
+// Ficha de personaje. Los campos con `data-path` se editan en el sitio; las filas con
+// `data-entry` muestran su descripción al pasar el ratón y abren su edición al pulsarlas.
+// Toda la interacción vive en src/scripts/sheet/.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryRow from '../../components/EntryRow.astro';
+import ResourceRow from '../../components/ResourceRow.astro';
+import { readSheet } from '../../lib/store';
+import {
+  abilities,
+  abilityNames,
+  abilityShort,
+  featureRow,
+  historyRow,
+  initials,
+  itemRow,
+  liveBars,
+  liveText,
+  resourceRows,
+  skillIds,
+  skills,
+  slotRows,
+  spellRow,
+  weaponRow,
+} from '../../lib/sheet';
+
+const file = await readSheet(Astro.params.slug ?? '');
+if (!file) return Astro.rewrite('/404');
+
+const c = file.character;
+const text = liveText(c);
+const bars = liveBars(c);
+const tabs = [
+  { id: 'resumen', label: 'Resumen' },
+  { id: 'grimorio', label: 'Grimorio' },
+  { id: 'inventario', label: 'Inventario' },
+  { id: 'notas', label: 'Notas e historial' },
+];
+const identity = [
+  { path: 'species', label: 'Especie' },
+  { path: 'className', label: 'Clase' },
+  { path: 'subclass', label: 'Subclase' },
+  { path: 'background', label: 'Trasfondo' },
+  { path: 'alignment', label: 'Alineamiento' },
+] as const;
+---
+<BaseLayout title={c.name} crumb="Ficha de personaje">
+  <span slot="actions" class="save-state" id="saveState" role="status" data-state="ok">Guardado</span>
+
+  <div id="sheet" data-slug={Astro.params.slug} data-sheet={JSON.stringify(file)}>
+    <div class="title-row">
+      <div class="title-block">
+        <div class="eyebrow" data-bind="eyebrow">{text.eyebrow}</div>
+        <input class="edit edit-title" data-path="name" value={c.name} required aria-label="Nombre del personaje" />
+      </div>
+      <div class="title-actions">
+        <button class="button ghost" id="undo" disabled>↶ Deshacer</button>
+        <button class="button secondary" id="export">Exportar</button>
+        <button class="button primary" id="openLevelUp" disabled={c.level >= 20}>＋ Subir de nivel</button>
+      </div>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="Secciones de la ficha">
+      {tabs.map((tab, i) => (
+        <button class="tab" role="tab" id={`tab-${tab.id}`} aria-controls={tab.id} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{tab.label}</button>
+      ))}
+    </div>
+
+    <section class="sheet-grid" id="resumen" role="tabpanel" aria-labelledby="tab-resumen">
+      <div class="column">
+        <article class="panel"><div class="panel-body">
+          <div class="character-head">
+            <div class="character-meta">
+              <div class="portrait" aria-hidden="true" data-bind="initials">{initials(c.name)}</div>
+              <div class="identity">
+                {identity.map((field) => (
+                  <label><span>{field.label}</span><input class="edit" data-path={field.path} value={c[field.path]} placeholder="—" /></label>
+                ))}
+              </div>
+            </div>
+            <label class="level-badge"><input class="edit" type="number" min="1" max="20" data-path="level" value={c.level} aria-label="Nivel" /><span>Nivel</span></label>
+          </div>
+
+          <div class="stat-strip">
+            <label class="stat-box"><small>Clase de armadura</small><input class="edit" type="number" min="0" max="40" data-path="armorClass" value={c.armorClass} /></label>
+            <div class="stat-box"><small>Iniciativa</small><strong data-bind="initiative">{text.initiative}</strong></div>
+            <label class="stat-box"><small>Velocidad</small><input class="edit" data-path="speed" value={c.speed} /></label>
+            <div class="stat-box"><small>Percepción pasiva</small><strong data-bind="passivePerception">{text.passivePerception}</strong></div>
+          </div>
+
+          <div class="bar-label">
+            <span>Puntos de golpe</span>
+            <span class="pair"><input class="edit narrow" type="number" min="0" data-path="hp.current" value={c.hp.current} aria-label="PG actuales" /> / <input class="edit narrow" type="number" min="1" data-path="hp.max" value={c.hp.max} aria-label="PG máximos" /></span>
+          </div>
+          <div class="bar"><span data-bar="hp" style={`width:${bars.hp}`}></span></div>
+          <form class="inline-form" id="hpForm">
+            <input class="field narrow" type="number" name="amount" min="1" step="1" value="1" required aria-label="Cantidad de PG" />
+            <button class="button secondary" name="direction" value="-1">− Daño</button>
+            <button class="button secondary" name="direction" value="1">＋ Curar</button>
+          </form>
+
+          <div class="bar-label">
+            <span>Dados de golpe</span>
+            <span class="pair">
+              <input class="edit narrow" type="number" min="0" data-path="hitDice.current" value={c.hitDice.current} aria-label="Dados de golpe disponibles" /> /
+              <input class="edit narrow" type="number" min="1" max="20" data-path="hitDice.max" value={c.hitDice.max} aria-label="Dados de golpe máximos" /> ·
+              <select class="edit" data-path="hitDice.die" aria-label="Dado de golpe">
+                {['d6', 'd8', 'd10', 'd12'].map((die) => <option selected={c.hitDice.die === die}>{die}</option>)}
+              </select>
+            </span>
+          </div>
+          <div class="bar blue"><span data-bar="hitDice" style={`width:${bars.hitDice}`}></span></div>
+          <button class="button ghost" id="spendHitDie">Gastar dado de golpe</button>
+
+          <div class="bar-label">
+            <span>Experiencia</span>
+            <span class="pair"><input class="edit" type="number" min="0" data-path="xp" value={c.xp} aria-label="Puntos de experiencia" /> <span data-bind="xpNext">{text.xpNext}</span></span>
+          </div>
+          <div class="bar gold"><span data-bar="xp" style={`width:${bars.xp}`}></span></div>
+
+          <div class="section-heading"><h3>Características</h3><span>pulsa el modificador para tirar</span></div>
+          <div class="ability-grid">
+            {abilities.map((key) => (
+              <div class="ability" data-entry={`abilities:${key}`} data-tip="entry">
+                <small>{abilityNames[key]}</small>
+                <button class="mod" data-roll={`abilities:${key}`} data-bind={`mod-${key}`} aria-label={`Prueba de ${abilityNames[key]}`}>{text[`mod-${key}`]}</button>
+                <input class="edit narrow" type="number" min="1" max="30" data-path={`abilities.${key}`} value={c.abilities[key]} aria-label={`Puntuación de ${abilityNames[key]}`} />
+              </div>
+            ))}
+          </div>
+        </div></article>
+
+        <article class="panel">
+          <div class="panel-header"><h2>Salvaciones y habilidades</h2><span class="tag">○ sin · ● competente · ◆ pericia</span></div>
+          <div class="panel-body proficiency-grid">
+            <ul class="check-list" aria-label="Tiradas de salvación">
+              {abilities.map((key) => (
+                <li class="check-row" data-entry={`saves:${key}`} data-tip="entry">
+                  <button class="mark" data-toggle={`saves:${key}`} data-bind={`saveMark-${key}`} aria-label={`Competencia en salvación de ${abilityNames[key]}`}>{text[`saveMark-${key}`]}</button>
+                  <button class="check-name" data-roll={`saves:${key}`}>{abilityNames[key]}</button>
+                  <span class="bonus" data-bind={`save-${key}`}>{text[`save-${key}`]}</span>
+                </li>
+              ))}
+            </ul>
+            <ul class="check-list" aria-label="Habilidades">
+              {skillIds.map((id) => (
+                <li class="check-row" data-entry={`skills:${id}`} data-tip="entry">
+                  <button class="mark" data-toggle={`skills:${id}`} data-bind={`skillMark-${id}`} aria-label={`Competencia en ${skills[id].name}`}>{text[`skillMark-${id}`]}</button>
+                  <button class="check-name" data-roll={`skills:${id}`}>{skills[id].name} <small>{abilityShort(skills[id].ability)}</small></button>
+                  <span class="bonus" data-bind={`skill-${id}`}>{text[`skill-${id}`]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="column">
+        <aside class="panel">
+          <div class="panel-header"><h2>Ataques</h2><button class="button ghost" data-pick="weapons">＋ Añadir arma</button></div>
+          <div class="panel-body"><ul class="item-list" id="weapons" data-empty="Sin armas. Añade una del listado.">
+            {c.weapons.map((weapon, i) => <EntryRow row={weaponRow(c, weapon)} entry={`weapons:${i}`} editable rollable />)}
+          </ul></div>
+        </aside>
+
+        <aside class="panel">
+          <div class="panel-header">
+            <h2>Recursos</h2>
+            <span class="header-actions"><button class="button ghost" id="shortRest">Descanso corto</button><button class="button ghost" id="longRest">Descanso largo</button></span>
+          </div>
+          <div class="panel-body"><ul class="item-list" id="resources" data-empty="Sin recursos. Añade usos a un rasgo u objeto.">
+            {resourceRows(c).map((row) => <ResourceRow row={row} />)}
+          </ul></div>
+        </aside>
+
+        <aside class="panel">
+          <div class="panel-header"><h2>Rasgos y dotes</h2><button class="button ghost" data-pick="features">＋ Añadir</button></div>
+          <div class="panel-body"><ul class="feature-list" id="features" data-empty="Sin rasgos todavía.">
+            {c.features.map((feature, i) => <EntryRow row={featureRow(feature)} entry={`features:${i}`} editable variant="feature" />)}
+          </ul></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="sheet-grid" id="grimorio" role="tabpanel" aria-labelledby="tab-grimorio" hidden>
+      <article class="panel">
+        <div class="panel-header">
+          <div><div class="eyebrow" data-bind="spellCount">{text.spellCount}</div><h2>Conjuros</h2></div>
+          <button class="button ghost" data-pick="spells">＋ Añadir conjuro</button>
+        </div>
+        <div class="panel-body">
+          <div class="casting-strip">
+            <label class="stat-box"><small>Aptitud mágica</small>
+              <select class="edit" data-path="spellcastingAbility">
+                <option value="" selected={!c.spellcastingAbility}>Ninguna</option>
+                {abilities.map((key) => <option value={key} selected={c.spellcastingAbility === key}>{abilityNames[key]}</option>)}
+              </select>
+            </label>
+            <div class="stat-box"><small>CD de salvación</small><strong data-bind="spellDC">{text.spellDC}</strong></div>
+            <div class="stat-box"><small>Ataque de conjuro</small><strong data-bind="spellAttack">{text.spellAttack}</strong></div>
+          </div>
+          <input class="field" type="search" data-filter="spells" placeholder="Buscar por nombre, nivel o escuela…" aria-label="Buscar conjuros" />
+          <ul class="item-list" id="spells" data-empty="Sin conjuros. Añade uno del listado.">
+            {c.spells.map((spell, i) => <EntryRow row={spellRow(c, spell)} entry={`spells:${i}`} editable rollable={!!spell.effect || spell.attack} />)}
+          </ul>
+        </div>
+      </article>
+      <aside class="panel">
+        <div class="panel-header"><h2>Espacios</h2><button class="button ghost" id="addSlotLevel">＋ Nivel</button></div>
+        <div class="panel-body">
+          <ul class="item-list" id="slotList" data-empty="Sin espacios de conjuro.">
+            {slotRows(c).map((row) => <ResourceRow row={row} />)}
+          </ul>
+          <p class="note">Pon el máximo a 0 para quitar un nivel. Los lanzadores completos los actualizan solos al subir de nivel.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel" id="inventario" role="tabpanel" aria-labelledby="tab-inventario" hidden>
+      <div class="panel-header">
+        <div><div class="eyebrow" data-bind="weight">{text.weight}</div><h2>Inventario</h2></div>
+        <button class="button ghost" data-pick="inventory">＋ Añadir objeto</button>
+      </div>
+      <div class="panel-body">
+        <input class="field" type="search" data-filter="inventory" placeholder="Buscar equipo, objetos y tesoro…" aria-label="Buscar en el inventario" />
+        <ul class="item-list" id="inventory" data-empty="Inventario vacío. Añade algo del listado.">
+          {c.inventory.map((item, i) => <EntryRow row={itemRow(item)} entry={`inventory:${i}`} editable />)}
+        </ul>
+        <p class="note">Las armas van en Ataques (pestaña Resumen) y cuentan para la carga.</p>
+      </div>
+    </section>
+
+    <section class="sheet-grid" id="notas" role="tabpanel" aria-labelledby="tab-notas" hidden>
+      <article class="panel">
+        <div class="panel-header"><div><div class="eyebrow">Trazabilidad de la ficha</div><h2>Historial</h2></div></div>
+        <div class="panel-body"><ul class="item-list" id="history" data-empty="Sin cambios registrados.">
+          {c.history.map(historyRow).reverse().map((row) => <EntryRow row={row} />)}
+        </ul></div>
+      </article>
+      <aside class="panel">
+        <div class="panel-header"><h2>Notas</h2></div>
+        <div class="panel-body"><textarea class="field notes" id="notes" aria-label="Notas del personaje" placeholder="PNJ, pistas, deudas…">{c.notes}</textarea></div>
+      </aside>
+    </section>
+  </div>
+
+  <output class="dice-toast" id="rollResult" aria-live="polite" hidden>
+    <span id="rollLabel"></span><strong id="rollValue"></strong>
+    <button type="button" class="icon-button" id="closeRoll" aria-label="Cerrar resultado">×</button>
+  </output>
+  <div class="tooltip" id="tip" role="tooltip" popover="manual"></div>
+
+  <dialog class="modal-card" id="levelUp" aria-labelledby="levelUpTitle">
+    <form>
+      <div class="panel-header">
+        <div><div class="eyebrow">Progreso del personaje · paso <span id="stepNumber">1</span> de 3</div><h2 id="levelUpTitle">Subir a nivel <span data-bind="nextLevel">{text.nextLevel}</span></h2></div>
+        <button type="button" class="button ghost" data-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="panel-body">
+        <fieldset class="wizard-step" data-step>
+          <legend>¿Cómo aumentan tus puntos de golpe?</legend>
+          <label class="option"><input type="radio" name="hp" value="average" checked /> <span id="hpAverageLabel"></span></label>
+          <label class="option"><input type="radio" name="hp" value="roll" /> <span id="hpRollLabel"></span></label>
+        </fieldset>
+        <fieldset class="wizard-step" data-step hidden>
+          <legend>Rasgos y usos del nuevo nivel</legend>
+          <label class="stacked">Rasgo nuevo (opcional)<input class="field" name="featureName" placeholder="Nombre del rasgo" /></label>
+          <textarea class="field" name="featureDescription" rows="3" placeholder="Qué hace" aria-label="Descripción del rasgo"></textarea>
+          <div id="levelUpUses" class="wizard-step"></div>
+          <p class="note" id="levelUpSlotsNote"></p>
+        </fieldset>
+        <div class="wizard-step" data-step hidden>
+          <p>Revisa los cambios antes de confirmarlos. Quedarán en el historial y puedes deshacerlos.</p>
+          <ul class="feature-list"><li class="feature"><div class="row-main"><strong id="levelUpClass"></strong><p id="levelUpSummary"></p></div></li></ul>
+        </div>
+        <div class="wizard-actions">
+          <button type="button" class="button ghost" id="stepBack" hidden>Atrás</button>
+          <button type="button" class="button primary" id="stepNext">Continuar</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal-card" id="editDialog" aria-labelledby="editTitle">
+    <form id="editForm">
+      <div class="panel-header">
+        <div><div class="eyebrow" id="editKind"></div><h2 id="editTitle"></h2></div>
+        <button type="button" class="button ghost" data-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="description" id="editSummary"></div>
+        <div class="form-grid" id="editFields"></div>
+        <div class="wizard-actions">
+          <button type="button" class="button ghost danger" id="editDelete">Eliminar</button>
+          <button type="button" class="button ghost" data-close>Cancelar</button>
+          <button class="button primary">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal-card wide" id="picker" aria-labelledby="pickerTitle">
+    <div class="panel-header">
+      <div><div class="eyebrow">Listado · SRD 5.2</div><h2 id="pickerTitle"></h2></div>
+      <button type="button" class="button ghost" data-close aria-label="Cerrar">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="inline-form">
+        <input class="field" type="search" id="pickerSearch" placeholder="Buscar…" aria-label="Buscar en el listado" />
+        <select class="field narrow-select" id="pickerFilter" aria-label="Filtrar"></select>
+      </div>
+      <ul class="item-list picker-list" id="pickerList"></ul>
+      <div class="wizard-actions">
+        <span class="note" id="pickerStatus" role="status"></span>
+        <button type="button" class="button secondary" id="pickerCustom">Crear uno propio</button>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="entryTemplate"><EntryRow editable /></template>
+  <template id="featureTemplate"><EntryRow editable variant="feature" /></template>
+  <template id="plainTemplate"><EntryRow /></template>
+  <template id="resourceTemplate"><ResourceRow /></template>
+
+  <script>
+    import '../../scripts/sheet/main';
+  </script>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+// Recurso gastable (espacio de conjuro o usos de un rasgo u objeto) con botones para gastar y
+// recuperar. En la lista de espacios del grimorio también muestra el máximo editable.
+// Sin props sirve de plantilla para el cliente (ver `fillResource` en scripts/sheet.ts).
+import { pips, type ResourceRow } from '../lib/sheet';
+
+interface Props {
+  row?: ResourceRow;
+}
+const { row } = Astro.props;
+const slotLevel = row?.key.startsWith('slot:') ? row.key.slice(5) : undefined;
+---
+<li class="item" data-key={row?.key}>
+  <div class="row-main">
+    <strong data-field="title">{row?.title}</strong>
+    <small><span class="pips" data-field="pips">{row && pips(row.pool)}</span> · <span data-field="detail">{row?.detail}</span></small>
+  </div>
+  <span class="stepper">
+    <button type="button" class="icon-button" data-delta="-1" aria-label={`Gastar: ${row?.title ?? ''}`}>−</button>
+    <span class="tag" data-field="count">{row && `${row.pool.current} / ${row.pool.max}`}</span>
+    <button type="button" class="icon-button" data-delta="1" aria-label={`Recuperar: ${row?.title ?? ''}`}>+</button>
+    <label class="max-input">máx.<input class="edit narrow" type="number" min="0" max="9" data-path={slotLevel && `spellSlots.${slotLevel}.max`} value={row?.pool.max} /></label>
+  </span>
+</li>

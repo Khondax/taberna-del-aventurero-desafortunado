@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 2,
+  "version": 0,
+  "character": {
+    "name": "Arannis Valebright",
+    "species": "Elfo",
+    "className": "Mago",
+    "subclass": "Evocador",
+    "background": "Sabio",
+    "alignment": "Neutral bueno",
+    "level": 5,
+    "xp": 7240,
+    "abilities": {
+      "fue": 10,
+      "des": 14,
+      "con": 12,
+      "int": 18,
+      "sab": 12,
+      "car": 8
+    },
+    "armorClass": 12,
+    "speed": "9 m",
+    "hp": {
+      "current": 22,
+      "max": 27
+    },
+    "hitDice": {
+      "current": 3,
+      "max": 5,
+      "die": "d6"
+    },
+    "savingThrows": [
+      "int",
+      "sab"
+    ],
+    "skills": {
+      "arcanos": 2,
+      "historia": 1,
+      "investigacion": 1,
+      "percepcion": 1
+    },
+    "spellcastingAbility": "int",
+    "spellSlots": {
+      "1": {
+        "current": 3,
+        "max": 4
+      },
+      "2": {
+        "current": 2,
+        "max": 3
+      },
+      "3": {
+        "current": 1,
+        "max": 2
+      }
+    },
+    "features": [
+      {
+        "name": "Recuperación arcana",
+        "source": "Mago 1",
+        "description": "Una vez al día, tras un descanso corto, recuperas espacios cuyo nivel sumado no supere la mitad de tu nivel de mago.",
+        "uses": {
+          "current": 1,
+          "max": 1,
+          "recovery": "largo"
+        }
+      },
+      {
+        "name": "Visión en la oscuridad",
+        "source": "Elfo",
+        "description": "Ves a 18 m en la oscuridad como si fuera luz tenue.",
+        "uses": null
+      },
+      {
+        "name": "Sabio de la evocación",
+        "source": "Evocador 3",
+        "description": "Añades gratis a tu libro conjuros de evocación al acceder a cada nuevo nivel de espacios.",
+        "uses": null
+      }
+    ],
+    "spells": [
+      {
+        "name": "Proyectil mágico",
+        "level": 1,
+        "school": "Evocación",
+        "casting": "1 acción",
+        "range": "36 m",
+        "components": "V, S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Tres dardos que impactan siempre; cada uno hace 1d4 + 1 y puedes repartirlos entre objetivos.",
+        "effect": {
+          "dice": "3d4+3",
+          "type": "fuerza",
+          "addModifier": false
+        },
+        "save": null,
+        "attack": false,
+        "higherLevels": "+1 dardo por cada nivel de espacio por encima del 1."
+      },
+      {
+        "name": "Escudo",
+        "level": 1,
+        "school": "Abjuración",
+        "casting": "Reacción",
+        "range": "Uno mismo",
+        "components": "V, S",
+        "duration": "1 asalto",
+        "concentration": false,
+        "ritual": false,
+        "description": "+5 a la CA hasta el inicio de tu siguiente turno, incluido el ataque que lo provocó. Inmune a Proyectil mágico.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Armadura de mago",
+        "level": 1,
+        "school": "Abjuración",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S, M",
+        "duration": "8 horas",
+        "concentration": false,
+        "ritual": false,
+        "description": "Una criatura sin armadura tiene CA base 13 + su modificador de Destreza.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Detectar magia",
+        "level": 1,
+        "school": "Adivinación",
+        "casting": "1 acción",
+        "range": "Uno mismo",
+        "components": "V, S",
+        "duration": "10 minutos",
+        "concentration": true,
+        "ritual": true,
+        "description": "Percibes la magia a 9 m y puedes ver su aura y su escuela.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Rayo abrasador",
+        "level": 2,
+        "school": "Evocación",
+        "casting": "1 acción",
+        "range": "36 m",
+        "components": "V, S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Tres rayos de fuego, cada uno con su propio ataque a distancia de conjuro (daño por rayo).",
+        "effect": {
+          "dice": "2d6",
+          "type": "fuego",
+          "addModifier": false
+        },
+        "save": null,
+        "attack": true,
+        "higherLevels": "+1 rayo por cada nivel de espacio por encima del 2."
+      },
+      {
+        "name": "Invisibilidad",
+        "level": 2,
+        "school": "Ilusión",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S, M",
+        "duration": "1 hora",
+        "concentration": true,
+        "ritual": false,
+        "description": "Una criatura se vuelve invisible hasta que ataca, causa daño o lanza un conjuro.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": "+1 objetivo por cada nivel de espacio por encima del 2."
+      },
+      {
+        "name": "Paso brumoso",
+        "level": 2,
+        "school": "Conjuración",
+        "casting": "Acción adicional",
+        "range": "Uno mismo",
+        "components": "V",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Te teletransportas hasta 9 m a un espacio que puedas ver.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Bola de fuego",
+        "level": 3,
+        "school": "Evocación",
+        "casting": "1 acción",
+        "range": "45 m",
+        "components": "V, S, M",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Explosión en una esfera de 6 m de radio; mitad de daño si supera la salvación.",
+        "effect": {
+          "dice": "8d6",
+          "type": "fuego",
+          "addModifier": false
+        },
+        "save": "des",
+        "attack": false,
+        "higherLevels": "+1d6 por cada nivel de espacio por encima del 3."
+      },
+      {
+        "name": "Contrahechizo",
+        "level": 3,
+        "school": "Abjuración",
+        "casting": "Reacción",
+        "range": "18 m",
+        "components": "S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Interrumpes a quien lanza un conjuro: si falla la salvación, el conjuro se disipa y no gasta el espacio.",
+        "effect": null,
+        "save": "con",
+        "attack": false,
+        "higherLevels": ""
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Bastón",
+        "category": "sencilla",
+        "ranged": false,
+        "damage": "1d6",
+        "damageType": "contundente",
+        "versatile": "1d8",
+        "properties": [
+          "Versátil (1d8)"
+        ],
+        "range": "",
+        "mastery": "Derribar",
+        "proficient": true,
+        "magicBonus": 0,
+        "weightKg": 2,
+        "description": ""
+      }
+    ],
+    "inventory": [
+      {
+        "name": "Libro de conjuros",
+        "kind": "Equipo de aventurero",
+        "quantity": 1,
+        "weightKg": 1.5,
+        "description": "Contiene los conjuros de mago que conoces.",
+        "uses": null
+      },
+      {
+        "name": "Poción de curación",
+        "kind": "Consumible · 2d4 + 2 PG",
+        "quantity": 2,
+        "weightKg": 0.25,
+        "description": "Recuperas 2d4 + 2 PG al beberla.",
+        "uses": null
+      },
+      {
+        "name": "Ojos de águila",
+        "kind": "Objeto maravilloso · sintonizado",
+        "quantity": 1,
+        "weightKg": 0,
+        "description": "Ventaja en las pruebas de Sabiduría (Percepción) que dependen de la vista. Requiere sintonización.",
+        "uses": null
+      }
+    ],
+    "history": [
+      {
+        "date": "2026-11-08T21:30:00.000Z",
+        "title": "Subida a nivel 5",
+        "detail": "Bola de fuego y Contrahechizo añadidos al libro"
+      },
+      {
+        "date": "2026-11-10T20:15:00.000Z",
+        "title": "Descanso corto",
+        "detail": "2 dados de golpe gastados"
+      }
+    ],
+    "notes": "El mapa de la torre está en la mochila. Preguntar a Gundren por la Cueva del Eco de la Ola."
+  }
+}

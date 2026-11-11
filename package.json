@@ -7,14 +7,16 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "astro check",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "start": "node dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/vercel": "latest",
-    "astro": "latest",
-    "typescript": "latest"
+    "@astrojs/node": "^11.1.12",
+    "astro": "^7.4.10"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10"
+    "@astrojs/check": "^0.9.12",
+    "@types/node": "^26.6.6",
+    "typescript": "^6.0.3"
   }
 }

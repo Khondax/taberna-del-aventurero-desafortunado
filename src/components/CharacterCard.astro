@@ -1,0 +1,49 @@
+---
+// Resumen de una ficha para la vista del máster.
+import {
+  classLine,
+  initials,
+  initiative,
+  passivePerception,
+  percent,
+  pips,
+  resourceRows,
+  signed,
+  type Character,
+} from '../lib/sheet';
+
+interface Props {
+  slug: string;
+  character: Character;
+}
+const { slug, character: c } = Astro.props;
+const stats = [
+  { label: 'CA', value: c.armorClass },
+  { label: 'Iniciativa', value: signed(initiative(c)) },
+  { label: 'Perc. pasiva', value: passivePerception(c) },
+  { label: 'Dados de golpe', value: `${c.hitDice.current}/${c.hitDice.max}` },
+];
+const hpRatio = c.hp.max ? c.hp.current / c.hp.max : 0;
+---
+<a class="panel party-card" href={`/personajes/${slug}`}>
+  <div class="party-head">
+    <div class="portrait" aria-hidden="true">{initials(c.name)}</div>
+    <div class="party-name">
+      <div class="eyebrow">{classLine(c)}</div>
+      <h2>{c.name}</h2>
+    </div>
+    <div class="level-badge"><strong>{String(c.level).padStart(2, '0')}</strong><span>Nivel</span></div>
+  </div>
+  <div class="bar-label">
+    <span>Puntos de golpe{c.hp.current === 0 && ' · inconsciente'}</span><strong>{c.hp.current} / {c.hp.max}</strong>
+  </div>
+  <div class:list={['bar', { critical: hpRatio <= 0.25 }]}><span style={`width:${percent(c.hp)}`}></span></div>
+  <div class="stat-strip compact">
+    {stats.map((stat) => <div class="stat-box"><small>{stat.label}</small><strong>{stat.value}</strong></div>)}
+  </div>
+  {resourceRows(c).length > 0 && (
+    <ul class="resource-summary">
+      {resourceRows(c).map((row) => <li><span>{row.title}</span><span class="pips">{pips(row.pool)}</span></li>)}
+    </ul>
+  )}
+</a>

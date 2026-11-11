@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 2,
+  "version": 0,
+  "character": {
+    "name": "Brunilda Martillo de Hierro",
+    "species": "Enana",
+    "className": "Guerrera",
+    "subclass": "Campeona",
+    "background": "Soldado",
+    "alignment": "Legal neutral",
+    "level": 5,
+    "xp": 8100,
+    "abilities": {
+      "fue": 18,
+      "des": 12,
+      "con": 16,
+      "int": 8,
+      "sab": 13,
+      "car": 10
+    },
+    "armorClass": 18,
+    "speed": "9 m",
+    "hp": {
+      "current": 41,
+      "max": 49
+    },
+    "hitDice": {
+      "current": 4,
+      "max": 5,
+      "die": "d10"
+    },
+    "savingThrows": [
+      "fue",
+      "con"
+    ],
+    "skills": {
+      "atletismo": 1,
+      "intimidacion": 1,
+      "percepcion": 1,
+      "supervivencia": 1
+    },
+    "spellcastingAbility": null,
+    "spellSlots": {},
+    "features": [
+      {
+        "name": "Ataque adicional",
+        "source": "Guerrera 5",
+        "description": "Atacas dos veces cuando realizas la acción de Ataque en tu turno.",
+        "uses": null
+      },
+      {
+        "name": "Crítico mejorado",
+        "source": "Campeona 3",
+        "description": "Tus tiradas de ataque con armas y ataques sin armas son críticos con un 19 o un 20.",
+        "uses": null
+      },
+      {
+        "name": "Resistencia enana",
+        "source": "Enana",
+        "description": "Tienes resistencia al daño de veneno y ventaja en las salvaciones para evitar o terminar el estado envenenado.",
+        "uses": null
+      },
+      {
+        "name": "Visión en la oscuridad",
+        "source": "Enana",
+        "description": "Ves a 36 m en la oscuridad como si fuera luz tenue.",
+        "uses": null
+      },
+      {
+        "name": "Tomar aliento",
+        "source": "Guerrera 1",
+        "description": "Como acción adicional recuperas 1d10 + tu nivel de guerrera en PG.",
+        "uses": {
+          "current": 2,
+          "max": 3,
+          "recovery": "corto"
+        }
+      },
+      {
+        "name": "Oleada de acción",
+        "source": "Guerrera 2",
+        "description": "En tu turno puedes realizar una acción adicional (que no sea Magia).",
+        "uses": {
+          "current": 1,
+          "max": 1,
+          "recovery": "corto"
+        }
+      }
+    ],
+    "spells": [],
+    "weapons": [
+      {
+        "name": "Martillo de guerra",
+        "category": "marcial",
+        "ranged": false,
+        "damage": "1d8",
+        "damageType": "contundente",
+        "versatile": "1d10",
+        "properties": [
+          "Versátil (1d10)"
+        ],
+        "range": "",
+        "mastery": "Empujar",
+        "proficient": true,
+        "magicBonus": 0,
+        "weightKg": 2.5,
+        "description": ""
+      },
+      {
+        "name": "Hacha de mano",
+        "category": "sencilla",
+        "ranged": false,
+        "damage": "1d6",
+        "damageType": "cortante",
+        "versatile": "",
+        "properties": [
+          "Ligera",
+          "Arrojadiza (6/18 m)"
+        ],
+        "range": "6/18 m",
+        "mastery": "Hostigar",
+        "proficient": true,
+        "magicBonus": 0,
+        "weightKg": 1,
+        "description": ""
+      },
+      {
+        "name": "Hacha de mano",
+        "category": "sencilla",
+        "ranged": false,
+        "damage": "1d6",
+        "damageType": "cortante",
+        "versatile": "",
+        "properties": [
+          "Ligera",
+          "Arrojadiza (6/18 m)"
+        ],
+        "range": "6/18 m",
+        "mastery": "Hostigar",
+        "proficient": true,
+        "magicBonus": 0,
+        "weightKg": 1,
+        "description": ""
+      }
+    ],
+    "inventory": [
+      {
+        "name": "Cota de mallas",
+        "kind": "Armadura pesada · CA 16",
+        "quantity": 1,
+        "weightKg": 27.5,
+        "description": "Malla completa con acolchado. Requiere Fue 13. Desventaja en Sigilo.",
+        "uses": null
+      },
+      {
+        "name": "Escudo",
+        "kind": "Escudo · +2 CA",
+        "quantity": 1,
+        "weightKg": 3,
+        "description": "Se lleva en una mano y suma 2 a la CA.",
+        "uses": null
+      },
+      {
+        "name": "Raciones",
+        "kind": "Provisiones",
+        "quantity": 5,
+        "weightKg": 1,
+        "description": "Comida seca para un día.",
+        "uses": null
+      }
+    ],
+    "history": [
+      {
+        "date": "2026-11-08T21:35:00.000Z",
+        "title": "Subida a nivel 5",
+        "detail": "Ataque adicional"
+      },
+      {
+        "date": "2026-11-10T20:15:00.000Z",
+        "title": "Descanso corto",
+        "detail": "Tomar aliento recuperado"
+      }
+    ],
+    "notes": "Le debe 10 po a Sildar Hallwinter."
+  }
+}

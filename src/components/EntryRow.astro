@@ -1,0 +1,27 @@
+---
+// Fila de lista. Con `entry` (p. ej. `spells:3`) muestra su descripción al pasar el ratón y,
+// si es `editable`, abre su edición al pulsarla. Sin `row` sirve de plantilla para el cliente
+// (ver `fillRow` en scripts/sheet.ts).
+import type { Row } from '../lib/sheet';
+
+interface Props {
+  row?: Row;
+  entry?: string;
+  editable?: boolean;
+  /** Muestra el botón de tirada (armas y conjuros con ataque o efecto). */
+  rollable?: boolean;
+  variant?: 'item' | 'feature';
+}
+const { row = { title: '', detail: '', tag: '' }, entry, editable = false, rollable = false, variant = 'item' } = Astro.props;
+const Main = editable ? 'button' : 'div';
+---
+<li class={variant} data-entry={entry} data-tip={entry && 'entry'}>
+  <Main class="row-main" type={editable ? 'button' : undefined} data-edit={editable ? '' : undefined}>
+    <strong data-field="title">{row.title}</strong>
+    {variant === 'feature' ? <p data-field="detail">{row.detail}</p> : <small data-field="detail">{row.detail}</small>}
+  </Main>
+  <span class="row-end">
+    <span class="tag" data-field="tag">{row.tag}</span>
+    {editable && <button type="button" class="icon-button" data-roll hidden={!rollable} aria-label={`Tirar: ${row.title}`}>⚄</button>}
+  </span>
+</li>

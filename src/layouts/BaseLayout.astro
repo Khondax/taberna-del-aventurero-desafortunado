@@ -1,17 +1,53 @@
 ---
+// Estructura común: barra lateral con la mesa y sus personajes, cabecera y contenido.
+// El slot `actions` añade elementos a la derecha de la cabecera.
 import '../styles/global.css';
-const { title = 'La Taberna del Aventurero Desafortunado' } = Astro.props;
+import { campaign } from '../config';
+import { listSheets } from '../lib/store';
+
+interface Props {
+  title?: string;
+  /** Ruta de migas en la cabecera, después del nombre de la campaña. */
+  crumb: string;
+}
+const { title, crumb } = Astro.props;
+const sheets = await listSheets();
+const current = Astro.url.pathname;
 ---
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Fichas y grimorios para tus partidas de D&D 2024." />
-    <title>{title}</title>
+    <title>{title ? `${title} · La Taberna` : 'La Taberna del Aventurero Desafortunado'}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   </head>
-  <body><slot /></body>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/"><div class="brand-mark" aria-hidden="true">✦</div><div><strong>Grimorio</strong><small>& Crónicas</small></div></a>
+        <nav aria-label="Mesa y personajes">
+          <div class="sidebar-label">Mesa</div>
+          <a class="nav-item" href="/" aria-current={current === '/' ? 'page' : undefined}><strong>Vista del máster</strong></a>
+          <div class="sidebar-label">Personajes</div>
+          {sheets.map((entry) => 'sheet' in entry && (
+            <a class="nav-item" href={`/personajes/${entry.slug}`} aria-current={current === `/personajes/${entry.slug}` ? 'page' : undefined}>
+              <strong>{entry.sheet.character.name}</strong><small>{entry.sheet.character.className} · nivel {entry.sheet.character.level}</small>
+            </a>
+          ))}
+        </nav>
+        <div class="table-card"><small>Mesa activa</small><strong>{campaign.name}</strong><small>{sheets.length} aventureros</small></div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <span class="crumb">{campaign.name} / {crumb}</span>
+          <div class="top-actions"><slot name="actions" /></div>
+        </header>
+        <div class="content"><slot /></div>
+      </main>
+    </div>
+  </body>
 </html>
