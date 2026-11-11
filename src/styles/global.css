@@ -168,6 +168,13 @@ textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
 .death-saves .button { margin-left: auto; }
 .concentration-row { display: flex; align-items: flex-end; gap: 8px; }
 .concentration-row .stacked { flex: 1; }
+/* Estados: se marcan pulsándolos (aria-pressed); la descripción sale en el tooltip. */
+.condition-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.chip { padding: 4px 8px; border: 1px solid #d8cebe; border-radius: 4px; background: var(--paper-low); color: var(--muted); font: 11px var(--font-mono); }
+.chip:hover { border-color: var(--brass); color: var(--garnet); }
+.chip[aria-pressed="true"] { border-color: var(--garnet); background: var(--garnet-mid); color: #fff; }
+.exhaustion-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--paper-high); font-size: 13px; }
+.exhaustion-row small { color: var(--muted); font: 10px var(--font-mono); }
 .inline-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 #spendHitDie { margin-top: 6px; }
 .section-heading { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--line); margin: 22px 0 10px; }
@@ -226,6 +233,9 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .stat-strip.compact strong { font-size: 18px; }
 .resource-summary { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
 .resource-summary li { display: flex; justify-content: space-between; gap: 10px; }
+.party-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.party-tags .tag.alert { color: #fff; background: var(--garnet-mid); }
+.temp-text { color: var(--brass); }
 
 /* Salvaciones y habilidades: cada salvación con sus habilidades anidadas debajo. */
 .proficiency-list { columns: 2 200px; column-gap: 22px; }

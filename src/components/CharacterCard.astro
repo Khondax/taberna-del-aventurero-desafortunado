@@ -3,6 +3,9 @@
 import {
   armorClass,
   classLine,
+  conditions,
+  deathSaveState,
+  exhaustionDescription,
   initials,
   initiative,
   passivePerception,
@@ -25,6 +28,18 @@ const stats = [
   { label: 'Dados de golpe', value: `${c.hitDice.current}/${c.hitDice.max}` },
 ];
 const hpRatio = c.hp.max ? c.hp.current / c.hp.max : 0;
+// A 0 PG: las casillas de salvación contra la muerte, o «Estabilizado» o «Ha muerto».
+const dying = deathSaveState(c) === 'Inconsciente';
+const deathTag = c.hp.current > 0 ? null : dying
+  ? `Salvaciones: éxitos ${pips({ current: c.deathSaves.successes, max: 3 })} · fallos ${pips({ current: c.deathSaves.failures, max: 3 })}`
+  : deathSaveState(c);
+// Estado en partida; `title` es la descripción del estado (tooltip nativo, porque la tarjeta es un enlace).
+const tags = [
+  ...(deathTag ? [{ label: deathTag, title: '', alert: true }] : []),
+  ...(c.concentration ? [{ label: `Concentración: ${c.concentration}`, title: '', alert: false }] : []),
+  ...c.conditions.map((id) => ({ label: conditions[id].name, title: conditions[id].description, alert: false })),
+  ...(c.exhaustion ? [{ label: `Agotamiento ${c.exhaustion}`, title: exhaustionDescription, alert: false }] : []),
+];
 ---
 <a class="panel party-card" href={`/personajes/${slug}`}>
   <div class="party-head">
@@ -36,9 +51,15 @@ const hpRatio = c.hp.max ? c.hp.current / c.hp.max : 0;
     <div class="level-badge"><strong>{String(c.level).padStart(2, '0')}</strong><span>Nivel</span></div>
   </div>
   <div class="bar-label">
-    <span>Puntos de golpe{c.hp.current === 0 && ' · inconsciente'}</span><strong>{c.hp.current} / {c.hp.max}</strong>
+    <span>Puntos de golpe{c.hp.current === 0 && ' · inconsciente'}</span>
+    <strong>{c.hp.current} / {c.hp.max}{c.hp.temp > 0 && <span class="temp-text"> +{c.hp.temp} temp.</span>}</strong>
   </div>
   <div class:list={['bar', { critical: hpRatio <= 0.25 }]}><span style={`width:${percent(c.hp)}`}></span></div>
+  {tags.length > 0 && (
+    <ul class="party-tags" aria-label="Estado en partida">
+      {tags.map((tag) => <li class:list={['tag', { alert: tag.alert }]} title={tag.title || undefined}>{tag.label}</li>)}
+    </ul>
+  )}
   <div class="stat-strip compact">
     {stats.map((stat) => <div class="stat-box"><small>{stat.label}</small><strong>{stat.value}</strong></div>)}
   </div>

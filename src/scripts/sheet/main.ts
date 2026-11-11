@@ -37,6 +37,7 @@ import {
   weaponDamageBonus,
   weaponRow,
   type Ability,
+  type ConditionId,
   type DeathSaveOutcome,
   type Pool,
   type ResourceRow,
@@ -139,6 +140,11 @@ onRender(() => {
   });
   $<HTMLButtonElement>('#rollDeathSave').disabled = state.deathSaves.stable || state.deathSaves.failures >= 3;
   $<HTMLButtonElement>('#endConcentration').disabled = !state.concentration;
+  document.querySelectorAll<HTMLElement>('[data-condition]').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(state.conditions.includes(chip.dataset.condition as ConditionId)));
+  });
+  $<HTMLButtonElement>('[data-exhaustion="-1"]').disabled = state.exhaustion === 0;
+  $<HTMLButtonElement>('[data-exhaustion="1"]').disabled = state.exhaustion === 6;
 
   $<HTMLButtonElement>('#undo').disabled = !canUndo();
   $<HTMLButtonElement>('#spendHitDie').disabled = state.hitDice.current === 0 || state.hp.current === state.hp.max;
@@ -368,6 +374,21 @@ $('#rollDeathSave').addEventListener('click', () => {
 });
 
 $('#endConcentration').addEventListener('click', () => update(() => (state.concentration = null)));
+
+// --- Estados y agotamiento ------------------------------------------------------
+
+root.addEventListener('click', (event) => {
+  const chip = (event.target as Element).closest<HTMLElement>('[data-condition]');
+  if (!chip) return;
+  const id = chip.dataset.condition as ConditionId;
+  update(() => (state.conditions = state.conditions.includes(id) ? state.conditions.filter((c) => c !== id) : [...state.conditions, id]));
+});
+
+root.addEventListener('click', (event) => {
+  const step = (event.target as Element).closest<HTMLElement>('[data-exhaustion]');
+  if (!step) return;
+  update(() => (state.exhaustion = clamp(state.exhaustion + Number(step.dataset.exhaustion), 0, 6)));
+});
 
 $('#spendHitDie').addEventListener('click', () => {
   const die = rollExpression(`1${state.hitDice.die}`)!.total;

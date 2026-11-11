@@ -10,6 +10,8 @@ import {
   abilities,
   abilityNames,
   concentrationOptions,
+  conditionIds,
+  conditions,
   featureRow,
   historyRow,
   initials,
@@ -194,6 +196,20 @@ const identity = [
                 </select>
               </label>
               <button type="button" class="button ghost" id="endConcentration" disabled={!c.concentration}>Terminar</button>
+            </div>
+            <ul class="condition-list" aria-label="Estados">
+              {conditionIds.map((id) => (
+                <li><button type="button" class="chip" data-condition={id} data-entry={`conditions:${id}`} data-tip="entry" aria-pressed={c.conditions.includes(id) ? 'true' : 'false'}>{conditions[id].name}</button></li>
+              ))}
+            </ul>
+            <div class="exhaustion-row" data-entry="conditions:agotamiento" data-tip="entry">
+              <span>Agotamiento</span>
+              <span class="stepper">
+                <button type="button" class="icon-button" data-exhaustion="-1" aria-label="Quitar un nivel de agotamiento">−</button>
+                <span class="tag" data-bind="exhaustion">{text.exhaustion}</span>
+                <button type="button" class="icon-button" data-exhaustion="1" aria-label="Añadir un nivel de agotamiento">+</button>
+              </span>
+              <small data-bind="exhaustionNote">{text.exhaustionNote}</small>
             </div>
           </div>
         </aside>

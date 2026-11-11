@@ -1,7 +1,7 @@
-// En partida: PG temporales, salvaciones contra la muerte y concentración.
+// En partida: PG temporales, salvaciones contra la muerte, concentración, estados y agotamiento.
 // El Hermano Tobías es un clérigo de nivel 5 con 38 PG, CON 14 (+2, sin competencia en su salvación).
 import type { Page } from '@playwright/test';
-import { disk, expect, saved, seed, test } from './helpers';
+import { disk, expect, saved, seed, test, tip } from './helpers';
 
 /** Fija el resultado de los dados: `value` entre 0 y 1 (0 → 1 natural, 0.999 → 20 natural). */
 const fixDice = (page: Page, value: number) => page.addInitScript((v) => (Math.random = () => v), value);
@@ -91,4 +91,32 @@ test('concentración: el daño pide la salvación de Constitución y fallarla la
   await expect(select).toHaveValue('');
   await saved(page);
   expect(disk('partida-concentracion').character.concentration).toBeNull();
+});
+
+test('estados y agotamiento: se marcan, se explican, penalizan y se ven en la mesa', async ({ page }) => {
+  await fixDice(page, 0.5); // d20 = 11
+  await page.goto(seed('partida-estados', 'hermano-tobias'));
+  const poisoned = page.locator('[data-condition="envenenado"]');
+  await poisoned.click();
+  await expect(poisoned).toHaveAttribute('aria-pressed', 'true');
+  expect(await tip(page, '[data-condition="envenenado"]')).toContain('desventaja en las tiradas de ataque');
+
+  await page.click('[data-exhaustion="1"]');
+  await page.click('[data-exhaustion="1"]');
+  await expect(page.locator('[data-bind="exhaustionNote"]')).toHaveText('−4 a pruebas d20 · −3 m');
+  await expect(page.locator('[data-bind="speedNote"]')).toHaveText('6 m con agotamiento');
+  await page.click('[data-roll="skills:religion"]'); // +3: 11 + 3 − 4
+  await expect(page.locator('#rollValue')).toHaveText('10');
+  await expect(page.locator('#rollLabel')).toContainText('agotamiento −4');
+  await saved(page);
+  expect(disk('partida-estados').character).toMatchObject({ conditions: ['envenenado'], exhaustion: 2 });
+
+  await page.goto('/');
+  const card = page.locator('.party-card[href="/personajes/partida-estados"]');
+  await expect(card.locator('.party-tags')).toContainText('Envenenado');
+  await expect(card.locator('.party-tags')).toContainText('Agotamiento 2');
+
+  await page.goto('/personajes/partida-estados');
+  await page.click('#longRest');
+  await expect(page.locator('[data-bind="exhaustion"]')).toHaveText('1 / 6');
 });

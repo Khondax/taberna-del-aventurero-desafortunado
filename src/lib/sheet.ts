@@ -480,6 +480,7 @@ export function liveText(c: Character): Record<string, string> {
     spellDC: c.spellcastingAbility ? String(spellSaveDC(c)) : '—',
     spellAttack: c.spellcastingAbility ? signed(spellAttackBonus(c)) : '—',
     speedNote: speedNote(c),
+    exhaustion: `${c.exhaustion} / 6`,
     exhaustionNote: c.exhaustion ? `−${exhaustionPenalty(c)} a pruebas d20 · −${formatNumber(exhaustionSpeed(c))} m${c.exhaustion === 6 ? ' · muerte' : ''}` : 'sin agotamiento',
     deathState: deathSaveState(c),
   };
