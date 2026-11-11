@@ -1,6 +1,6 @@
 // Asistente de subida de nivel: PG (media o tirada), rasgo opcional y usos máximos de los
-// rasgos con usos. Los espacios de los lanzadores completos se actualizan con su tabla.
-import { fullCasterSlotsAt, hitDieAverage, modifier, rollExpression, signed } from '../../lib/sheet';
+// rasgos con usos. Los espacios se actualizan con la tabla de la clase (completo, medio o pacto).
+import { hitDieAverage, modifier, rollExpression, signed, slotTableAt } from '../../lib/sheet';
 import { $, clamp, log, state, update } from './state';
 
 const dialog = $<HTMLDialogElement>('#levelUp');
@@ -29,8 +29,8 @@ function summary(): string[] {
   const lines = [`Nivel ${level}`, `PG máximos +${hpGain()}${rollsHp() ? ` (${state.hitDice.die} [${hpRoll}] ${signed(conMod())})` : ''}`];
   const feature = newFeature();
   if (feature.name) lines.push(`Rasgo nuevo: ${feature.name}`);
-  const slots = fullCasterSlotsAt(state, level);
-  if (slots) lines.push(`Espacios: ${slots.join(' / ')}`);
+  const slots = slotTableAt(state, level);
+  if (slots) lines.push(`Espacios: ${slots.map((max, i) => (max ? `${max} de nivel ${i + 1}` : '')).filter(Boolean).join(', ')}`);
   for (const [i, max] of usesMaxima()) {
     const f = state.features[i];
     if (f.uses && max !== f.uses.max) lines.push(`${f.name}: ${f.uses.max} → ${max} usos`);
@@ -58,11 +58,17 @@ function applyLevelUp() {
     state.hp.current += gain;
     state.hitDice.max += 1;
     state.hitDice.current += 1;
-    fullCasterSlotsAt(state, state.level)?.forEach((max, i) => {
-      const slots = (state.spellSlots[String(i + 1)] ??= { current: 0, max: 0 });
-      slots.current = Math.max(0, slots.current + max - slots.max);
-      slots.max = max;
-    });
+    const table = slotTableAt(state, state.level);
+    if (table) {
+      // Los niveles que la tabla ya no incluye quedan a 0 y `normalize` los quita (p. ej. el brujo).
+      for (let i = 0; i < 9; i++) {
+        const max = table[i] ?? 0;
+        const slots = state.spellSlots[String(i + 1)] ?? (max ? (state.spellSlots[String(i + 1)] = { current: 0, max: 0 }) : null);
+        if (!slots) continue;
+        slots.current = Math.max(0, slots.current + max - slots.max);
+        slots.max = max;
+      }
+    }
     for (const [i, max] of maxima) {
       const uses = state.features[i].uses!;
       uses.current = clamp(uses.current + max - uses.max, 0, max);
@@ -88,9 +94,9 @@ $('#openLevelUp').addEventListener('click', () => {
   $('#hpAverageLabel').textContent = `Valor fijo: +${Math.max(1, average + conMod())} (${average} ${signed(conMod())} Con)`;
   $('#hpRollLabel').textContent = `Tirar ${state.hitDice.die} ${signed(conMod())} (se tira al revisar los cambios)`;
   $('#levelUpClass').textContent = `${state.className} ${state.subclass.toLowerCase()}`.trim();
-  $('#levelUpSlotsNote').textContent = fullCasterSlotsAt(state, state.level + 1)
-    ? 'Los espacios de conjuro se actualizan solos con la tabla de lanzador completo.'
-    : 'Si tus espacios de conjuro cambian, ajústalos en la pestaña Grimorio.';
+  $('#levelUpSlotsNote').textContent = slotTableAt(state, state.level + 1)
+    ? 'Los espacios de conjuro se actualizan solos con la tabla de tu clase.'
+    : 'Tu clase no tiene tabla de espacios: si los tienes (p. ej. por subclase), ajústalos en la pestaña Grimorio.';
   usesContainer.replaceChildren(
     ...state.features.flatMap((feature, i) => {
       if (!feature.uses) return [];

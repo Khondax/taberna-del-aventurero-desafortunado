@@ -64,7 +64,7 @@ Cada personaje es un archivo `<id>.json` con esta forma:
 ## Estructura
 
 - `src/lib/schema.ts`: esquema Zod del archivo de ficha. Solo lo usa el servidor. `src/lib/migrate.ts`: migraciones entre versiones.
-- `src/lib/sheet.ts`: reglas 2024 (PX, competencia, habilidades, clases, ataque y daño de armas, CD de conjuros, escalado de trucos) y valores derivados. Lo comparten el servidor y el cliente.
+- `src/lib/sheet.ts`: reglas 2024 (PX, competencia, habilidades, clases, espacios de lanzador completo, medio y de pacto, ataque y daño de armas, CD de conjuros, escalado de trucos) y valores derivados. Lo comparten el servidor y el cliente.
 - `src/lib/describe.ts`: contenido de los tooltips y del resumen del diálogo de edición.
 - `src/data/catalog.ts` y `src/data/spells.ts`: listados de armas, objetos, dotes y conjuros (nivel 0 a 5). Al añadir una entrada se copia a la ficha.
 - `src/lib/store.ts`: lectura y escritura de archivos: escritura atómica, guardados en serie por ficha y control de versión.

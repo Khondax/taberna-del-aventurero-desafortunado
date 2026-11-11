@@ -54,27 +54,41 @@ const fullCasterSlots = [
   [4, 3, 3, 3, 3, 2, 2, 1, 1],
 ];
 
+/** Espacios por nivel de conjuro para lanzadores medios: paladín y explorador (índice 0 = nivel 1). */
+const halfCasterSlots = [
+  [2], [2], [3], [3], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3, 2], [4, 3, 2], [4, 3, 3], [4, 3, 3], [4, 3, 3, 1],
+  [4, 3, 3, 1], [4, 3, 3, 2], [4, 3, 3, 2], [4, 3, 3, 3, 1], [4, 3, 3, 3, 1], [4, 3, 3, 3, 2], [4, 3, 3, 3, 2],
+];
+
+/** Magia de pacto del brujo: [número de espacios, nivel de los espacios] (índice 0 = nivel 1). */
+const pactSlots = [
+  [1, 1], [2, 1], [2, 2], [2, 2], [2, 3], [2, 3], [2, 4], [2, 4], [2, 5], [2, 5],
+  [3, 5], [3, 5], [3, 5], [3, 5], [3, 5], [3, 5], [4, 5], [4, 5], [4, 5], [4, 5],
+];
+
+type Caster = 'completo' | 'medio' | 'pacto' | null;
+
 interface ClassInfo {
   saves: [Ability, Ability];
   spellcasting: Ability | null;
-  fullCaster: boolean;
+  caster: Caster;
   martialWeapons: 'todas' | 'ligeras' | 'sutiles-o-ligeras' | 'ninguna';
 }
 
 /** Datos de clase indexados por el comienzo del nombre normalizado (cubre «Guerrero» y «Guerrera»). */
 const classes: Record<string, ClassInfo> = {
-  barbar: { saves: ['fue', 'con'], spellcasting: null, fullCaster: false, martialWeapons: 'todas' },
-  bard: { saves: ['des', 'car'], spellcasting: 'car', fullCaster: true, martialWeapons: 'ninguna' },
-  bruj: { saves: ['sab', 'car'], spellcasting: 'car', fullCaster: false, martialWeapons: 'ninguna' },
-  cleri: { saves: ['sab', 'car'], spellcasting: 'sab', fullCaster: true, martialWeapons: 'ninguna' },
-  druid: { saves: ['int', 'sab'], spellcasting: 'sab', fullCaster: true, martialWeapons: 'ninguna' },
-  explorador: { saves: ['fue', 'des'], spellcasting: 'sab', fullCaster: false, martialWeapons: 'todas' },
-  guerrer: { saves: ['fue', 'con'], spellcasting: null, fullCaster: false, martialWeapons: 'todas' },
-  hechicer: { saves: ['con', 'car'], spellcasting: 'car', fullCaster: true, martialWeapons: 'ninguna' },
-  mag: { saves: ['int', 'sab'], spellcasting: 'int', fullCaster: true, martialWeapons: 'ninguna' },
-  monj: { saves: ['fue', 'des'], spellcasting: null, fullCaster: false, martialWeapons: 'ligeras' },
-  paladin: { saves: ['sab', 'car'], spellcasting: 'car', fullCaster: false, martialWeapons: 'todas' },
-  picar: { saves: ['des', 'int'], spellcasting: null, fullCaster: false, martialWeapons: 'sutiles-o-ligeras' },
+  barbar: { saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
+  bard: { saves: ['des', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
+  bruj: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'pacto', martialWeapons: 'ninguna' },
+  cleri: { saves: ['sab', 'car'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
+  druid: { saves: ['int', 'sab'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
+  explorador: { saves: ['fue', 'des'], spellcasting: 'sab', caster: 'medio', martialWeapons: 'todas' },
+  guerrer: { saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
+  hechicer: { saves: ['con', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
+  mag: { saves: ['int', 'sab'], spellcasting: 'int', caster: 'completo', martialWeapons: 'ninguna' },
+  monj: { saves: ['fue', 'des'], spellcasting: null, caster: null, martialWeapons: 'ligeras' },
+  paladin: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'medio', martialWeapons: 'todas' },
+  picar: { saves: ['des', 'int'], spellcasting: null, caster: null, martialWeapons: 'sutiles-o-ligeras' },
 };
 
 export const normalize = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -83,9 +97,22 @@ export const classInfo = (className: string): ClassInfo | undefined => {
   return Object.entries(classes).find(([prefix]) => key.startsWith(prefix))?.[1];
 };
 
-/** Espacios máximos de un lanzador completo a cierto nivel, o `null` si la clase no lo es. */
-export const fullCasterSlotsAt = (c: Character, level: number) =>
-  classInfo(c.className)?.fullCaster ? fullCasterSlots[level - 1] : null;
+/**
+ * Espacios máximos por nivel de conjuro (índice 0 = nivel 1) que da la clase a cierto nivel,
+ * o `null` si la clase no lanza conjuros con espacios. Los niveles sin espacios valen 0.
+ */
+export function slotTableAt(c: Character, level: number): number[] | null {
+  const caster = classInfo(c.className)?.caster;
+  if (caster === 'completo') return fullCasterSlots[level - 1];
+  if (caster === 'medio') return halfCasterSlots[level - 1];
+  if (caster === 'pacto') {
+    const [count, slotLevel] = pactSlots[level - 1];
+    return Array.from({ length: slotLevel }, (_, i) => (i === slotLevel - 1 ? count : 0));
+  }
+  return null;
+}
+/** Los espacios de la magia de pacto se recuperan también en un descanso corto. */
+export const hasPactMagic = (c: Character) => classInfo(c.className)?.caster === 'pacto';
 
 export const modifier = (score: number) => Math.floor((score - 10) / 2);
 export const proficiencyBonus = (level: number) => Math.ceil(level / 4) + 1;
@@ -221,7 +248,12 @@ export interface ResourceRow {
 export const slotRows = (c: Character): ResourceRow[] =>
   Object.entries(c.spellSlots)
     .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([level, slots]) => ({ key: `slot:${level}`, title: `Espacios de nivel ${level}`, detail: 'Descanso largo', pool: slots }));
+    .map(([level, slots]) => ({
+      key: `slot:${level}`,
+      title: `Espacios de nivel ${level}`,
+      detail: hasPactMagic(c) ? 'Descanso corto' : 'Descanso largo',
+      pool: slots,
+    }));
 
 export const resourceRows = (c: Character): ResourceRow[] => [
   ...slotRows(c),

@@ -5,6 +5,7 @@ import {
   abilityMod,
   abilityNames,
   featureRow,
+  hasPactMagic,
   historyRow,
   initials,
   itemRow,
@@ -297,10 +298,15 @@ $('#addSlotLevel').addEventListener('click', () => {
 const usesEntries = () => [...state.features, ...state.inventory].filter((entry) => entry.uses);
 
 $('#shortRest').addEventListener('click', () => {
-  const recovered = usesEntries().filter((entry) => entry.uses!.recovery === 'corto' && entry.uses!.current < entry.uses!.max);
+  const recovered = usesEntries()
+    .filter((entry) => entry.uses!.recovery === 'corto' && entry.uses!.current < entry.uses!.max)
+    .map((entry) => entry.name);
+  const pact = hasPactMagic(state) && Object.values(state.spellSlots).some((slots) => slots.current < slots.max);
+  if (pact) recovered.push('espacios de pacto');
   update(() => {
-    recovered.forEach((entry) => (entry.uses!.current = entry.uses!.max));
-    log('Descanso corto', recovered.length ? `Recuperado: ${recovered.map((entry) => entry.name).join(', ')}` : 'Sin recursos que recuperar');
+    for (const entry of usesEntries()) if (entry.uses!.recovery === 'corto') entry.uses!.current = entry.uses!.max;
+    if (hasPactMagic(state)) Object.values(state.spellSlots).forEach((slots) => (slots.current = slots.max));
+    log('Descanso corto', recovered.length ? `Recuperado: ${recovered.join(', ')}` : 'Sin recursos que recuperar');
   });
   showResult('Descanso corto · gasta dados de golpe para curarte', '✓');
 });
