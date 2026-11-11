@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { weaponCatalog } from '../../src/data/catalog';
 import { spellCatalog } from '../../src/data/spells';
-import { armorClassBreakdown, rollExpression, slotTableAt, spellDice, weaponAbility, weaponAttack } from '../../src/lib/sheet';
+import {
+  armorClassBreakdown,
+  carriedWeight,
+  concentrationDC,
+  deathSave,
+  exhaustionPenalty,
+  gainTempHp,
+  heal,
+  liveText,
+  rollExpression,
+  slotTableAt,
+  spellDice,
+  takeDamage,
+  weaponAbility,
+  weaponAttack,
+} from '../../src/lib/sheet';
 import { character, equipped } from './fixtures';
 
 /** Arma del listado con competencia (el listado las trae sin ella; la decide la clase al añadirla). */
@@ -130,5 +145,136 @@ describe('rollExpression', () => {
     expect(rollExpression('abc')).toBeNull();
     expect(rollExpression('2d6+')).toBeNull();
     expect(rollExpression('')).toBeNull();
+  });
+});
+
+/** Arannis con 27 PG máximos y los PG actuales y temporales indicados. */
+const wounded = (current: number, temp = 0, overrides = {}) => character({ hp: { current, max: 27, temp }, ...overrides });
+
+describe('takeDamage y PG temporales', () => {
+  it('el daño gasta primero los PG temporales', () => {
+    const c = wounded(20, 5);
+    takeDamage(c, 3);
+    expect(c.hp).toEqual({ current: 20, max: 27, temp: 2 });
+    takeDamage(c, 6);
+    expect(c.hp).toEqual({ current: 16, max: 27, temp: 0 });
+  });
+
+  it('no baja de 0 PG', () => {
+    const c = wounded(4);
+    takeDamage(c, 50);
+    expect(c.hp.current).toBe(0);
+  });
+
+  it('la curación no suma PG temporales ni pasa del máximo', () => {
+    const c = wounded(20, 5);
+    heal(c, 30);
+    expect(c.hp).toEqual({ current: 27, max: 27, temp: 5 });
+  });
+
+  it('los PG temporales no se acumulan: se queda el mayor', () => {
+    const c = wounded(20, 5);
+    gainTempHp(c, 3);
+    expect(c.hp.temp).toBe(5);
+    gainTempHp(c, 8);
+    expect(c.hp.temp).toBe(8);
+  });
+});
+
+describe('salvaciones contra la muerte', () => {
+  const down = (deathSaves = { successes: 0, failures: 0, stable: false }, overrides = {}) => wounded(0, 0, { deathSaves, ...overrides });
+
+  it('10 o más es éxito y menos, fallo', () => {
+    const c = down();
+    expect(deathSave(c, 10)).toBe('exito');
+    expect(deathSave(c, 9)).toBe('fallo');
+    expect(c.deathSaves).toEqual({ successes: 1, failures: 1, stable: false });
+  });
+
+  it('un 1 natural son dos fallos y tres fallos, la muerte', () => {
+    const c = down({ successes: 0, failures: 1, stable: false });
+    expect(deathSave(c, 1)).toBe('muerte');
+    expect(c.deathSaves.failures).toBe(3);
+  });
+
+  it('un 20 natural recupera 1 PG y reinicia las casillas', () => {
+    const c = down({ successes: 1, failures: 2, stable: false });
+    expect(deathSave(c, 20)).toBe('recupera');
+    expect(c.hp.current).toBe(1);
+    expect(c.deathSaves).toEqual({ successes: 0, failures: 0, stable: false });
+  });
+
+  it('tres éxitos estabilizan y reinician las casillas', () => {
+    const c = down({ successes: 2, failures: 2, stable: false });
+    expect(deathSave(c, 15)).toBe('estable');
+    expect(c.deathSaves).toEqual({ successes: 0, failures: 0, stable: true });
+    expect(c.hp.current).toBe(0);
+  });
+
+  it('el agotamiento resta a la tirada, pero no a los naturales', () => {
+    const c = down(undefined, { exhaustion: 1 });
+    expect(deathSave(c, 11)).toBe('fallo');
+    expect(deathSave(c, 12)).toBe('exito');
+  });
+
+  it('recibir daño a 0 PG suma un fallo y quita la estabilidad', () => {
+    const c = down({ successes: 0, failures: 0, stable: true });
+    takeDamage(c, 3);
+    expect(c.deathSaves).toEqual({ successes: 0, failures: 1, stable: false });
+  });
+
+  it('a 0 PG, el daño que absorben los PG temporales no es un fallo', () => {
+    const c = wounded(0, 5);
+    takeDamage(c, 4);
+    expect(c.deathSaves.failures).toBe(0);
+    expect(c.hp.temp).toBe(1);
+  });
+
+  it('curarse reinicia las casillas', () => {
+    const c = down({ successes: 2, failures: 1, stable: false });
+    heal(c, 2);
+    expect(c.hp.current).toBe(2);
+    expect(c.deathSaves).toEqual({ successes: 0, failures: 0, stable: false });
+  });
+});
+
+describe('concentración', () => {
+  it('CD = máx(10, mitad del daño), hasta 30', () => {
+    expect([1, 19, 21, 22, 45, 80].map(concentrationDC)).toEqual([10, 10, 10, 11, 22, 30]);
+  });
+
+  it('takeDamage devuelve la CD si se concentra, aunque el daño lo absorban los PG temporales', () => {
+    expect(takeDamage(wounded(27, 0, { concentration: 'Bendición' }), 24)).toBe(12);
+    expect(takeDamage(wounded(20, 30, { concentration: 'Bendición' }), 24)).toBe(12);
+    expect(takeDamage(wounded(20), 24)).toBeNull();
+  });
+
+  it('caer a 0 PG termina la concentración', () => {
+    const c = wounded(5, 0, { concentration: 'Bendición' });
+    expect(takeDamage(c, 10)).toBeNull();
+    expect(c.concentration).toBeNull();
+  });
+});
+
+describe('agotamiento', () => {
+  it('−2 por nivel a las pruebas d20', () => {
+    expect([0, 1, 3, 6].map((exhaustion) => exhaustionPenalty(character({ exhaustion })))).toEqual([0, 2, 6, 12]);
+  });
+
+  it('−1,5 m por nivel a la velocidad', () => {
+    expect(liveText(character({ exhaustion: 0 })).speedNote).toBe('');
+    expect(liveText(character({ speed: '9 m', exhaustion: 2 })).speedNote).toBe('6 m con agotamiento');
+    expect(liveText(character({ speed: '7,5 m', exhaustion: 1 })).speedNote).toBe('6 m con agotamiento');
+    expect(liveText(character({ speed: '9 m', exhaustion: 6 })).speedNote).toBe('0 m con agotamiento');
+    expect(liveText(character({ speed: 'normal', exhaustion: 1 })).speedNote).toBe('−1,5 m por agotamiento');
+    expect(liveText(character({ exhaustion: 3 })).exhaustionNote).toBe('−6 a pruebas d20 · −4,5 m');
+  });
+});
+
+describe('monedas', () => {
+  it('50 monedas pesan 0,5 kg y cuentan para la carga', () => {
+    const c = character({ weapons: [], coins: { pc: 20, pp: 0, pe: 0, po: 30, ppt: 0 } });
+    expect(carriedWeight(c)).toBe(0.5);
+    expect(liveText(c).weight).toBe('Carga · 0,5 kg (monedas 0,5 kg)');
   });
 });

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "version": 0,
   "character": {
     "name": "Hermano Tobías",
@@ -22,13 +22,22 @@
     "speed": "9 m",
     "hp": {
       "current": 38,
-      "max": 38
+      "max": 38,
+      "temp": 0
     },
     "hitDice": {
       "current": 5,
       "max": 5,
       "die": "d8"
     },
+    "deathSaves": {
+      "successes": 0,
+      "failures": 0,
+      "stable": false
+    },
+    "concentration": null,
+    "conditions": [],
+    "exhaustion": 0,
     "savingThrows": [
       "sab",
       "car"
@@ -373,6 +382,13 @@
         "armor": null
       }
     ],
+    "coins": {
+      "pc": 0,
+      "pp": 0,
+      "pe": 0,
+      "po": 0,
+      "ppt": 0
+    },
     "history": [
       {
         "date": "2026-11-08T21:40:00.000Z",

@@ -88,7 +88,25 @@ function v2ToV3(file: any): any {
   return { ...file, schemaVersion: 3, character };
 }
 
-const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3 };
+/** v3 → v4: estado en partida (PG temporales, salvaciones contra la muerte, concentración, estados y agotamiento) y monedas. */
+function v3ToV4(file: any): any {
+  const c = file.character ?? {};
+  return {
+    ...file,
+    schemaVersion: 4,
+    character: {
+      ...c,
+      hp: { ...c.hp, temp: 0 },
+      deathSaves: { successes: 0, failures: 0, stable: false },
+      concentration: null,
+      conditions: [],
+      exhaustion: 0,
+      coins: { pc: 0, pp: 0, pe: 0, po: 0, ppt: 0 },
+    },
+  };
+}
+
+const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3, 3: v3ToV4 };
 
 /** Aplica los pasos necesarios hasta la versión actual. Lo que no sea un objeto se devuelve tal cual. */
 export function migrate(raw: unknown): unknown {

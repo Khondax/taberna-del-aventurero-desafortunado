@@ -155,7 +155,7 @@ test('subida de nivel con espacios de lanzador completo', async ({ page }) => {
   await expect(page.locator('[data-path=level]')).toHaveValue('6');
   await saved(page);
   const file = disk('ficha-nivel');
-  expect(file).toMatchObject({ schemaVersion: 3, character: { level: 6, spellSlots: { 3: { max: 3 } } } });
+  expect(file).toMatchObject({ schemaVersion: 4, character: { level: 6, spellSlots: { 3: { max: 3 } } } });
 });
 
 test('importar un archivo v1 desde la mesa lo migra', async ({ page }) => {

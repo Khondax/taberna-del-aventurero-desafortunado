@@ -2,7 +2,7 @@
 // importar); el cliente importa únicamente los tipos para no cargar Zod en el navegador.
 // Los archivos de versiones anteriores se convierten en `migrate.ts` antes de validar.
 import { z } from 'astro/zod';
-import { abilities, currentSchemaVersion, skillIds } from './ids';
+import { abilities, conditionIds, currentSchemaVersion, skillIds } from './ids';
 
 // Mensajes de validación en español (se muestran al importar un archivo inválido).
 z.config(z.locales.es());
@@ -85,8 +85,16 @@ const characterSchema = z.object({
   /** Bonificadores a la CA que no vienen de la armadura (Armadura de mago, objetos, estilos…). */
   acBonus: z.number().int().min(-10).max(20),
   speed: text,
-  hp: pool,
+  /** `temp`: PG temporales. El daño los gasta primero y no se acumulan (se queda el mayor). */
+  hp: pool.extend({ temp: count }),
   hitDice: pool.extend({ die: z.enum(['d6', 'd8', 'd10', 'd12']) }),
+  /** Salvaciones contra la muerte a 0 PG. `stable`: tres éxitos, ya no tira. */
+  deathSaves: z.object({ successes: z.number().int().min(0).max(3), failures: z.number().int().min(0).max(3), stable: z.boolean() }),
+  /** Nombre del conjuro en el que se concentra, o `null`. */
+  concentration: name.nullable(),
+  conditions: z.array(z.enum(conditionIds)),
+  /** Niveles de agotamiento (0 a 6). */
+  exhaustion: z.number().int().min(0).max(6),
   savingThrows: z.array(ability),
   /** Competencia en habilidades: 1 = competente, 2 = pericia. Las que faltan valen 0. */
   skills: z.partialRecord(z.enum(skillIds), z.union([z.literal(0), z.literal(1), z.literal(2)])),
@@ -97,6 +105,8 @@ const characterSchema = z.object({
   spells: z.array(spellSchema),
   weapons: z.array(weaponSchema),
   inventory: z.array(itemSchema),
+  /** Monedas: cobre, plata, electro, oro y platino. Cuentan para la carga (50 monedas = 0,5 kg). */
+  coins: z.object({ pc: count, pp: count, pe: count, po: count, ppt: count }),
   history: z.array(z.object({ date: z.iso.datetime(), title: text, detail: text })),
   notes: z.string(),
 });
@@ -114,7 +124,20 @@ export const sheetFileSchema = z.object({
 /** Lo que se acepta al importar: un archivo exportado, sin importar su `version`. */
 export const importSchema = sheetFileSchema.omit({ version: true });
 
-export type { Ability, SkillId } from './ids';
+/**
+ * Tirada del historial compartido (`.tiradas.json` en `DATA_DIR`), fuera de la ficha para
+ * no cambiar su versión con cada tirada.
+ */
+export const rollEntrySchema = z.object({
+  date: z.iso.datetime(),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  name: name.max(120),
+  /** Qué se tiró, con el desglose: «Sigilo · d20 [14] +5». */
+  label: text.max(400),
+  result: text.max(80),
+});
+
+export type { Ability, CoinId, ConditionId, SkillId } from './ids';
 export type Character = z.infer<typeof characterSchema>;
 export type Feature = z.infer<typeof featureSchema>;
 export type Spell = z.infer<typeof spellSchema>;
@@ -124,3 +147,4 @@ export type Uses = z.infer<typeof usesSchema>;
 export type Armor = NonNullable<InventoryItem['armor']>;
 export type SheetFile = z.infer<typeof sheetFileSchema>;
 export type Pool = z.infer<typeof pool>;
+export type RollEntry = z.infer<typeof rollEntrySchema>;

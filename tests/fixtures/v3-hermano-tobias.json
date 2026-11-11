@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 3,
+  "version": 0,
+  "character": {
+    "name": "Hermano Tobías",
+    "species": "Humano",
+    "className": "Clérigo",
+    "subclass": "Dominio de la Vida",
+    "background": "Acólito",
+    "alignment": "Neutral bueno",
+    "level": 5,
+    "xp": 7000,
+    "abilities": {
+      "fue": 14,
+      "des": 10,
+      "con": 14,
+      "int": 10,
+      "sab": 18,
+      "car": 12
+    },
+    "acBonus": 0,
+    "speed": "9 m",
+    "hp": {
+      "current": 38,
+      "max": 38
+    },
+    "hitDice": {
+      "current": 5,
+      "max": 5,
+      "die": "d8"
+    },
+    "savingThrows": [
+      "sab",
+      "car"
+    ],
+    "skills": {
+      "medicina": 1,
+      "perspicacia": 1,
+      "persuasion": 1,
+      "religion": 1
+    },
+    "spellcastingAbility": "sab",
+    "spellSlots": {
+      "1": {
+        "current": 2,
+        "max": 4
+      },
+      "2": {
+        "current": 3,
+        "max": 3
+      },
+      "3": {
+        "current": 1,
+        "max": 2
+      }
+    },
+    "features": [
+      {
+        "name": "Discípulo de la vida",
+        "source": "Dominio de la Vida 3",
+        "description": "Tus conjuros de curación con espacio curan 2 + el nivel del espacio PG adicionales.",
+        "uses": null
+      },
+      {
+        "name": "Preservar la vida",
+        "source": "Dominio de la Vida 3",
+        "description": "Con Canalizar divinidad repartes hasta cinco veces tu nivel de clérigo en PG entre criaturas cercanas.",
+        "uses": null
+      },
+      {
+        "name": "Abrasar muertos vivientes",
+        "source": "Clérigo 5",
+        "description": "Al expulsar muertos vivientes, sufren daño radiante igual a tu modificador de Sabiduría en d8.",
+        "uses": null
+      },
+      {
+        "name": "Ingenioso",
+        "source": "Humano",
+        "description": "Ganas Inspiración heroica al terminar cada descanso largo.",
+        "uses": null
+      },
+      {
+        "name": "Canalizar divinidad",
+        "source": "Clérigo 2",
+        "description": "Canalizas energía divina para Preservar la vida, Expulsar muertos vivientes u otras opciones de tu dominio.",
+        "uses": {
+          "current": 1,
+          "max": 2,
+          "recovery": "largo"
+        }
+      }
+    ],
+    "spells": [
+      {
+        "name": "Orientación",
+        "level": 0,
+        "school": "Adivinación",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S",
+        "duration": "1 minuto",
+        "concentration": true,
+        "ritual": false,
+        "description": "Un aliado añade 1d4 a las pruebas de una habilidad que elijas mientras dure.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Llama sagrada",
+        "level": 0,
+        "school": "Evocación",
+        "casting": "1 acción",
+        "range": "18 m",
+        "components": "V, S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Fuego radiante desciende sobre el objetivo, que no se beneficia de la cobertura para esta salvación.",
+        "effect": {
+          "dice": "1d8",
+          "type": "radiante",
+          "addModifier": false
+        },
+        "save": "des",
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Taumaturgia",
+        "level": 0,
+        "school": "Transmutación",
+        "casting": "1 acción",
+        "range": "9 m",
+        "components": "V",
+        "duration": "Hasta 1 minuto",
+        "concentration": false,
+        "ritual": false,
+        "description": "Prodigios menores: voz atronadora, llamas que cambian, temblores leves, ojos que cambian de aspecto.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Curar heridas",
+        "level": 1,
+        "school": "Abjuración",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Una criatura que tocas recupera PG.",
+        "effect": {
+          "dice": "2d8",
+          "type": "curación",
+          "addModifier": true
+        },
+        "save": null,
+        "attack": false,
+        "higherLevels": "+2d8 por cada nivel de espacio por encima del 1."
+      },
+      {
+        "name": "Palabra de curación",
+        "level": 1,
+        "school": "Abjuración",
+        "casting": "Acción adicional",
+        "range": "18 m",
+        "components": "V",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Una criatura que ves recupera PG.",
+        "effect": {
+          "dice": "2d4",
+          "type": "curación",
+          "addModifier": true
+        },
+        "save": null,
+        "attack": false,
+        "higherLevels": "+2d4 por cada nivel de espacio por encima del 1."
+      },
+      {
+        "name": "Bendición",
+        "level": 1,
+        "school": "Encantamiento",
+        "casting": "1 acción",
+        "range": "9 m",
+        "components": "V, S, M",
+        "duration": "1 minuto",
+        "concentration": true,
+        "ritual": false,
+        "description": "Hasta tres criaturas añaden 1d4 a sus tiradas de ataque y de salvación.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": "+1 criatura por cada nivel de espacio por encima del 1."
+      },
+      {
+        "name": "Escudo de fe",
+        "level": 1,
+        "school": "Abjuración",
+        "casting": "Acción adicional",
+        "range": "18 m",
+        "components": "V, S, M",
+        "duration": "10 minutos",
+        "concentration": true,
+        "ritual": false,
+        "description": "Una criatura obtiene +2 a la CA.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Arma espiritual",
+        "level": 2,
+        "school": "Evocación",
+        "casting": "Acción adicional",
+        "range": "18 m",
+        "components": "V, S",
+        "duration": "1 minuto",
+        "concentration": true,
+        "ritual": false,
+        "description": "Un arma espectral ataca cuerpo a cuerpo con conjuro; como acción adicional puedes moverla 6 m y volver a atacar.",
+        "effect": {
+          "dice": "1d8",
+          "type": "fuerza",
+          "addModifier": true
+        },
+        "save": null,
+        "attack": true,
+        "higherLevels": "+1d8 por cada nivel de espacio por encima del 2."
+      },
+      {
+        "name": "Ayuda",
+        "level": 2,
+        "school": "Abjuración",
+        "casting": "1 acción",
+        "range": "9 m",
+        "components": "V, S, M",
+        "duration": "8 horas",
+        "concentration": false,
+        "ritual": false,
+        "description": "Hasta tres criaturas aumentan sus PG máximos y actuales en 5.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": "+5 PG por cada nivel de espacio por encima del 2."
+      },
+      {
+        "name": "Restablecimiento menor",
+        "level": 2,
+        "school": "Abjuración",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Terminas los estados cegado, ensordecido, paralizado o envenenado de una criatura.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      },
+      {
+        "name": "Espíritus guardianes",
+        "level": 3,
+        "school": "Conjuración",
+        "casting": "1 acción",
+        "range": "Uno mismo (emanación de 4,5 m)",
+        "components": "V, S, M",
+        "duration": "10 minutos",
+        "concentration": true,
+        "ritual": false,
+        "description": "Espíritus a tu alrededor: los enemigos van a mitad de velocidad y sufren daño radiante o necrótico (mitad si superan).",
+        "effect": {
+          "dice": "3d8",
+          "type": "radiante o necrótico",
+          "addModifier": false
+        },
+        "save": "sab",
+        "attack": false,
+        "higherLevels": "+1d8 por cada nivel de espacio por encima del 3."
+      },
+      {
+        "name": "Revivificar",
+        "level": 3,
+        "school": "Nigromancia",
+        "casting": "1 acción",
+        "range": "Toque",
+        "components": "V, S, M (diamante de 300 po)",
+        "duration": "Instantánea",
+        "concentration": false,
+        "ritual": false,
+        "description": "Una criatura muerta hace menos de 1 minuto vuelve a la vida con 1 PG.",
+        "effect": null,
+        "save": null,
+        "attack": false,
+        "higherLevels": ""
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Maza",
+        "category": "sencilla",
+        "ranged": false,
+        "damage": "1d6",
+        "damageType": "contundente",
+        "versatile": "",
+        "properties": [],
+        "range": "",
+        "mastery": "Debilitar",
+        "proficient": true,
+        "magicBonus": 0,
+        "weightKg": 2,
+        "description": ""
+      }
+    ],
+    "inventory": [
+      {
+        "name": "Cota de escamas",
+        "kind": "Armadura intermedia · CA 14 + Des (máx. 2)",
+        "quantity": 1,
+        "weightKg": 22.5,
+        "description": "Escamas metálicas sobre cuero. Desventaja en Sigilo.",
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "intermedia",
+          "base": 14
+        }
+      },
+      {
+        "name": "Escudo",
+        "kind": "Escudo · +2 CA",
+        "quantity": 1,
+        "weightKg": 3,
+        "description": "Se lleva en una mano y suma 2 a la CA.",
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "escudo",
+          "base": 2
+        }
+      },
+      {
+        "name": "Símbolo sagrado",
+        "kind": "Foco divino · amuleto",
+        "quantity": 1,
+        "weightKg": 0.5,
+        "description": "Amuleto, emblema o relicario para canalizar conjuros divinos.",
+        "uses": null,
+        "equipped": false,
+        "armor": null
+      },
+      {
+        "name": "Útiles de sanador",
+        "kind": "10 usos",
+        "quantity": 1,
+        "weightKg": 1.5,
+        "description": "Estabilizan a una criatura con 0 PG sin prueba de Medicina.",
+        "uses": {
+          "current": 10,
+          "max": 10,
+          "recovery": "ninguna"
+        },
+        "equipped": false,
+        "armor": null
+      }
+    ],
+    "history": [
+      {
+        "date": "2026-11-08T21:40:00.000Z",
+        "title": "Subida a nivel 5",
+        "detail": "Espíritus guardianes y Revivificar preparados"
+      }
+    ],
+    "notes": "Diamante de 300 po guardado para Revivificar."
+  }
+}

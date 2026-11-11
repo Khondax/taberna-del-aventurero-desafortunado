@@ -1,10 +1,10 @@
 // Reglas D&D 2024 y valores derivados de una ficha. Lo comparten el render en servidor
 // y el script de cliente, para que ambos muestren exactamente lo mismo.
-import { abilities, skillIds, type Ability, type SkillId } from './ids';
+import { abilities, coinIds, conditionIds, skillIds, type Ability, type CoinId, type ConditionId, type SkillId } from './ids';
 import type { Character, Feature, InventoryItem, Pool, Spell, Uses, Weapon } from './schema';
 
-export { abilities, skillIds };
-export type { Ability, SkillId };
+export { abilities, coinIds, conditionIds, skillIds };
+export type { Ability, CoinId, ConditionId, SkillId };
 export type { Character, Feature, InventoryItem, Pool, SheetFile, Spell, Uses, Weapon } from './schema';
 
 export const abilityNames: Record<Ability, string> = {
@@ -36,6 +36,34 @@ export const skills: Record<SkillId, { name: string; ability: Ability; descripti
   sigilo: { name: 'Sigilo', ability: 'des', description: 'Moverse sin ser visto ni oído y ocultarse.' },
   supervivencia: { name: 'Supervivencia', ability: 'sab', description: 'Rastrear, orientarse, cazar y prever peligros naturales.' },
   tratoConAnimales: { name: 'Trato con animales', ability: 'sab', description: 'Calmar, adiestrar o intuir las intenciones de un animal.' },
+};
+
+/** Estados de 2024 (resumen propio). El agotamiento va aparte, por niveles. */
+export const conditions: Record<ConditionId, { name: string; description: string }> = {
+  agarrado: { name: 'Agarrado', description: 'Tu velocidad es 0. Tienes desventaja en los ataques contra cualquiera que no sea quien te agarra, y esa criatura puede arrastrarte consigo.' },
+  apresado: { name: 'Apresado', description: 'Tu velocidad es 0. Los ataques contra ti tienen ventaja y los tuyos, desventaja. Tienes desventaja en las salvaciones de Destreza.' },
+  asustado: { name: 'Asustado', description: 'Mientras veas el origen de tu miedo, tienes desventaja en pruebas de característica y ataques, y no puedes acercarte a él por voluntad propia.' },
+  aturdido: { name: 'Aturdido', description: 'Estás incapacitado. Fallas automáticamente las salvaciones de Fuerza y Destreza, y los ataques contra ti tienen ventaja.' },
+  cegado: { name: 'Cegado', description: 'No ves y fallas las pruebas que dependan de la vista. Los ataques contra ti tienen ventaja y los tuyos, desventaja.' },
+  derribado: { name: 'Derribado', description: 'Solo puedes arrastrarte, o gastar la mitad de tu movimiento en levantarte. Tus ataques tienen desventaja. Los ataques contra ti tienen ventaja a 1,5 m o menos, y desventaja a más distancia.' },
+  encantado: { name: 'Encantado', description: 'No puedes atacar ni dañar a quien te ha encantado, y esa criatura tiene ventaja en las pruebas para relacionarse contigo.' },
+  ensordecido: { name: 'Ensordecido', description: 'No oyes y fallas las pruebas que dependan del oído.' },
+  envenenado: { name: 'Envenenado', description: 'Tienes desventaja en las tiradas de ataque y en las pruebas de característica.' },
+  incapacitado: { name: 'Incapacitado', description: 'No puedes hacer acciones, acciones adicionales ni reacciones, ni hablar. Pierdes la concentración y tiras la iniciativa con desventaja.' },
+  inconsciente: { name: 'Inconsciente', description: 'Estás incapacitado y derribado, sueltas lo que lleves y no percibes nada. Velocidad 0. Fallas las salvaciones de Fuerza y Destreza. Los ataques contra ti tienen ventaja, y los impactos a 1,5 m o menos son críticos.' },
+  invisible: { name: 'Invisible', description: 'No se te puede ver sin magia ni sentidos especiales. Tienes ventaja en la iniciativa y en tus ataques, y los ataques contra ti tienen desventaja, salvo con quien pueda verte.' },
+  paralizado: { name: 'Paralizado', description: 'Estás incapacitado y tu velocidad es 0. Fallas las salvaciones de Fuerza y Destreza. Los ataques contra ti tienen ventaja, y los impactos a 1,5 m o menos son críticos.' },
+  petrificado: { name: 'Petrificado', description: 'Te conviertes en piedra u otra sustancia inerte y pesas diez veces más. Estás incapacitado, con velocidad 0, y fallas las salvaciones de Fuerza y Destreza. Los ataques contra ti tienen ventaja. Resistes todo el daño y eres inmune al veneno.' },
+};
+export const exhaustionDescription =
+  'Cada nivel resta 2 a tus pruebas d20 (pruebas de característica, ataques y salvaciones) y 1,5 m a tu velocidad. Un descanso largo quita un nivel. Con 6 niveles, mueres.';
+
+export const coinNames: Record<CoinId, string> = {
+  pc: 'Piezas de cobre',
+  pp: 'Piezas de plata',
+  pe: 'Piezas de electro',
+  po: 'Piezas de oro',
+  ppt: 'Piezas de platino',
 };
 
 // --- Reglas -----------------------------------------------------------------
@@ -210,9 +238,12 @@ export function armorClassBreakdown(c: Character): { total: number; parts: strin
 }
 export const armorClass = (c: Character) => armorClassBreakdown(c).total;
 
+/** En 2024, 50 monedas pesan 1 libra; aquí, como el resto del equipo, 1 libra = 0,5 kg. */
+export const coinWeight = (c: Character) => coinIds.reduce((total, coin) => total + c.coins[coin], 0) / 100;
 export const carriedWeight = (c: Character) =>
   c.inventory.reduce((total, item) => total + item.weightKg * item.quantity, 0) +
-  c.weapons.reduce((total, weapon) => total + weapon.weightKg, 0);
+  c.weapons.reduce((total, weapon) => total + weapon.weightKg, 0) +
+  coinWeight(c);
 
 export const hasProperty = (weapon: Weapon, property: string) =>
   weapon.properties.some((p) => normalize(p).startsWith(normalize(property)));
@@ -264,6 +295,82 @@ export function rollExpression(expression: string, random = Math.random): { roll
   return { rolls, total };
 }
 
+// --- En partida: PG temporales, salvaciones contra la muerte, concentración y agotamiento ---
+// Las funciones que cambian la ficha la modifican en el sitio; el cliente las llama dentro de `update`.
+
+/** Lo que resta el agotamiento a cada prueba d20. */
+export const exhaustionPenalty = (c: Character) => 2 * c.exhaustion;
+/** Metros que resta el agotamiento a la velocidad. */
+export const exhaustionSpeed = (c: Character) => 1.5 * c.exhaustion;
+
+export const noDeathSaves = (): Character['deathSaves'] => ({ successes: 0, failures: 0, stable: false });
+
+/** CD de la salvación de Constitución para mantener la concentración: la mitad del daño, entre 10 y 30. */
+export const concentrationDC = (damage: number) => Math.min(30, Math.max(10, Math.floor(damage / 2)));
+
+/**
+ * Recibe daño: primero se gastan los PG temporales. A 0 PG, el daño que pase de los temporales
+ * es un fallo de salvación contra la muerte y quita la estabilidad. Caer a 0 PG deja inconsciente
+ * y termina la concentración. Devuelve la CD de concentración si sigue concentrándose.
+ */
+export function takeDamage(c: Character, amount: number): number | null {
+  if (amount <= 0) return null;
+  const absorbed = Math.min(c.hp.temp, amount);
+  const rest = amount - absorbed;
+  c.hp.temp -= absorbed;
+  if (c.hp.current === 0) {
+    if (rest > 0) c.deathSaves = { ...c.deathSaves, failures: Math.min(3, c.deathSaves.failures + 1), stable: false };
+  } else {
+    c.hp.current = Math.max(0, c.hp.current - rest);
+  }
+  if (c.hp.current === 0) c.concentration = null;
+  return c.concentration ? concentrationDC(amount) : null;
+}
+
+/** Cura sin pasar del máximo; no suma PG temporales. Volver a tener PG reinicia las salvaciones contra la muerte. */
+export function heal(c: Character, amount: number) {
+  c.hp.current = Math.min(c.hp.max, c.hp.current + Math.max(0, amount));
+  if (c.hp.current > 0) c.deathSaves = noDeathSaves();
+}
+
+/** Los PG temporales no se acumulan: se queda el valor mayor. */
+export function gainTempHp(c: Character, amount: number) {
+  c.hp.temp = Math.max(c.hp.temp, amount);
+}
+
+export type DeathSaveOutcome = 'recupera' | 'exito' | 'estable' | 'fallo' | 'muerte';
+
+/**
+ * Aplica una salvación contra la muerte con el dado `die` (d20), al que se resta el agotamiento.
+ * Un 20 natural recupera 1 PG; un 1 natural son dos fallos; 10 o más es un éxito. Tres éxitos
+ * estabilizan y reinician las casillas; tres fallos, muerte.
+ */
+export function deathSave(c: Character, die: number): DeathSaveOutcome {
+  const saves = c.deathSaves;
+  if (die === 20) {
+    heal(c, 1);
+    return 'recupera';
+  }
+  if (die !== 1 && die - exhaustionPenalty(c) >= 10) {
+    if (saves.successes + 1 >= 3) {
+      c.deathSaves = { ...noDeathSaves(), stable: true };
+      return 'estable';
+    }
+    saves.successes += 1;
+    return 'exito';
+  }
+  saves.failures = Math.min(3, saves.failures + (die === 1 ? 2 : 1));
+  return saves.failures === 3 ? 'muerte' : 'fallo';
+}
+
+/** Estado de las salvaciones contra la muerte en palabras, o cadena vacía si no hay nada que contar. */
+export function deathSaveState(c: Character): string {
+  if (c.hp.current > 0) return '';
+  if (c.deathSaves.failures >= 3) return 'Ha muerto';
+  if (c.deathSaves.stable) return 'Estabilizado';
+  return 'Inconsciente';
+}
+
 // --- Formato ----------------------------------------------------------------
 
 export const signed = (n: number) => (n < 0 ? `−${-n}` : `+${n}`);
@@ -271,6 +378,8 @@ const numberFormat = new Intl.NumberFormat('es-ES', { useGrouping: 'always', max
 export const formatNumber = (n: number) => numberFormat.format(n);
 const dateFormat = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 export const formatDate = (iso: string) => dateFormat.format(new Date(iso));
+const timeFormat = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit' });
+export const formatTime = (iso: string) => timeFormat.format(new Date(iso));
 export const pips = ({ current, max }: Pool) => '●'.repeat(Math.min(current, max)) + '○'.repeat(Math.max(0, max - current));
 export const percent = ({ current, max }: Pool) => `${max ? Math.min(100, (current / max) * 100) : 0}%`;
 export const initials = (name: string) =>
@@ -360,9 +469,12 @@ export function liveText(c: Character): Record<string, string> {
     armorClass: String(armorClass(c)),
     passivePerception: String(passivePerception(c)),
     spellCount: `${c.spells.length} conjuros`,
-    weight: `Carga · ${formatNumber(carriedWeight(c))} kg`,
+    weight: `Carga · ${formatNumber(carriedWeight(c))} kg${coinWeight(c) ? ` (monedas ${formatNumber(coinWeight(c))} kg)` : ''}`,
     spellDC: c.spellcastingAbility ? String(spellSaveDC(c)) : '—',
     spellAttack: c.spellcastingAbility ? signed(spellAttackBonus(c)) : '—',
+    speedNote: speedNote(c),
+    exhaustionNote: c.exhaustion ? `−${exhaustionPenalty(c)} a pruebas d20 · −${formatNumber(exhaustionSpeed(c))} m${c.exhaustion === 6 ? ' · muerte' : ''}` : 'sin agotamiento',
+    deathState: deathSaveState(c),
   };
   for (const ability of abilities) {
     text[`mod-${ability}`] = signed(abilityMod(c, ability));
@@ -374,11 +486,23 @@ export function liveText(c: Character): Record<string, string> {
   return text;
 }
 
+/** Velocidad con el agotamiento aplicado; si la velocidad no empieza por «N m», solo lo que resta. */
+function speedNote(c: Character): string {
+  if (!c.exhaustion) return '';
+  const meters = /^\s*(\d+(?:[.,]\d+)?)\s*m\b/.exec(c.speed)?.[1];
+  const lost = exhaustionSpeed(c);
+  return meters === undefined
+    ? `−${formatNumber(lost)} m por agotamiento`
+    : `${formatNumber(Math.max(0, Number(meters.replace(',', '.')) - lost))} m con agotamiento`;
+}
+
 /** Anchuras de las barras de progreso, indexadas por la clave de `data-bar`. */
 export function liveBars(c: Character): Record<string, string> {
   const next = xpForNextLevel(c.level);
   return {
     hp: percent(c.hp),
+    // Los PG temporales se pintan a continuación de los actuales, dentro de la misma barra.
+    hpTemp: percent({ current: c.hp.temp, max: c.hp.max }),
     hitDice: percent(c.hitDice),
     xp: next === null ? '100%' : percent({ current: c.xp, max: next }),
   };

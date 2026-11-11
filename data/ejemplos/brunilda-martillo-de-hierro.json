@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "version": 0,
   "character": {
     "name": "Brunilda Martillo de Hierro",
@@ -22,13 +22,22 @@
     "speed": "9 m",
     "hp": {
       "current": 41,
-      "max": 49
+      "max": 49,
+      "temp": 0
     },
     "hitDice": {
       "current": 4,
       "max": 5,
       "die": "d10"
     },
+    "deathSaves": {
+      "successes": 0,
+      "failures": 0,
+      "stable": false
+    },
+    "concentration": null,
+    "conditions": [],
+    "exhaustion": 0,
     "savingThrows": [
       "fue",
       "con"
@@ -181,6 +190,13 @@
         "armor": null
       }
     ],
+    "coins": {
+      "pc": 0,
+      "pp": 0,
+      "pe": 0,
+      "po": 0,
+      "ppt": 0
+    },
     "history": [
       {
         "date": "2026-11-08T21:35:00.000Z",

@@ -6,7 +6,11 @@ import {
   abilityNames,
   abilityShort,
   armorClassBreakdown,
+  conditions,
   damageText,
+  exhaustionDescription,
+  exhaustionPenalty,
+  exhaustionSpeed,
   formatNumber,
   hasProperty,
   proficiencyBonus,
@@ -197,6 +201,21 @@ function describeAbility(c: Character, ability: Ability): Description {
   };
 }
 
+/** Un estado de 2024, o el agotamiento (`conditions:agotamiento`) con su penalización actual. */
+function describeCondition(c: Character, id: string): Description | null {
+  if (id === 'agotamiento') {
+    return {
+      title: 'Agotamiento',
+      subtitle: `Nivel ${c.exhaustion} de 6`,
+      facts: c.exhaustion ? [['Penalización', `−${exhaustionPenalty(c)} a pruebas d20 · −${formatNumber(exhaustionSpeed(c))} m de velocidad`]] : [],
+      text: exhaustionDescription,
+    };
+  }
+  if (!(id in conditions)) return null;
+  const { name, description } = conditions[id as keyof typeof conditions];
+  return { title: name, subtitle: 'Estado', facts: [], text: description };
+}
+
 /** `key` tiene la forma `tipo:índice`, p. ej. `weapons:0`, `skills:atletismo` o `abilities:fue`. */
 export function describe(c: Character, key: string): Description | null {
   const [kind, id] = key.split(':');
@@ -210,6 +229,7 @@ export function describe(c: Character, key: string): Description | null {
     case 'saves': return (abilities as readonly string[]).includes(id) ? describeSave(c, id as Ability) : null;
     case 'ac': return describeArmorClass(c);
     case 'abilities': return (abilities as readonly string[]).includes(id) ? describeAbility(c, id as Ability) : null;
+    case 'conditions': return describeCondition(c, id);
     default: return null;
   }
 }

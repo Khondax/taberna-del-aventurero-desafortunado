@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "version": 0,
   "character": {
     "name": "Arannis Valebright",
@@ -22,13 +22,22 @@
     "speed": "9 m",
     "hp": {
       "current": 22,
-      "max": 27
+      "max": 27,
+      "temp": 0
     },
     "hitDice": {
       "current": 3,
       "max": 5,
       "die": "d6"
     },
+    "deathSaves": {
+      "successes": 0,
+      "failures": 0,
+      "stable": false
+    },
+    "concentration": null,
+    "conditions": [],
+    "exhaustion": 0,
     "savingThrows": [
       "int",
       "sab"
@@ -287,6 +296,13 @@
         "armor": null
       }
     ],
+    "coins": {
+      "pc": 0,
+      "pp": 0,
+      "pe": 0,
+      "po": 0,
+      "ppt": 0
+    },
     "history": [
       {
         "date": "2026-11-08T21:30:00.000Z",

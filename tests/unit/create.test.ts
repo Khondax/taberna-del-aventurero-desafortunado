@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildCharacter, findClass, pointBuyCost, type CreationChoices } from '../../src/lib/create';
-import { sheetFileSchema } from '../../src/lib/schema';
+import { currentSchemaVersion, sheetFileSchema } from '../../src/lib/schema';
 import { armorClass, skillBonus } from '../../src/lib/sheet';
 
 describe('pointBuyCost', () => {
@@ -34,7 +34,7 @@ describe('buildCharacter', () => {
   it('guerrero: puntuaciones con trasfondo, PG, salvaciones, habilidades y rasgos de nivel 1', () => {
     const c = buildCharacter(choices('Guerrero'));
     expect(c.abilities).toEqual({ fue: 17, des: 14, con: 14, int: 8, sab: 12, car: 10 });
-    expect(c.hp).toEqual({ current: 12, max: 12 });
+    expect(c.hp).toEqual({ current: 12, max: 12, temp: 0 });
     expect(c.hitDice).toEqual({ current: 1, max: 1, die: 'd10' });
     expect(c.savingThrows).toEqual(['fue', 'con']);
     expect(skillBonus(c, 'atletismo')).toBe(5);
@@ -43,7 +43,7 @@ describe('buildCharacter', () => {
     expect(c.spellSlots).toEqual({});
     expect(armorClass(c)).toBe(12);
     expect(c.history).toHaveLength(1);
-    expect(() => sheetFileSchema.parse({ schemaVersion: 3, version: 0, character: c })).not.toThrow();
+    expect(() => sheetFileSchema.parse({ schemaVersion: currentSchemaVersion, version: 0, character: c })).not.toThrow();
   });
 
   it('mago: espacios de nivel 1 y aptitud mágica', () => {
