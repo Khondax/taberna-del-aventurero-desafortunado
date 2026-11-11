@@ -1,0 +1,94 @@
+---
+// Asistente de creación de un personaje de nivel 1. La lógica vive en src/scripts/new-character.ts
+// y las reglas en src/lib/create.ts.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { abilities, abilityNames, abilityShort, classList, skillIds, skills } from '../lib/sheet';
+---
+<BaseLayout title="Nueva ficha" crumb="Nueva ficha">
+  <div class="title-row">
+    <div><div class="eyebrow">Personaje de nivel 1</div><h1>Nueva ficha</h1></div>
+  </div>
+
+  <form class="sheet-grid" id="create" novalidate>
+    <div class="column">
+      <section class="panel">
+        <div class="panel-header"><h2>1 · Identidad</h2></div>
+        <div class="panel-body form-grid">
+          <label>Nombre<input class="field" name="name" required autocomplete="off" /></label>
+          <label>Clase<select class="field" name="className">{classList.map((info) => <option>{info.name}</option>)}</select></label>
+          <label>Especie<input class="field" name="species" placeholder="Humano, Elfo, Enano…" /></label>
+          <label>Trasfondo<input class="field" name="background" placeholder="Acólito, Sabio, Soldado…" /></label>
+          <label>Alineamiento<input class="field" name="alignment" placeholder="Neutral bueno" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header"><h2>2 · Características</h2></div>
+        <div class="panel-body">
+          <div class="segmented" role="radiogroup" aria-label="Método">
+            <label class="option"><input type="radio" name="method" value="standard" checked /> Matriz estándar</label>
+            <label class="option"><input type="radio" name="method" value="pointbuy" /> Compra de puntos</label>
+            <label class="option"><input type="radio" name="method" value="roll" /> Tiradas</label>
+          </div>
+          <p class="note" id="methodHelp"></p>
+          <div class="inline-form" id="rollPanel" hidden>
+            <button type="button" class="button secondary" id="rollScores">Tirar 4d6 × 6</button>
+            <span class="note" id="rollDetail"></span>
+          </div>
+          <div class="ability-assign">
+            {abilities.map((ability) => (
+              <label class="stat-box">
+                <small>{abilityNames[ability]}</small>
+                <select class="field" data-assign={ability} aria-label={`Puntuación de ${abilityNames[ability]}`}></select>
+                <input class="field" type="number" min="8" max="15" value="8" data-buy={ability} aria-label={`Puntuación de ${abilityNames[ability]}`} hidden />
+                <span class="note" data-final={ability}></span>
+              </label>
+            ))}
+          </div>
+
+          <div class="section-heading"><h3>Bonificador del trasfondo</h3><span>2024: elige según tu trasfondo</span></div>
+          <div class="segmented" role="radiogroup" aria-label="Reparto del bonificador">
+            <label class="option"><input type="radio" name="bonusMode" value="2-1" checked /> +2 y +1</label>
+            <label class="option"><input type="radio" name="bonusMode" value="1-1-1" /> +1, +1 y +1</label>
+          </div>
+          <div class="inline-form">
+            {[0, 1, 2].map((slot) => (
+              <select class="field narrow-select" data-bonus={slot} aria-label={`Característica del bonificador ${slot + 1}`}>
+                <option value="">—</option>
+                {abilities.map((ability) => <option value={ability}>{abilityNames[ability]}</option>)}
+              </select>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header"><h2>3 · Habilidades</h2><span class="tag" id="skillCount"></span></div>
+        <div class="panel-body">
+          <p class="note" id="skillHelp"></p>
+          <div class="skill-grid">
+            {skillIds.map((id) => (
+              <label class="option" data-skill={id}><input type="checkbox" name="skills" value={id} /> {skills[id].name} <small>{abilityShort(skills[id].ability)}</small></label>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="column">
+      <section class="panel sticky-panel">
+        <div class="panel-header"><h2>Resumen</h2></div>
+        <div class="panel-body">
+          <div class="description" id="summary"></div>
+          <ul class="problems" id="problems"></ul>
+          <button class="button primary" id="createButton">Crear ficha</button>
+          <p class="note" id="createStatus" role="status"></p>
+        </div>
+      </section>
+    </aside>
+  </form>
+
+  <script>
+    import '../scripts/new-character';
+  </script>
+</BaseLayout>

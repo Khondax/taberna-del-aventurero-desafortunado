@@ -38,6 +38,7 @@ const current = Astro.url.pathname;
               <strong>{entry.sheet.character.name}</strong><small>{entry.sheet.character.className} · nivel {entry.sheet.character.level}</small>
             </a>
           ))}
+          <a class="nav-item" href="/nueva-ficha" aria-current={current === '/nueva-ficha' ? 'page' : undefined}><strong>＋ Nueva ficha</strong></a>
         </nav>
         <div class="table-card"><small>Mesa activa</small><strong>{campaign.name}</strong><small>{sheets.length} aventureros</small></div>
       </aside>

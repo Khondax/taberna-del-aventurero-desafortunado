@@ -10,6 +10,7 @@ const sheets = await listSheets();
     <div><div class="eyebrow">Vista del máster · se actualiza sola</div><h1>La mesa</h1></div>
     <div class="title-actions">
       <button class="button secondary" id="importButton">Importar ficha</button>
+      <a class="button primary" href="/nueva-ficha">＋ Nueva ficha</a>
       <input type="file" id="importFile" accept=".json,application/json" hidden />
     </div>
   </div>
@@ -27,7 +28,7 @@ const sheets = await listSheets();
         </article>
       ),
     )}
-    {sheets.length === 0 && <p class="note">Todavía no hay fichas. Importa un archivo exportado para empezar.</p>}
+    {sheets.length === 0 && <p class="note">Todavía no hay fichas. Crea una nueva o importa un archivo exportado.</p>}
   </div>
 
   <script>

@@ -15,7 +15,8 @@ La interfaz sigue el proyecto de Stitch “Gestor de Rol Medieval”: estética 
 
 ## Hecho
 
-- Vista del máster con refresco automático e importación.
+- Vista del máster con refresco automático, creación e importación.
+- Creación de personajes de nivel 1: matriz estándar, compra de puntos o tiradas, bonificador del trasfondo y habilidades de clase.
 - Ficha editable en el sitio: identidad, nivel, PX, características, CA, velocidad, PG, dados de golpe, competencias en salvaciones y habilidades, aptitud mágica y espacios.
 - Armas, conjuros, objetos y rasgos desde los listados del SRD 5.2 o personalizados, con diálogo de edición y tooltip con desglose de cada número.
 - Tiradas de características, salvaciones, habilidades, ataques y conjuros. Recursos, descansos, subida de nivel, deshacer, exportación y guardado automático con detección de conflictos.
@@ -26,7 +27,9 @@ La interfaz sigue el proyecto de Stitch “Gestor de Rol Medieval”: estética 
 
 ## Pendiente
 
-- Crear personajes de nivel 1 con asistente (matriz estándar, compra de puntos o tiradas).
+- Recuperaciones parciales: los rasgos que «recuperan uno en descanso corto» (Furia, Canalizar divinidad…) se marcan como de descanso largo y el uso extra se suma a mano.
+- Multiclase y subclases lanzadoras (caballero arcano, embaucador arcano): sus espacios se ajustan a mano en el grimorio.
+- Trasfondos y especies con sus datos (habilidades, bonificadores, dotes de origen): hoy se escriben a mano y se eligen libremente.
 
 ## Suposiciones
 

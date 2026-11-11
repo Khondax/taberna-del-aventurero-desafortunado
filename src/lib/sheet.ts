@@ -68,7 +68,12 @@ const pactSlots = [
 
 type Caster = 'completo' | 'medio' | 'pacto' | null;
 
-interface ClassInfo {
+export interface ClassInfo {
+  name: string;
+  hitDie: Character['hitDice']['die'];
+  /** Habilidades entre las que elige la clase a nivel 1 y cuántas. */
+  skillChoices: readonly SkillId[];
+  skillCount: number;
   saves: [Ability, Ability];
   spellcasting: Ability | null;
   caster: Caster;
@@ -79,19 +84,58 @@ interface ClassInfo {
 
 /** Datos de clase indexados por el comienzo del nombre normalizado (cubre «Guerrero» y «Guerrera»). */
 const classes: Record<string, ClassInfo> = {
-  barbar: { saves: ['fue', 'con'], spellcasting: null, caster: null, unarmored: 'con', martialWeapons: 'todas' },
-  bard: { saves: ['des', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
-  bruj: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'pacto', martialWeapons: 'ninguna' },
-  cleri: { saves: ['sab', 'car'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
-  druid: { saves: ['int', 'sab'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
-  explorador: { saves: ['fue', 'des'], spellcasting: 'sab', caster: 'medio', martialWeapons: 'todas' },
-  guerrer: { saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
-  hechicer: { saves: ['con', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
-  mag: { saves: ['int', 'sab'], spellcasting: 'int', caster: 'completo', martialWeapons: 'ninguna' },
-  monj: { saves: ['fue', 'des'], spellcasting: null, caster: null, unarmored: 'sab', martialWeapons: 'ligeras' },
-  paladin: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'medio', martialWeapons: 'todas' },
-  picar: { saves: ['des', 'int'], spellcasting: null, caster: null, martialWeapons: 'sutiles-o-ligeras' },
+  barbar: {
+    name: 'Bárbaro', hitDie: 'd12', skillCount: 2,
+    skillChoices: ['tratoConAnimales', 'atletismo', 'intimidacion', 'naturaleza', 'percepcion', 'supervivencia'],
+    saves: ['fue', 'con'], spellcasting: null, caster: null, unarmored: 'con', martialWeapons: 'todas' },
+  bard: {
+    name: 'Bardo', hitDie: 'd8', skillCount: 3,
+    skillChoices: skillIds,
+    saves: ['des', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
+  bruj: {
+    name: 'Brujo', hitDie: 'd8', skillCount: 2,
+    skillChoices: ['arcanos', 'engano', 'historia', 'intimidacion', 'investigacion', 'naturaleza', 'religion'],
+    saves: ['sab', 'car'], spellcasting: 'car', caster: 'pacto', martialWeapons: 'ninguna' },
+  cleri: {
+    name: 'Clérigo', hitDie: 'd8', skillCount: 2,
+    skillChoices: ['historia', 'perspicacia', 'medicina', 'persuasion', 'religion'],
+    saves: ['sab', 'car'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
+  druid: {
+    name: 'Druida', hitDie: 'd8', skillCount: 2,
+    skillChoices: ['arcanos', 'tratoConAnimales', 'perspicacia', 'medicina', 'naturaleza', 'percepcion', 'religion', 'supervivencia'],
+    saves: ['int', 'sab'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
+  explorador: {
+    name: 'Explorador', hitDie: 'd10', skillCount: 3,
+    skillChoices: ['tratoConAnimales', 'atletismo', 'perspicacia', 'investigacion', 'naturaleza', 'percepcion', 'sigilo', 'supervivencia'],
+    saves: ['fue', 'des'], spellcasting: 'sab', caster: 'medio', martialWeapons: 'todas' },
+  guerrer: {
+    name: 'Guerrero', hitDie: 'd10', skillCount: 2,
+    skillChoices: ['acrobacias', 'tratoConAnimales', 'atletismo', 'historia', 'perspicacia', 'intimidacion', 'persuasion', 'percepcion', 'supervivencia'],
+    saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
+  hechicer: {
+    name: 'Hechicero', hitDie: 'd6', skillCount: 2,
+    skillChoices: ['arcanos', 'engano', 'perspicacia', 'intimidacion', 'persuasion', 'religion'],
+    saves: ['con', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
+  mag: {
+    name: 'Mago', hitDie: 'd6', skillCount: 2,
+    skillChoices: ['arcanos', 'historia', 'perspicacia', 'investigacion', 'medicina', 'naturaleza', 'religion'],
+    saves: ['int', 'sab'], spellcasting: 'int', caster: 'completo', martialWeapons: 'ninguna' },
+  monj: {
+    name: 'Monje', hitDie: 'd8', skillCount: 2,
+    skillChoices: ['acrobacias', 'atletismo', 'historia', 'perspicacia', 'religion', 'sigilo'],
+    saves: ['fue', 'des'], spellcasting: null, caster: null, unarmored: 'sab', martialWeapons: 'ligeras' },
+  paladin: {
+    name: 'Paladín', hitDie: 'd10', skillCount: 2,
+    skillChoices: ['atletismo', 'perspicacia', 'intimidacion', 'medicina', 'persuasion', 'religion'],
+    saves: ['sab', 'car'], spellcasting: 'car', caster: 'medio', martialWeapons: 'todas' },
+  picar: {
+    name: 'Pícaro', hitDie: 'd8', skillCount: 4,
+    skillChoices: ['acrobacias', 'atletismo', 'engano', 'perspicacia', 'intimidacion', 'investigacion', 'percepcion', 'persuasion', 'juegoDeManos', 'sigilo'],
+    saves: ['des', 'int'], spellcasting: null, caster: null, martialWeapons: 'sutiles-o-ligeras' },
 };
+
+/** Clases del juego en orden alfabético, para elegir al crear un personaje. */
+export const classList: readonly ClassInfo[] = Object.values(classes);
 
 export const normalize = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 export const classInfo = (className: string): ClassInfo | undefined => {

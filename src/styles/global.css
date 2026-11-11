@@ -66,6 +66,7 @@ h3 { font-size: 22px; }
 .button { border: 1px solid transparent; border-radius: 5px; padding: 10px 14px; font-weight: 600; font-size: 13px; transition: transform .15s, background .15s; }
 .button:hover { transform: translateY(-1px); }
 .button.primary { background: var(--garnet-mid); color: #fff; border-color: var(--garnet); }
+a.button { display: inline-block; text-decoration: none; }
 .button.secondary { background: var(--paper); color: var(--ink); border-color: var(--brass); }
 .button.ghost { background: transparent; color: var(--leather); padding-inline: 8px; }
 .button.ghost:hover { background: var(--well); }
@@ -204,6 +205,20 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .narrow-select { width: auto; }
 .inline-form .field[type="search"] { flex: 1; width: auto; margin: 0; }
 
+/* Nueva ficha */
+.segmented { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.segmented .option { padding: 9px 12px; }
+.ability-assign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.ability-assign .field { margin-top: 6px; text-align: center; font-family: 'JetBrains Mono'; }
+.ability-assign .note { display: block; margin-top: 4px; font-size: 11px; }
+.skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.skill-grid .option { padding: 8px 10px; font-size: 13px; }
+.skill-grid .option small { display: inline; margin: 0; }
+.option.suggested { border-color: var(--brass); }
+.problems { margin: 12px 0; padding-left: 18px; list-style: disc; color: var(--danger); font-size: 13px; }
+.problems:empty { display: none; }
+.sticky-panel { position: sticky; top: 20px; }
+
 /* Asistente */
 .modal-card { max-width: 620px; width: calc(100% - 40px); max-height: 90vh; padding: 0; color: var(--ink); background: var(--paper); border: 1px solid var(--brass); border-radius: 8px; box-shadow: 0 16px 32px #23140a29; }
 .modal-card.wide { max-width: 760px; }
@@ -234,6 +249,8 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
   .sheet-grid { grid-template-columns: minmax(0, 1fr); }
   .proficiency-grid, .casting-strip { grid-template-columns: minmax(0, 1fr); }
   .identity { grid-template-columns: minmax(0, 1fr); }
+  .ability-assign { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sticky-panel { position: static; }
   .dice-toast { left: 12px; right: 12px; bottom: 12px; max-width: none; }
   .stat-strip { grid-template-columns: repeat(2, 1fr); }
   .ability-grid { grid-template-columns: repeat(2, 1fr); }
