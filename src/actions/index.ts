@@ -29,7 +29,7 @@ export const server = {
     handler: async ({ character }) => ({ character }),
   }),
 
-  /** Borra la ficha del disco. No se puede deshacer. */
+  /** Mueve la ficha a la papelera del servidor. Desde la interfaz no se puede deshacer. */
   deleteCharacter: defineAction({
     input: z.object({ slug: z.string() }),
     handler: async ({ slug }) => {

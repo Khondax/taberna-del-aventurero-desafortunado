@@ -50,6 +50,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
 - Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
+- Copias automáticas de cada ficha al guardar (`.historial/`, una cada 10 minutos como mucho, las 30 últimas) y papelera para las fichas eliminadas.
 
 ## Pendiente
 

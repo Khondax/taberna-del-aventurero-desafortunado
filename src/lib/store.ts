@@ -2,7 +2,9 @@
 // `data/personajes`, relativo al directorio desde el que se arranca el servidor).
 // Si la carpeta no existe, se crea con los ejemplos de `data/ejemplos`. Los archivos de
 // versiones anteriores se migran al leerlos y se reescriben en el formato actual al guardar.
-import { cp, mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+// Antes de guardar se conserva una instantánea del archivo en `.historial/<slug>/`, y al
+// eliminar una ficha se mueve a `.papelera/`. Ambas carpetas están dentro de `DATA_DIR`.
+import { copyFile, cp, mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { migrate } from './migrate';
@@ -11,7 +13,13 @@ import { normalize } from './sheet';
 
 const dataDir = path.resolve(process.env.DATA_DIR ?? 'data/personajes');
 const samplesDir = path.resolve('data/ejemplos');
+const historyDir = path.join(dataDir, '.historial');
+const trashDir = path.join(dataDir, '.papelera');
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** Como mucho una instantánea por ficha en este intervalo, y solo las últimas `snapshotLimit`. */
+export const snapshotInterval = 10 * 60 * 1000;
+export const snapshotLimit = 30;
 
 export type StoredSheet = { slug: string; sheet: SheetFile } | { slug: string; error: string };
 export type SaveResult = { ok: true; version: number } | { ok: false; reason: 'not-found' | 'conflict' };
@@ -42,6 +50,23 @@ async function writeAtomic(file: string, sheet: SheetFile) {
   const tmp = `${file}.${process.pid}.tmp`;
   await writeFile(tmp, `${JSON.stringify(sheet, null, 2)}\n`);
   await rename(tmp, file);
+}
+
+/** Marca de tiempo para nombres de archivo: ISO sin «:», que se ordena igual que las fechas. */
+const stamp = (time = Date.now()) => new Date(time).toISOString().replaceAll(':', '-');
+
+/**
+ * Copia el archivo actual de la ficha a su historial si la última copia tiene más de
+ * `snapshotInterval`, y borra las que pasen de `snapshotLimit`.
+ */
+async function snapshot(slug: string) {
+  const dir = path.join(historyDir, slug);
+  await mkdir(dir, { recursive: true });
+  const names = (await readdir(dir)).filter((name) => name.endsWith('.json')).sort();
+  if (names.length && names[names.length - 1] > `${stamp(Date.now() - snapshotInterval)}.json`) return;
+  const name = `${stamp()}.json`;
+  await copyFile(fileFor(slug), path.join(dir, name));
+  for (const old of [...names, name].slice(0, -snapshotLimit)) await unlink(path.join(dir, old));
 }
 
 async function readFileSheet(file: string): Promise<SheetFile> {
@@ -87,6 +112,7 @@ export function saveCharacter(slug: string, expectedVersion: number, character: 
     if (!current) return { ok: false, reason: 'not-found' };
     if (current.version !== expectedVersion) return { ok: false, reason: 'conflict' };
     const version = expectedVersion + 1;
+    await snapshot(slug);
     await writeAtomic(fileFor(slug), { schemaVersion: currentSchemaVersion, version, character });
     return { ok: true, version };
   });
@@ -104,12 +130,13 @@ export function createCharacter(character: Character): Promise<string> {
   });
 }
 
-/** Borra el archivo de la ficha. Devuelve `false` si ya no existía. */
+/** Mueve la ficha a la papelera como `<slug>-<fecha>.json`. Devuelve `false` si ya no existía. */
 export function deleteCharacter(slug: string): Promise<boolean> {
   return serialized(slug, async () => {
     await ensureDataDir();
     try {
-      await unlink(fileFor(slug));
+      await mkdir(trashDir, { recursive: true });
+      await rename(fileFor(slug), path.join(trashDir, `${slug}-${stamp()}.json`));
       return true;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
