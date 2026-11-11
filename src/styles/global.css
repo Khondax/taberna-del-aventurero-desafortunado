@@ -255,6 +255,9 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .check-name:hover { color: var(--garnet-mid); }
 .check-name small { color: var(--muted); font: 10px var(--font-mono); }
 .bonus { color: var(--garnet); font: 700 14px var(--font-mono); }
+.coin-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.coin-strip .stat-box { padding: 8px 6px; }
+.coin-strip .stat-box > .edit { font-size: 20px; }
 .casting-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
 .casting-strip strong { font-size: 20px; }
 

@@ -9,6 +9,8 @@ import { readSheet } from '../../lib/store';
 import {
   abilities,
   abilityNames,
+  coinIds,
+  coinNames,
   concentrationOptions,
   conditionIds,
   conditions,
@@ -271,11 +273,16 @@ const identity = [
         <button class="button ghost" data-pick="inventory">＋ Añadir objeto</button>
       </div>
       <div class="panel-body">
+        <div class="coin-strip">
+          {coinIds.map((coin) => (
+            <label class="stat-box" title={coinNames[coin]}><small>{coin}</small><input class="edit" type="number" min="0" data-path={`coins.${coin}`} value={c.coins[coin]} aria-label={coinNames[coin]} /></label>
+          ))}
+        </div>
         <input class="field" type="search" data-filter="inventory" placeholder="Buscar equipo, objetos y tesoro…" aria-label="Buscar en el inventario" />
         <ul class="item-list" id="inventory" data-empty="Inventario vacío. Añade algo del listado.">
           {c.inventory.map((item, i) => <EntryRow row={itemRow(item)} entry={`inventory:${i}`} editable />)}
         </ul>
-        <p class="note">Las armas van en Ataques (pestaña Resumen) y cuentan para la carga.</p>
+        <p class="note">Las armas van en Ataques (pestaña Resumen) y cuentan para la carga. Las monedas también: 50 pesan 0,5 kg (1 libra).</p>
       </div>
     </section>
 

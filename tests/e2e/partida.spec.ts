@@ -1,4 +1,4 @@
-// En partida: PG temporales, salvaciones contra la muerte, concentración, estados y agotamiento.
+// En partida: PG temporales, salvaciones contra la muerte, concentración, estados, agotamiento y monedas.
 // El Hermano Tobías es un clérigo de nivel 5 con 38 PG, CON 14 (+2, sin competencia en su salvación).
 import type { Page } from '@playwright/test';
 import { disk, expect, saved, seed, test, tip } from './helpers';
@@ -119,4 +119,16 @@ test('estados y agotamiento: se marcan, se explican, penalizan y se ven en la me
   await page.goto('/personajes/partida-estados');
   await page.click('#longRest');
   await expect(page.locator('[data-bind="exhaustion"]')).toHaveText('1 / 6');
+});
+
+test('las monedas se editan en el inventario y cuentan para la carga', async ({ page }) => {
+  await page.goto(seed('partida-monedas', 'hermano-tobias'));
+  await page.click('#tab-inventario');
+  await page.getByLabel('Piezas de oro').fill('120');
+  await page.getByLabel('Piezas de oro').press('Tab');
+  await page.getByLabel('Piezas de plata').fill('30');
+  await page.getByLabel('Piezas de plata').press('Tab');
+  await expect(page.locator('[data-bind=weight]')).toContainText('(monedas 1,5 kg)');
+  await saved(page);
+  expect(disk('partida-monedas').character.coins).toEqual({ pc: 0, pp: 30, pe: 0, po: 120, ppt: 0 });
 });
