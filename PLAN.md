@@ -11,7 +11,32 @@ La interfaz sigue el proyecto de Stitch “Gestor de Rol Medieval”: estética 
 - Astro con `@astrojs/node`, servido desde mint-node solo por red local o Tailscale.
 - Persistencia en un archivo JSON por personaje, sin base de datos. El formato de exportación es el mismo que el de disco.
 - Sin autenticación: puede editar cualquiera con acceso a la red. Si algún día se expone fuera, habrá que añadir al menos una contraseña de mesa.
-- JavaScript sin framework en cliente. Si la ficha crece mucho en interactividad, valorar un componente Svelte para ella.
+- JavaScript sin framework en cliente. Ver «Evaluación de Svelte» para cuándo convertir la ficha en una isla Svelte.
+
+## Evaluación de Svelte (noviembre de 2026)
+
+**Medidas.** El cliente de la ficha son 1128 líneas en `src/scripts/sheet/` (`entries.ts` 369, `main.ts` 359, `state.ts` 136, `level-up.ts` 118, `tooltip.ts` 79, `manage.ts` 67), más 176 de `new-character.ts`, y la plantilla `personajes/[slug].astro` tiene 364. Tras `pnpm build`, `dist/client/_astro` suma 101 KB de JS (33 KB con gzip). La ficha carga unos 94 KB (32 KB con gzip): su script ocupa 33 KB y los listados (`spells` y `catalog`), 41 KB, que seguirían igual con Svelte.
+
+**Qué complica el código sin framework.** El modelo ya es «estado → `render()` lo repinta todo», y funciona, pero lo hace a mano:
+
+- Cada fila tiene dos fuentes. `EntryRow` y `ResourceRow` se pintan en el servidor con props, y en el cliente se clonan desde un `<template>` y se rellenan con `fillRow` y `fillResource`, que repiten los `aria-label`, los `hidden` y los `data-path`. Además, las filas del buscador de listados (`renderPicker`) rehacen la misma marca con `createElement`. Un campo nuevo en una fila obliga a tocar tres sitios.
+- `renderList` sincroniza las listas por posición. Funciona porque las filas son planas, pero no admite listas anidadas ni filas con estado propio.
+- Hay 14 `data-bind`, 13 `data-path` y los `data-toggle`, que se vuelven a buscar en todo el documento con cada cambio. Las claves de `liveText` tienen que coincidir con las de la plantilla sin ayuda de los tipos.
+- El formulario del diálogo de edición (`buildField` y `readForm`), el tooltip y los usos de la subida de nivel construyen DOM a mano.
+
+En total, unas 230 líneas (alrededor del 18 % del cliente) son fontanería que Svelte haría innecesaria. El resto son reglas, tiradas y guardado, y se quedarían como están.
+
+**Qué ganaríamos.** Una sola plantilla por fila para el servidor y el cliente, `bind:value` en lugar de `data-path`, `{#each}` con clave en lugar de `renderList`, y comprobación de tipos en la plantilla. `state.ts` (deshacer y guardado) y `src/lib/` se reutilizarían tal cual.
+
+**Cuánto costaría.** Dos dependencias (`svelte` y `@astrojs/svelte`) y, probablemente, `svelte-check` para que `pnpm check` cubra los `.svelte`. Unos 10-15 KB más de JS con gzip por el runtime (estimado, sin medir). Reescribir la plantilla de la ficha y los cinco módulos de interacción, de dos a tres días de trabajo, con riesgo de regresiones en el foco, los diálogos, el tooltip y el deshacer. No hay tests de interfaz que lo protejan.
+
+**Recomendación.** Ahora no: la ficha tiene listas planas y un solo repintado, y el código actual se entiende bien. Merece la pena migrar la ficha entera a una isla `client:load` (la vista del máster y la creación pueden seguir como están) cuando se cumpla una de estas condiciones:
+
+- Se aborda la multiclase o los trasfondos y especies con datos, que traen bloques repetidos y anidados (varias clases con sus rasgos y espacios), justo lo que `renderList` no cubre.
+- Las filas necesitan estado propio: edición en línea, reordenar o desplegar.
+- Aparecen fallos repetidos por desajustes entre la plantilla Astro y `fillRow`, `fillResource` o `renderPicker`.
+
+Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edición, deshacer y guardado) que sirvan de red.
 
 ## Hecho
 
