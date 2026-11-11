@@ -150,7 +150,7 @@ Las pestañas que tuvieran la ficha abierta detectan el cambio de versión al gu
 - Cada tarea va en una rama nueva creada desde `master`. `develop` ya no existe, y `backup/develop-wip` solo guarda trabajo antiguo obsoleto: no se parte de ella.
 - Un solo agente a la vez por zona del código: ficha (`src/scripts/sheet/`, `src/pages/personajes/`), esquema y datos (`src/lib/schema.ts`, `src/lib/migrate.ts`, `src/lib/store.ts`) o estilos (`src/styles/`). Solo se trabaja en paralelo en zonas que no se pisen.
 - Antes de integrar, rebasa la rama sobre `master` e intégrala con fast-forward (`git merge --ff-only`).
-- Antes de integrar tienen que pasar `pnpm check`, `pnpm build` y los tests.
+- Antes de integrar tienen que pasar `pnpm check`, `pnpm build`, `pnpm test` y `pnpm test:e2e`.
 - No se hace push sin que lo pida Miguel.
 
 ## Licencia del contenido de reglas
