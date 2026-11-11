@@ -310,6 +310,9 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .wizard-actions { display: flex; justify-content: space-between; margin-top: 24px; }
 .wizard-actions .primary { margin-left: auto; }
 
+/* Barra de acciones de la ficha: solo en pantallas estrechas, fija abajo. */
+.action-dock { display: none; }
+
 @media (max-width: 980px) {
   .app-shell { display: block; }
   .sidebar { z-index: 4; height: auto; padding: 10px 16px; flex-direction: row; align-items: center; gap: 16px; }
@@ -333,4 +336,10 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
   .stat-strip { grid-template-columns: repeat(2, 1fr); }
   .ability-grid { grid-template-columns: repeat(2, 1fr); }
   .party-grid { grid-template-columns: minmax(0, 1fr); }
+  .action-dock { position: fixed; inset: auto 0 0; z-index: 5; display: flex; gap: 6px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: var(--garnet); box-shadow: 0 -8px 20px #23140a33; }
+  .action-dock .field.narrow { flex: none; width: 64px; }
+  .action-dock .button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding-inline: 6px; white-space: nowrap; }
+  .action-dock .die { width: 16px; height: 16px; }
+  .content:has(.action-dock) { padding-bottom: 96px; }
+  body:has(.action-dock) .dice-toast { bottom: 72px; }
 }

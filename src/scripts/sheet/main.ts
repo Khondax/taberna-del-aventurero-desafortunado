@@ -367,6 +367,12 @@ document.querySelectorAll<HTMLFormElement>('.hp-form').forEach((form) =>
   }),
 );
 
+// Tirada rápida de la barra de móvil: un d20 sin modificadores.
+$('#quickRoll').addEventListener('click', () => {
+  const die = d20();
+  showRoll(`Tirada rápida · d20 [${die}]`, String(die));
+});
+
 // Casillas de salvación contra la muerte: marcar la n.ª deja n; desmarcarla, n − 1.
 root.addEventListener('change', (event) => {
   const box = event.target as HTMLInputElement;

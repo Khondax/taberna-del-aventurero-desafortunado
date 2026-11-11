@@ -320,6 +320,14 @@ const identity = [
         </div>
       </aside>
     </section>
+
+    <!-- Barra fija en pantallas estrechas (ver global.css): fuera de las pestañas para verse siempre. -->
+    <form class="hp-form action-dock" id="actionDock" aria-label="Acciones rápidas">
+      <input class="field narrow" type="number" name="amount" min="1" step="1" value="1" required aria-label="Cantidad de PG" />
+      <button class="button secondary" name="direction" value="-1">− Daño</button>
+      <button class="button secondary" name="direction" value="1">＋ Curar</button>
+      <button type="button" class="button secondary" id="quickRoll" aria-label="Tirada rápida: 1d20"><span class="die" aria-hidden="true"></span> d20</button>
+    </form>
   </div>
 
   <output class="dice-toast" id="rollResult" aria-live="polite" hidden>

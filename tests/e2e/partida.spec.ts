@@ -150,3 +150,27 @@ test('las tiradas de la ficha se ven en la vista del máster', async ({ page }) 
   // La tirada no cambia la versión de la ficha.
   expect(disk('partida-tiradas').version).toBe(0);
 });
+
+test('en móvil, la barra fija abajo hace daño, cura y tira un d20 desde cualquier pestaña', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(seed('partida-movil', 'hermano-tobias'));
+  const dock = page.locator('#actionDock');
+  await expect(dock).toBeVisible();
+  expect(await dock.evaluate((el) => el.getBoundingClientRect().bottom)).toBe(844);
+
+  await page.click('#tab-inventario');
+  await dock.locator('[name=amount]').fill('5');
+  await dock.getByRole('button', { name: '− Daño' }).click();
+  await expect(page.locator('#rollResult')).toContainText('33 PG');
+  await dock.getByRole('button', { name: '＋ Curar' }).click();
+  await expect(page.locator('#rollResult')).toContainText('38 PG');
+  await dock.getByRole('button', { name: 'Tirada rápida: 1d20' }).click();
+  await expect(page.locator('#rollLabel')).toContainText('Tirada rápida · d20');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  await page.close();
+});
+
+test('en escritorio no se muestra la barra de móvil', async ({ page }) => {
+  await page.goto(seed('partida-escritorio', 'hermano-tobias'));
+  await expect(page.locator('#actionDock')).toBeHidden();
+});
