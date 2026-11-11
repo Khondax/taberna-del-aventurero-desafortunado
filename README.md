@@ -24,6 +24,8 @@ pnpm check       # tipos
 pnpm build
 ```
 
+Las fuentes (EB Garamond, Hanken Grotesk y JetBrains Mono) se configuran en `astro.config.mjs` con la API de fuentes de Astro. Se descargan de Google Fonts la primera vez que se compila o se arranca `pnpm dev`, quedan en caché (`node_modules/.astro/` y `.astro/`) y la app las sirve desde `/_astro/fonts/`, así que en la mesa no hace falta internet. En CSS se usan con `var(--font-garamond)`, `var(--font-hanken)` y `var(--font-mono)`.
+
 En mint-node, el servidor de desarrollo corre como unidad transitoria de systemd de usuario, para que no dependa de la terminal ni de la sesión del agente que lo lanzó. No sobrevive a un reinicio.
 
 ```bash

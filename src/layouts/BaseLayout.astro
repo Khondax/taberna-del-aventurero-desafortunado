@@ -1,6 +1,7 @@
 ---
 // Estructura común: barra lateral con la mesa y sus personajes, cabecera y contenido.
 // El slot `actions` añade elementos a la derecha de la cabecera.
+import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { campaign } from '../config';
 import { listSheets } from '../lib/store';
@@ -21,9 +22,9 @@ const current = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Fichas y grimorios para tus partidas de D&D 2024." />
     <title>{title ? `${title} · La Taberna` : 'La Taberna del Aventurero Desafortunado'}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+    <Font cssVariable="--font-garamond" />
+    <Font cssVariable="--font-hanken" />
+    <Font cssVariable="--font-mono" />
   </head>
   <body>
     <div class="app-shell">
