@@ -3,7 +3,7 @@ import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro/zod';
 import { migrate } from '../lib/migrate';
 import { importSchema, sheetFileSchema } from '../lib/schema';
-import { createCharacter, saveCharacter } from '../lib/store';
+import { createCharacter, deleteCharacter, saveCharacter } from '../lib/store';
 
 export const server = {
   /** Guarda la ficha completa. Devuelve la nueva versión o CONFLICT si el archivo cambió entretanto. */
@@ -21,5 +21,19 @@ export const server = {
   importCharacter: defineAction({
     input: z.preprocess(migrate, importSchema),
     handler: async ({ character }) => ({ slug: await createCharacter(character) }),
+  }),
+
+  /** Valida y migra un archivo exportado sin guardarlo. La ficha lo usa para reemplazar su contenido. */
+  parseCharacter: defineAction({
+    input: z.preprocess(migrate, importSchema),
+    handler: async ({ character }) => ({ character }),
+  }),
+
+  /** Borra la ficha del disco. No se puede deshacer. */
+  deleteCharacter: defineAction({
+    input: z.object({ slug: z.string() }),
+    handler: async ({ slug }) => {
+      if (!(await deleteCharacter(slug))) throw new ActionError({ code: 'NOT_FOUND', message: 'La ficha ya no existe.' });
+    },
   }),
 };

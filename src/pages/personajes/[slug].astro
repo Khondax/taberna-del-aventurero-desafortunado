@@ -35,6 +35,7 @@ const tabs = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'inventario', label: 'Inventario' },
   { id: 'notas', label: 'Notas e historial' },
+  { id: 'gestion', label: 'Gestión' },
 ];
 const identity = [
   { path: 'species', label: 'Especie' },
@@ -55,7 +56,6 @@ const identity = [
       </div>
       <div class="title-actions">
         <button class="button ghost" id="undo" disabled>↶ Deshacer</button>
-        <button class="button secondary" id="export">Exportar</button>
         <button class="button primary" id="openLevelUp" disabled={c.level >= 20}>＋ Subir de nivel</button>
       </div>
     </div>
@@ -241,6 +241,28 @@ const identity = [
         <div class="panel-body"><textarea class="field notes" id="notes" aria-label="Notas del personaje" placeholder="PNJ, pistas, deudas…">{c.notes}</textarea></div>
       </aside>
     </section>
+
+    <section class="sheet-grid" id="gestion" role="tabpanel" aria-labelledby="tab-gestion" hidden>
+      <article class="panel">
+        <div class="panel-header"><div><div class="eyebrow">Archivo JSON</div><h2>Exportar e importar</h2></div></div>
+        <div class="panel-body wizard-step">
+          <p>Exporta la ficha para guardar una copia o llevarla a otra campaña. Al importar un archivo, su contenido reemplaza el de esta ficha; se puede deshacer, salvo las notas.</p>
+          <div class="title-actions">
+            <button class="button secondary" id="export">Exportar</button>
+            <button class="button secondary" id="importButton">Importar y reemplazar</button>
+            <input type="file" id="importFile" accept=".json,application/json" hidden />
+          </div>
+          <p class="note" id="importStatus" role="status"></p>
+        </div>
+      </article>
+      <aside class="panel">
+        <div class="panel-header"><h2>Eliminar ficha</h2></div>
+        <div class="panel-body wizard-step">
+          <p>Borra la ficha del servidor para todos. No se puede deshacer: exporta antes si quieres conservar una copia.</p>
+          <div><button class="button secondary danger" id="openDelete">Eliminar ficha</button></div>
+        </div>
+      </aside>
+    </section>
   </div>
 
   <output class="dice-toast" id="rollResult" aria-live="polite" hidden>
@@ -296,6 +318,21 @@ const identity = [
         </div>
       </div>
     </form>
+  </dialog>
+
+  <dialog class="modal-card" id="deleteDialog" aria-labelledby="deleteTitle">
+    <div class="panel-header">
+      <div><div class="eyebrow">Gestión</div><h2 id="deleteTitle">¿Eliminar a <span id="deleteName">{c.name}</span>?</h2></div>
+      <button type="button" class="button ghost" data-close aria-label="Cerrar">×</button>
+    </div>
+    <div class="panel-body">
+      <p>La ficha desaparecerá de la mesa para todos y no se podrá recuperar.</p>
+      <p class="note" id="deleteStatus" role="status"></p>
+      <div class="wizard-actions">
+        <button type="button" class="button ghost" data-close>Cancelar</button>
+        <button type="button" class="button secondary danger" id="confirmDelete">Eliminar</button>
+      </div>
+    </div>
   </dialog>
 
   <dialog class="modal-card wide" id="picker" aria-labelledby="pickerTitle">

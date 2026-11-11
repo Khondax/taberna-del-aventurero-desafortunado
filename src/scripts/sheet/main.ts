@@ -1,6 +1,6 @@
 // Punto de entrada de la ficha (/personajes/[slug]): pintado, campos editables, tiradas,
-// recursos y descansos. La edición de listas, el tooltip y la subida de nivel viven en sus
-// propios módulos.
+// recursos y descansos. La edición de listas, el tooltip, la subida de nivel y la pestaña
+// Gestión viven en sus propios módulos.
 import {
   abilityMod,
   abilityNames,
@@ -36,10 +36,11 @@ import {
   type Row,
   type SkillId,
 } from '../../lib/sheet';
-import { $, canUndo, clamp, commit, currentFile, getPath, log, onRender, render, root, setPath, slug, state, undo, update } from './state';
+import { $, canUndo, clamp, commit, getPath, log, onRender, render, root, setPath, state, undo, update } from './state';
 import './tooltip';
 import './entries';
 import './level-up';
+import './manage';
 
 // --- Pintado -------------------------------------------------------------------------
 
@@ -346,19 +347,11 @@ $('#longRest').addEventListener('click', () => {
   showResult('Descanso largo · todo restaurado', '✓');
 });
 
-// --- Notas, exportación y deshacer -----------------------------------------------------------
+// --- Notas y deshacer -----------------------------------------------------------
 
 $<HTMLTextAreaElement>('#notes').addEventListener('input', (event) => {
   state.notes = (event.target as HTMLTextAreaElement).value;
   commit(); // Las notas se guardan sin pasar por `update`: no entran en deshacer.
-});
-
-$('#export').addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(new Blob([`${JSON.stringify(currentFile(), null, 2)}\n`], { type: 'application/json' }));
-  link.download = `${slug}.json`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 });
 
 $('#undo').addEventListener('click', undo);

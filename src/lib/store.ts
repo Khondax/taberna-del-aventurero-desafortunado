@@ -2,7 +2,7 @@
 // `data/personajes`, relativo al directorio desde el que se arranca el servidor).
 // Si la carpeta no existe, se crea con los ejemplos de `data/ejemplos`. Los archivos de
 // versiones anteriores se migran al leerlos y se reescriben en el formato actual al guardar.
-import { cp, mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { migrate } from './migrate';
@@ -101,5 +101,19 @@ export function createCharacter(character: Character): Promise<string> {
     for (let n = 2; existsSync(fileFor(slug)); n++) slug = `${base}-${n}`;
     await writeAtomic(fileFor(slug), { schemaVersion: currentSchemaVersion, version: 0, character });
     return slug;
+  });
+}
+
+/** Borra el archivo de la ficha. Devuelve `false` si ya no existía. */
+export function deleteCharacter(slug: string): Promise<boolean> {
+  return serialized(slug, async () => {
+    await ensureDataDir();
+    try {
+      await unlink(fileFor(slug));
+      return true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+      throw error;
+    }
   });
 }
