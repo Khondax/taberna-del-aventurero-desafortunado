@@ -5,11 +5,11 @@ Fichas de personaje de **Dragones y Mazmorras 2024 (5.5e)** para una partida ent
 ## Qué hace
 
 - **Vista del máster** (`/`): resumen de todas las fichas (PG, CA, iniciativa, percepción pasiva, dados de golpe, espacios y recursos). Se actualiza sola cada 10 s. Desde aquí se importan fichas.
-- **Ficha** (`/personajes/<id>`): editable como una de papel. Nombre, especie, clase, nivel, PX, características, CA, velocidad, PG, dados de golpe, aptitud mágica y espacios se editan en el sitio. Las competencias en salvaciones y habilidades se marcan pulsando el círculo: ○ sin competencia, ● competente, ◆ pericia.
+- **Ficha** (`/personajes/<id>`): editable como una de papel. Nombre, especie, clase, nivel, PX, características, velocidad, PG, dados de golpe, aptitud mágica y espacios se editan en el sitio. La CA se calcula con la armadura y el escudo equipados (o la Defensa sin armadura de bárbaros y monjes), más un campo «otros» para Armadura de mago u objetos mágicos. Las competencias en salvaciones y habilidades se marcan pulsando el círculo: ○ sin competencia, ● competente, ◆ pericia.
 - **Armas, conjuros, objetos y rasgos**: se añaden desde los listados del SRD 5.2 o se crean desde cero. Al pulsar una fila se abre su edición.
 - **Descripción al pasar el ratón** (o al enfocar con teclado): usos, daño, competencia y la característica que lo mejora, con el desglose del número. Por ejemplo, «Ataque +6 = FUE +3 + competencia +3», o «2d8 +4 curación · suma INT +4».
 - **En partida**: tiradas de características, salvaciones, habilidades, ataques y conjuros (los críticos duplican los dados), daño y curación, dados de golpe, usos con gastar y recuperar, descansos corto y largo, subida de nivel guiada, deshacer, notas, historial y exportación a JSON.
-- Cada cambio se guarda solo en el servidor medio segundo después. El indicador de la cabecera muestra si está guardado, guardando o con error.
+- Cada cambio se guarda solo en el servidor medio segundo después; si sales antes, se envía al cerrar la página. El indicador de la cabecera muestra si está guardado, guardando o con error.
 
 No hay cuentas ni permisos: cualquiera con acceso a la red puede ver y editar todas las fichas. Está pensada para servirse solo por red local o Tailscale.
 
@@ -48,12 +48,12 @@ HOST=0.0.0.0 PORT=4321 DATA_DIR=/ruta/a/fichas npm start
 Cada personaje es un archivo `<id>.json` con esta forma:
 
 ```json
-{ "schemaVersion": 2, "version": 12, "character": { "name": "…", "level": 5, "hp": { "current": 22, "max": 27 } } }
+{ "schemaVersion": 3, "version": 12, "character": { "name": "…", "level": 5, "hp": { "current": 22, "max": 27 } } }
 ```
 
 - El esquema completo está en `src/lib/schema.ts`, y se valida al leer, guardar e importar.
 - `version` sube con cada guardado. Si alguien guarda desde una copia desactualizada (otra pestaña), el servidor lo rechaza y la ficha pide recargar en vez de pisar cambios.
-- `schemaVersion` cambia cuando lo hace la forma de `character`. `src/lib/migrate.ts` convierte los archivos antiguos al leerlos o importarlos, y se reescriben en el formato actual al guardar. La v1 (sin habilidades ni armas) se migra completando conjuros, armas y objetos desde los listados cuando el nombre coincide.
+- `schemaVersion` cambia cuando lo hace la forma de `character`. `src/lib/migrate.ts` convierte los archivos antiguos al leerlos o importarlos, y se reescriben en el formato actual al guardar. La v1 (sin habilidades ni armas) se migra completando conjuros, armas y objetos desde los listados cuando el nombre coincide. La v2 (CA escrita a mano) se migra equipando las armaduras conocidas y guardando la diferencia en «otros», para que la CA no cambie.
 - El archivo exportado es el mismo que hay en disco. La importación crea una ficha nueva.
 
 ## Nueva campaña

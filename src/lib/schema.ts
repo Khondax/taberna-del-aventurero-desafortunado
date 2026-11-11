@@ -67,6 +67,9 @@ const itemSchema = z.object({
   weightKg: z.number().min(0),
   description: text,
   uses: usesSchema.nullable(),
+  equipped: z.boolean(),
+  /** Si es armadura o escudo: tipo y CA base (para el escudo, su bonificador). */
+  armor: z.object({ kind: z.enum(['ligera', 'intermedia', 'pesada', 'escudo']), base: z.number().int().min(0).max(30) }).nullable(),
 });
 
 const characterSchema = z.object({
@@ -79,7 +82,8 @@ const characterSchema = z.object({
   level: z.number().int().min(1).max(20),
   xp: count,
   abilities: z.object({ fue: score, des: score, con: score, int: score, sab: score, car: score }),
-  armorClass: z.number().int().min(0).max(40),
+  /** Bonificadores a la CA que no vienen de la armadura (Armadura de mago, objetos, estilos…). */
+  acBonus: z.number().int().min(-10).max(20),
   speed: text,
   hp: pool,
   hitDice: pool.extend({ die: z.enum(['d6', 'd8', 'd10', 'd12']) }),
@@ -117,5 +121,6 @@ export type Spell = z.infer<typeof spellSchema>;
 export type Weapon = z.infer<typeof weaponSchema>;
 export type InventoryItem = z.infer<typeof itemSchema>;
 export type Uses = z.infer<typeof usesSchema>;
+export type Armor = NonNullable<InventoryItem['armor']>;
 export type SheetFile = z.infer<typeof sheetFileSchema>;
 export type Pool = z.infer<typeof pool>;

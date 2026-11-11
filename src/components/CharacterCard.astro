@@ -1,6 +1,7 @@
 ---
 // Resumen de una ficha para la vista del máster.
 import {
+  armorClass,
   classLine,
   initials,
   initiative,
@@ -18,7 +19,7 @@ interface Props {
 }
 const { slug, character: c } = Astro.props;
 const stats = [
-  { label: 'CA', value: c.armorClass },
+  { label: 'CA', value: armorClass(c) },
   { label: 'Iniciativa', value: signed(initiative(c)) },
   { label: 'Perc. pasiva', value: passivePerception(c) },
   { label: 'Dados de golpe', value: `${c.hitDice.current}/${c.hitDice.max}` },

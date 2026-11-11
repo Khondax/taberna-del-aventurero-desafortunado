@@ -1,6 +1,6 @@
 // Estado de la ficha en el navegador y su ciclo de vida: cada cambio pasa por `update`, que
 // guarda una copia para deshacer, normaliza, vuelve a pintar y programa el guardado.
-import { actions } from 'astro:actions';
+import { actions, getActionPath } from 'astro:actions';
 import { currentSchemaVersion } from '../../lib/ids';
 import type { Character, Pool, SheetFile } from '../../lib/sheet';
 
@@ -40,7 +40,7 @@ export function setPath(target: object, path: string, value: unknown) {
 const saveState = $('#saveState');
 let saveTimer: number | undefined;
 let saveQueue = Promise.resolve();
-let dirty = false;
+let failed = false;
 let blocked = false;
 
 function setSaveState(text: string, kind: 'ok' | 'pending' | 'error') {
@@ -54,22 +54,20 @@ async function save() {
     .saveCharacter({ slug, version, character: state })
     .catch(() => ({ data: undefined, error: { code: 'NETWORK', message: 'Sin conexión con el servidor.' } }));
   if (error) {
+    failed = true;
     blocked = error.code === 'CONFLICT' || error.code === 'NOT_FOUND';
     setSaveState(blocked ? `${error.message} Recarga la página.` : `Error al guardar: ${error.message} Se reintentará con el próximo cambio.`, 'error');
     return;
   }
   version = data.version;
-  if (saveTimer === undefined) {
-    dirty = false;
-    setSaveState('Guardado', 'ok');
-  }
+  failed = false;
+  if (saveTimer === undefined) setSaveState('Guardado', 'ok');
 }
 
 /** Pinta y programa un guardado 500 ms después del último cambio. Los guardados van en serie. */
 export function commit() {
   render();
   if (blocked) return;
-  dirty = true;
   setSaveState('Guardando…', 'pending');
   clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
@@ -78,8 +76,23 @@ export function commit() {
   }, 500);
 }
 
+/** Al salir de la página, envía el guardado que estaba esperando su medio segundo. */
+function flushOnExit() {
+  if (saveTimer === undefined || blocked) return;
+  clearTimeout(saveTimer);
+  saveTimer = undefined;
+  fetch(getActionPath(actions.saveCharacter), {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ slug, version, character: state }),
+  });
+}
+window.addEventListener('pagehide', flushOnExit);
 window.addEventListener('beforeunload', (event) => {
-  if (dirty) event.preventDefault();
+  flushOnExit();
+  // Solo avisa si el último guardado falló y hay cambios que no llegaron al servidor.
+  if (failed) event.preventDefault();
 });
 
 // --- Cambios y deshacer ----------------------------------------------------------

@@ -82,7 +82,10 @@ const identity = [
           </div>
 
           <div class="stat-strip">
-            <label class="stat-box"><small>Clase de armadura</small><input class="edit" type="number" min="0" max="40" data-path="armorClass" value={c.armorClass} /></label>
+            <div class="stat-box" data-entry="ac:" data-tip="entry">
+              <small>Clase de armadura</small><strong data-bind="armorClass">{text.armorClass}</strong>
+              <label class="ac-bonus">otros <input class="edit narrow" type="number" min="-10" max="20" data-path="acBonus" value={c.acBonus} aria-label="Otros bonificadores a la CA" /></label>
+            </div>
             <div class="stat-box"><small>Iniciativa</small><strong data-bind="initiative">{text.initiative}</strong></div>
             <label class="stat-box"><small>Velocidad</small><input class="edit" data-path="speed" value={c.speed} /></label>
             <div class="stat-box"><small>Percepción pasiva</small><strong data-bind="passivePerception">{text.passivePerception}</strong></div>

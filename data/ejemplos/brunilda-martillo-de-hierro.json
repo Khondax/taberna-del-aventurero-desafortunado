@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "version": 0,
   "character": {
     "name": "Brunilda Martillo de Hierro",
@@ -18,7 +18,7 @@
       "sab": 13,
       "car": 10
     },
-    "armorClass": 18,
+    "acBonus": 0,
     "speed": "9 m",
     "hp": {
       "current": 41,
@@ -150,7 +150,12 @@
         "quantity": 1,
         "weightKg": 27.5,
         "description": "Malla completa con acolchado. Requiere Fue 13. Desventaja en Sigilo.",
-        "uses": null
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "pesada",
+          "base": 16
+        }
       },
       {
         "name": "Escudo",
@@ -158,7 +163,12 @@
         "quantity": 1,
         "weightKg": 3,
         "description": "Se lleva en una mano y suma 2 a la CA.",
-        "uses": null
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "escudo",
+          "base": 2
+        }
       },
       {
         "name": "Raciones",
@@ -166,7 +176,9 @@
         "quantity": 5,
         "weightKg": 1,
         "description": "Comida seca para un día.",
-        "uses": null
+        "uses": null,
+        "equipped": false,
+        "armor": null
       }
     ],
     "history": [

@@ -3,8 +3,8 @@
 // el esquema actual los valida después.
 import { itemCatalog, weaponCatalog } from '../data/catalog';
 import { spellCatalog } from '../data/spells';
-import { classInfo, defaultWeaponProficiency, normalize } from './sheet';
-import type { Character, Feature, InventoryItem, Spell, Weapon } from './schema';
+import { armorClass, classInfo, defaultWeaponProficiency, normalize } from './sheet';
+import type { Character, Feature, Spell, Weapon } from './schema';
 
 const findByName = <T extends { name: string }>(list: T[], name: string) =>
   list.find((entry) => normalize(entry.name) === normalize(name));
@@ -32,7 +32,7 @@ function v1ToV2(file: any): any {
 
   const character = { className: c.className ?? '' } as Character;
   const weapons: Weapon[] = [];
-  const inventory: InventoryItem[] = [];
+  const inventory: any[] = []; // forma v2: sin `equipped` ni `armor`, que añade v2ToV3
   for (const item of c.inventory ?? []) {
     const quantity = Number(/×\s*(\d+)/.exec(item.tag ?? '')?.[1] ?? 1);
     const weapon = findByName(weaponCatalog, item.name);
@@ -68,7 +68,27 @@ function v1ToV2(file: any): any {
   };
 }
 
-const steps: Record<number, (file: any) => any> = { 1: v1ToV2 };
+/**
+ * v2 → v3: la CA se calcula desde la armadura equipada. Las armaduras y escudos conocidos
+ * del inventario se marcan como equipados (uno por hueco) y `acBonus` recoge la diferencia
+ * para que la CA de la ficha no cambie.
+ */
+function v2ToV3(file: any): any {
+  const { armorClass: oldArmorClass, ...c } = file.character ?? {};
+  const worn = new Set<string>();
+  const inventory = (c.inventory ?? []).map((item: any) => {
+    const armor = findByName(itemCatalog, item.name)?.armor ?? null;
+    const slot = armor?.kind === 'escudo' ? 'escudo' : 'cuerpo';
+    const equipped = Boolean(armor) && !worn.has(slot);
+    if (equipped) worn.add(slot);
+    return { ...item, equipped, armor };
+  });
+  const character = { ...c, inventory, acBonus: 0 };
+  if (typeof oldArmorClass === 'number') character.acBonus = oldArmorClass - armorClass(character as Character);
+  return { ...file, schemaVersion: 3, character };
+}
+
+const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3 };
 
 /** Aplica los pasos necesarios hasta la versión actual. Lo que no sea un objeto se devuelve tal cual. */
 export function migrate(raw: unknown): unknown {

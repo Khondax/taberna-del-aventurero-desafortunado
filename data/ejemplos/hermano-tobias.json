@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "version": 0,
   "character": {
     "name": "Hermano Tobías",
@@ -18,7 +18,7 @@
       "sab": 18,
       "car": 12
     },
-    "armorClass": 16,
+    "acBonus": 0,
     "speed": "9 m",
     "hp": {
       "current": 38,
@@ -328,7 +328,12 @@
         "quantity": 1,
         "weightKg": 22.5,
         "description": "Escamas metálicas sobre cuero. Desventaja en Sigilo.",
-        "uses": null
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "intermedia",
+          "base": 14
+        }
       },
       {
         "name": "Escudo",
@@ -336,7 +341,12 @@
         "quantity": 1,
         "weightKg": 3,
         "description": "Se lleva en una mano y suma 2 a la CA.",
-        "uses": null
+        "uses": null,
+        "equipped": true,
+        "armor": {
+          "kind": "escudo",
+          "base": 2
+        }
       },
       {
         "name": "Símbolo sagrado",
@@ -344,7 +354,9 @@
         "quantity": 1,
         "weightKg": 0.5,
         "description": "Amuleto, emblema o relicario para canalizar conjuros divinos.",
-        "uses": null
+        "uses": null,
+        "equipped": false,
+        "armor": null
       },
       {
         "name": "Útiles de sanador",
@@ -356,7 +368,9 @@
           "current": 10,
           "max": 10,
           "recovery": "ninguna"
-        }
+        },
+        "equipped": false,
+        "armor": null
       }
     ],
     "history": [

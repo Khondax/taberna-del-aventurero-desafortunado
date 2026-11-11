@@ -87,10 +87,13 @@ const kinds: Record<Kind, { singular: string; fields: Field[]; blank: () => Entr
       { path: 'kind', label: 'Tipo', type: 'text' },
       { path: 'quantity', label: 'Cantidad', type: 'number', min: 0 },
       { path: 'weightKg', label: 'Peso por unidad (kg)', type: 'number', min: 0, step: 0.01 },
+      { path: 'armor.kind', label: 'Armadura', type: 'select', options: [['', 'No es armadura'], ['ligera', 'Ligera (toda la Des)'], ['intermedia', 'Intermedia (Des hasta +2)'], ['pesada', 'Pesada (sin Des)'], ['escudo', 'Escudo']] },
+      { path: 'armor.base', label: 'CA base (escudo: bonificador)', type: 'number', min: 0, max: 30 },
+      { path: 'equipped', label: 'Equipado (cuenta para la CA si es armadura)', type: 'checkbox' },
       ...usesFields,
       { path: 'description', label: 'Descripción', type: 'textarea' },
     ],
-    blank: (): InventoryItem => ({ name: '', kind: '', quantity: 1, weightKg: 0, description: '', uses: null }),
+    blank: (): InventoryItem => ({ name: '', kind: '', quantity: 1, weightKg: 0, description: '', uses: null, equipped: false, armor: null }),
   },
   features: {
     singular: 'Rasgo',
@@ -170,6 +173,8 @@ function readForm(kind: Kind, draft: Entry): Entry {
   else if (uses) uses.current = Math.min(uses.current, uses.max);
   const effect = entry.effect as { dice: string } | null | undefined;
   if (effect && !effect.dice) entry.effect = null;
+  const armor = entry.armor as { kind: string } | null | undefined;
+  if (armor && !armor.kind) entry.armor = null;
   return entry as unknown as Entry;
 }
 
@@ -323,6 +328,12 @@ pickerList.addEventListener('click', (event) => {
   if (!button) return;
   const entry = structuredClone(catalog[Number(button.dataset.add)]);
   if (pickerKind === 'weapons') (entry as Weapon).proficient = defaultWeaponProficiency(state, entry as Weapon);
+  // Una armadura o escudo nuevo se equipa si su hueco (cuerpo o escudo) está libre.
+  const armor = (entry as InventoryItem).armor;
+  if (pickerKind === 'inventory' && armor) {
+    const isShield = armor.kind === 'escudo';
+    (entry as InventoryItem).equipped = !state.inventory.some((i) => i.equipped && i.armor && (i.armor.kind === 'escudo') === isShield);
+  }
   update(() => {
     insert(pickerKind, entry);
     log(`${kinds[pickerKind].singular} añadido`, entry.name);

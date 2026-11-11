@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "version": 0,
   "character": {
     "name": "Arannis Valebright",
@@ -18,7 +18,7 @@
       "sab": 12,
       "car": 8
     },
-    "armorClass": 12,
+    "acBonus": 0,
     "speed": "9 m",
     "hp": {
       "current": 22,
@@ -262,7 +262,9 @@
         "quantity": 1,
         "weightKg": 1.5,
         "description": "Contiene los conjuros de mago que conoces.",
-        "uses": null
+        "uses": null,
+        "equipped": false,
+        "armor": null
       },
       {
         "name": "Poción de curación",
@@ -270,7 +272,9 @@
         "quantity": 2,
         "weightKg": 0.25,
         "description": "Recuperas 2d4 + 2 PG al beberla.",
-        "uses": null
+        "uses": null,
+        "equipped": false,
+        "armor": null
       },
       {
         "name": "Ojos de águila",
@@ -278,7 +282,9 @@
         "quantity": 1,
         "weightKg": 0,
         "description": "Ventaja en las pruebas de Sabiduría (Percepción) que dependen de la vista. Requiere sintonización.",
-        "uses": null
+        "uses": null,
+        "equipped": false,
+        "armor": null
       }
     ],
     "history": [

@@ -5,6 +5,7 @@ import {
   abilityMod,
   abilityNames,
   abilityShort,
+  armorClassBreakdown,
   damageText,
   formatNumber,
   hasProperty,
@@ -109,6 +110,13 @@ function describeSpell(c: Character, i: number): Description | null {
   };
 }
 
+const armorKinds = {
+  ligera: 'ligera: suma toda tu Des',
+  intermedia: 'intermedia: suma tu Des hasta +2',
+  pesada: 'pesada: no suma Des',
+  escudo: 'escudo',
+};
+
 function describeItem(c: Character, i: number): Description | null {
   const item = c.inventory[i];
   if (!item) return null;
@@ -116,6 +124,8 @@ function describeItem(c: Character, i: number): Description | null {
     title: item.name,
     subtitle: item.kind,
     facts: [
+      ['CA', item.armor ? `${item.armor.kind === 'escudo' ? signed(item.armor.base) : item.armor.base} (${armorKinds[item.armor.kind]})` : ''],
+      ['Equipado', item.armor || item.equipped ? (item.equipped ? 'Sí' : 'No: edítalo para equiparlo') : ''],
       ['Cantidad', String(item.quantity)],
       ['Peso', `${formatNumber(item.weightKg)} kg c/u · ${formatNumber(item.weightKg * item.quantity)} kg en total`],
       ['Usos', item.uses ? `${item.uses.current} / ${item.uses.max} · ${recoveryText(item.uses)}` : ''],
@@ -163,6 +173,16 @@ function describeSave(c: Character, ability: Ability): Description {
   };
 }
 
+function describeArmorClass(c: Character): Description {
+  const { total, parts } = armorClassBreakdown(c);
+  return {
+    title: 'Clase de armadura',
+    subtitle: `CA ${total}`,
+    facts: [['Cálculo', `${total} = ${parts.join(' + ')}`]],
+    text: 'Se calcula con la armadura y el escudo equipados del inventario. Usa «otros» para Armadura de mago, objetos mágicos o estilos de combate.',
+  };
+}
+
 function describeAbility(c: Character, ability: Ability): Description {
   const related = skillIds.filter((id) => skills[id].ability === ability).map((id) => skills[id].name);
   return {
@@ -188,6 +208,7 @@ export function describe(c: Character, key: string): Description | null {
     case 'features': return describeFeature(c, index);
     case 'skills': return id in skills ? describeSkill(c, id as SkillId) : null;
     case 'saves': return (abilities as readonly string[]).includes(id) ? describeSave(c, id as Ability) : null;
+    case 'ac': return describeArmorClass(c);
     case 'abilities': return (abilities as readonly string[]).includes(id) ? describeAbility(c, id as Ability) : null;
     default: return null;
   }

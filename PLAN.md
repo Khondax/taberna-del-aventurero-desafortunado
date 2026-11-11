@@ -19,13 +19,13 @@ La interfaz sigue el proyecto de Stitch “Gestor de Rol Medieval”: estética 
 - Ficha editable en el sitio: identidad, nivel, PX, características, CA, velocidad, PG, dados de golpe, competencias en salvaciones y habilidades, aptitud mágica y espacios.
 - Armas, conjuros, objetos y rasgos desde los listados del SRD 5.2 o personalizados, con diálogo de edición y tooltip con desglose de cada número.
 - Tiradas de características, salvaciones, habilidades, ataques y conjuros. Recursos, descansos, subida de nivel, deshacer, exportación y guardado automático con detección de conflictos.
-- Formato v2 con migración automática desde v1.
+- Formato v3 con migración automática desde v1 y v2.
+- CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
 
 ## Pendiente
 
 - Crear personajes de nivel 1 con asistente (matriz estándar, compra de puntos o tiradas).
-- Calcular la CA a partir de la armadura equipada. Hoy es un campo editable.
 - Ampliar los listados: conjuros de nivel 6 a 9 y rasgos de clase.
 
 ## Suposiciones

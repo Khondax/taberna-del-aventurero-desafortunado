@@ -109,6 +109,7 @@ textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
 .stat-box small { display: block; color: var(--leather); font: 10px 'JetBrains Mono'; text-transform: uppercase; }
 .stat-box strong, .stat-box > .edit { display: block; width: 100%; margin-top: 6px; color: var(--garnet); font: 700 24px 'JetBrains Mono'; text-align: center; }
 .stat-box > select.edit { font-size: 14px; }
+.ac-bonus { display: inline-flex; align-items: center; gap: 2px; margin-top: 2px; color: var(--muted); font: 10px 'JetBrains Mono'; }
 .bar-label { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin: 14px 0 6px; }
 .pair { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); font: 600 13px 'JetBrains Mono'; }
 .pair .edit { width: auto; }

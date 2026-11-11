@@ -1,7 +1,7 @@
 // Listados para añadir a la ficha: armas, objetos y dotes. Basados en el SRD 5.2 de
 // Wizards of the Coast (CC-BY-4.0); las descripciones son resúmenes propios.
 // Al añadir una entrada se copia a la ficha, donde se puede editar sin afectar al listado.
-import type { Feature, InventoryItem, Weapon } from '../lib/schema';
+import type { Armor, Feature, InventoryItem, Weapon } from '../lib/schema';
 
 function weapon(
   name: string,
@@ -70,23 +70,29 @@ const item = (name: string, kind: string, weightKg: number, description: string,
   weightKg,
   description,
   uses,
+  equipped: false,
+  armor: null,
+});
+const armor = (name: string, kind: Armor['kind'], base: number, label: string, weightKg: number, description: string): InventoryItem => ({
+  ...item(name, label, weightKg, description),
+  armor: { kind, base },
 });
 
 export const itemCatalog: InventoryItem[] = [
   // Armaduras
-  item('Armadura acolchada', 'Armadura ligera · CA 11 + Des', 4, 'Capas de tela acolchada. Desventaja en Sigilo.'),
-  item('Armadura de cuero', 'Armadura ligera · CA 11 + Des', 5, 'Peto y hombreras de cuero endurecido.'),
-  item('Cuero tachonado', 'Armadura ligera · CA 12 + Des', 6.5, 'Cuero reforzado con remaches metálicos.'),
-  item('Armadura de pieles', 'Armadura intermedia · CA 12 + Des (máx. 2)', 6, 'Pieles gruesas y pelaje.'),
-  item('Camisote de mallas', 'Armadura intermedia · CA 13 + Des (máx. 2)', 10, 'Anillas entrelazadas bajo la ropa.'),
-  item('Cota de escamas', 'Armadura intermedia · CA 14 + Des (máx. 2)', 22.5, 'Escamas metálicas sobre cuero. Desventaja en Sigilo.'),
-  item('Coraza', 'Armadura intermedia · CA 14 + Des (máx. 2)', 10, 'Peto metálico ajustado con cuero flexible.'),
-  item('Media armadura', 'Armadura intermedia · CA 15 + Des (máx. 2)', 20, 'Placas sobre las zonas vitales. Desventaja en Sigilo.'),
-  item('Cota de anillas', 'Armadura pesada · CA 14', 20, 'Anillas cosidas sobre cuero. Desventaja en Sigilo.'),
-  item('Cota de mallas', 'Armadura pesada · CA 16', 27.5, 'Malla completa con acolchado. Requiere Fue 13. Desventaja en Sigilo.'),
-  item('Armadura de bandas', 'Armadura pesada · CA 17', 30, 'Tiras metálicas verticales. Requiere Fue 15. Desventaja en Sigilo.'),
-  item('Armadura de placas', 'Armadura pesada · CA 18', 32.5, 'Placas articuladas que cubren todo el cuerpo. Requiere Fue 15. Desventaja en Sigilo.'),
-  item('Escudo', 'Escudo · +2 CA', 3, 'Se lleva en una mano y suma 2 a la CA.'),
+  armor('Armadura acolchada', 'ligera', 11, 'Armadura ligera · CA 11 + Des', 4, 'Capas de tela acolchada. Desventaja en Sigilo.'),
+  armor('Armadura de cuero', 'ligera', 11, 'Armadura ligera · CA 11 + Des', 5, 'Peto y hombreras de cuero endurecido.'),
+  armor('Cuero tachonado', 'ligera', 12, 'Armadura ligera · CA 12 + Des', 6.5, 'Cuero reforzado con remaches metálicos.'),
+  armor('Armadura de pieles', 'intermedia', 12, 'Armadura intermedia · CA 12 + Des (máx. 2)', 6, 'Pieles gruesas y pelaje.'),
+  armor('Camisote de mallas', 'intermedia', 13, 'Armadura intermedia · CA 13 + Des (máx. 2)', 10, 'Anillas entrelazadas bajo la ropa.'),
+  armor('Cota de escamas', 'intermedia', 14, 'Armadura intermedia · CA 14 + Des (máx. 2)', 22.5, 'Escamas metálicas sobre cuero. Desventaja en Sigilo.'),
+  armor('Coraza', 'intermedia', 14, 'Armadura intermedia · CA 14 + Des (máx. 2)', 10, 'Peto metálico ajustado con cuero flexible.'),
+  armor('Media armadura', 'intermedia', 15, 'Armadura intermedia · CA 15 + Des (máx. 2)', 20, 'Placas sobre las zonas vitales. Desventaja en Sigilo.'),
+  armor('Cota de anillas', 'pesada', 14, 'Armadura pesada · CA 14', 20, 'Anillas cosidas sobre cuero. Desventaja en Sigilo.'),
+  armor('Cota de mallas', 'pesada', 16, 'Armadura pesada · CA 16', 27.5, 'Malla completa con acolchado. Requiere Fue 13. Desventaja en Sigilo.'),
+  armor('Armadura de bandas', 'pesada', 17, 'Armadura pesada · CA 17', 30, 'Tiras metálicas verticales. Requiere Fue 15. Desventaja en Sigilo.'),
+  armor('Armadura de placas', 'pesada', 18, 'Armadura pesada · CA 18', 32.5, 'Placas articuladas que cubren todo el cuerpo. Requiere Fue 15. Desventaja en Sigilo.'),
+  armor('Escudo', 'escudo', 2, 'Escudo · +2 CA', 3, 'Se lleva en una mano y suma 2 a la CA.'),
   // Equipo
   item('Aceite (frasco)', 'Equipo', 0.5, 'Combustible para lámparas; también se puede arrojar y prender.'),
   item('Antorcha', 'Equipo', 0.5, 'Arde 1 hora con luz brillante a 6 m y tenue 6 m más.'),

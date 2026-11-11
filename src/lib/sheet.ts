@@ -72,12 +72,14 @@ interface ClassInfo {
   saves: [Ability, Ability];
   spellcasting: Ability | null;
   caster: Caster;
+  /** Característica que suma la Defensa sin armadura (bárbaro y monje). */
+  unarmored?: Ability;
   martialWeapons: 'todas' | 'ligeras' | 'sutiles-o-ligeras' | 'ninguna';
 }
 
 /** Datos de clase indexados por el comienzo del nombre normalizado (cubre «Guerrero» y «Guerrera»). */
 const classes: Record<string, ClassInfo> = {
-  barbar: { saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
+  barbar: { saves: ['fue', 'con'], spellcasting: null, caster: null, unarmored: 'con', martialWeapons: 'todas' },
   bard: { saves: ['des', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
   bruj: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'pacto', martialWeapons: 'ninguna' },
   cleri: { saves: ['sab', 'car'], spellcasting: 'sab', caster: 'completo', martialWeapons: 'ninguna' },
@@ -86,7 +88,7 @@ const classes: Record<string, ClassInfo> = {
   guerrer: { saves: ['fue', 'con'], spellcasting: null, caster: null, martialWeapons: 'todas' },
   hechicer: { saves: ['con', 'car'], spellcasting: 'car', caster: 'completo', martialWeapons: 'ninguna' },
   mag: { saves: ['int', 'sab'], spellcasting: 'int', caster: 'completo', martialWeapons: 'ninguna' },
-  monj: { saves: ['fue', 'des'], spellcasting: null, caster: null, martialWeapons: 'ligeras' },
+  monj: { saves: ['fue', 'des'], spellcasting: null, caster: null, unarmored: 'sab', martialWeapons: 'ligeras' },
   paladin: { saves: ['sab', 'car'], spellcasting: 'car', caster: 'medio', martialWeapons: 'todas' },
   picar: { saves: ['des', 'int'], spellcasting: null, caster: null, martialWeapons: 'sutiles-o-ligeras' },
 };
@@ -127,6 +129,43 @@ export const skillLevel = (c: Character, skill: SkillId) => c.skills[skill] ?? 0
 export const skillBonus = (c: Character, skill: SkillId) =>
   abilityMod(c, skills[skill].ability) + skillLevel(c, skill) * proficiencyBonus(c.level);
 export const passivePerception = (c: Character) => 10 + skillBonus(c, 'percepcion');
+/**
+ * CA y su desglose: armadura equipada (o 10 + Des y la Defensa sin armadura de la clase),
+ * escudo y otros bonificadores. La armadura intermedia limita la Des a +2 y la pesada la ignora.
+ */
+export function armorClassBreakdown(c: Character): { total: number; parts: string[] } {
+  const body = c.inventory.find((item) => item.equipped && item.armor && item.armor.kind !== 'escudo');
+  const shield = c.inventory.find((item) => item.equipped && item.armor?.kind === 'escudo');
+  const dex = abilityMod(c, 'des');
+  const parts: string[] = [];
+  let total: number;
+  if (body?.armor) {
+    const dexPart = body.armor.kind === 'pesada' ? 0 : body.armor.kind === 'intermedia' ? Math.min(dex, 2) : dex;
+    total = body.armor.base + dexPart;
+    parts.push(`${body.name} ${body.armor.base}`);
+    if (body.armor.kind !== 'pesada') parts.push(`DES ${signed(dexPart)}${body.armor.kind === 'intermedia' && dex > 2 ? ' (máx. +2)' : ''}`);
+  } else {
+    total = 10 + dex;
+    parts.push('sin armadura 10', `DES ${signed(dex)}`);
+    const extra = classInfo(c.className)?.unarmored;
+    // El monje pierde su Defensa sin armadura si lleva escudo.
+    if (extra && !(extra === 'sab' && shield)) {
+      total += abilityMod(c, extra);
+      parts.push(`${extra.toUpperCase()} ${signed(abilityMod(c, extra))}`);
+    }
+  }
+  if (shield?.armor) {
+    total += shield.armor.base;
+    parts.push(`${shield.name} ${signed(shield.armor.base)}`);
+  }
+  if (c.acBonus) {
+    total += c.acBonus;
+    parts.push(`otros ${signed(c.acBonus)}`);
+  }
+  return { total, parts };
+}
+export const armorClass = (c: Character) => armorClassBreakdown(c).total;
+
 export const carriedWeight = (c: Character) =>
   c.inventory.reduce((total, item) => total + item.weightKg * item.quantity, 0) +
   c.weapons.reduce((total, weapon) => total + weapon.weightKg, 0);
@@ -221,7 +260,7 @@ export const weaponRow = (c: Character, weapon: Weapon): Row => ({
 });
 export const itemRow = (item: InventoryItem): Row => ({
   title: item.name,
-  detail: [item.kind, `${formatNumber(item.weightKg * item.quantity)} kg`, item.uses && `${item.uses.current}/${item.uses.max} usos`]
+  detail: [item.equipped && 'Equipado', item.kind, `${formatNumber(item.weightKg * item.quantity)} kg`, item.uses && `${item.uses.current}/${item.uses.max} usos`]
     .filter(Boolean)
     .join(' · '),
   tag: item.quantity === 1 ? '' : `× ${item.quantity}`,
@@ -272,6 +311,7 @@ export function liveText(c: Character): Record<string, string> {
     nextLevel: String(Math.min(20, c.level + 1)),
     xpNext: next === null ? 'nivel máximo' : `/ ${formatNumber(next)} PX`,
     initiative: signed(initiative(c)),
+    armorClass: String(armorClass(c)),
     passivePerception: String(passivePerception(c)),
     spellCount: `${c.spells.length} conjuros`,
     weight: `Carga · ${formatNumber(carriedWeight(c))} kg`,
