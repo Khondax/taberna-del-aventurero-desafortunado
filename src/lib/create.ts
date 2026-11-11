@@ -1,6 +1,7 @@
 // Creación de un personaje de nivel 1 (página /nueva-ficha). Funciones puras: el formulario
 // recoge las elecciones y `buildCharacter` produce la ficha que se envía a `importCharacter`.
 import { featureCatalog } from '../data/catalog';
+import { findBackground, findSpecies } from '../data/origins';
 import { abilities, classList, modifier, slotTableAt, type Ability, type Character, type ClassInfo, type SkillId } from './sheet';
 
 export const standardArray = [15, 14, 13, 12, 10, 8] as const;
@@ -26,14 +27,16 @@ export function rollAbilityScore(random = Math.random): { dice: number[]; total:
 
 export interface CreationChoices {
   name: string;
+  /** Especie y trasfondo: si están en `src/data/origins.ts` se aplican sus datos; si no, son texto libre. */
   species: string;
   classInfo: ClassInfo;
   background: string;
   alignment: string;
   /** Puntuaciones antes del bonificador del trasfondo. */
   baseScores: Record<Ability, number>;
-  /** Bonificadores del trasfondo: +2/+1 o +1/+1/+1. */
+  /** Bonificadores del trasfondo: +2/+1 o +1/+1/+1 (con un trasfondo del listado, entre sus tres características). */
   backgroundBonus: Partial<Record<Ability, number>>;
+  /** Habilidades elegidas; las del trasfondo del listado se añaden solas. */
   skills: SkillId[];
   method: string;
 }
@@ -44,8 +47,14 @@ export const finalScores = (choices: Pick<CreationChoices, 'baseScores' | 'backg
 
 export const findClass = (name: string) => classList.find((info) => info.name === name);
 
+/**
+ * Ficha de nivel 1. Un trasfondo del listado añade sus dos habilidades y su dote de origen; una
+ * especie del listado pone su velocidad y sus rasgos.
+ */
 export function buildCharacter(choices: CreationChoices): Character {
   const { classInfo: info } = choices;
+  const background = findBackground(choices.background);
+  const species = findSpecies(choices.species);
   const scores = finalScores(choices);
   const hpMax = Math.max(1, Number(info.hitDie.slice(1)) + modifier(scores.con));
   const character: Character = {
@@ -59,7 +68,7 @@ export function buildCharacter(choices: CreationChoices): Character {
     xp: 0,
     abilities: scores,
     acBonus: 0,
-    speed: '9 m',
+    speed: species?.speed ?? '9 m',
     hp: { current: hpMax, max: hpMax, temp: 0 },
     hitDice: { current: 1, max: 1, die: info.hitDie },
     deathSaves: { successes: 0, failures: 0, stable: false },
@@ -67,11 +76,15 @@ export function buildCharacter(choices: CreationChoices): Character {
     conditions: [],
     exhaustion: 0,
     savingThrows: [...info.saves],
-    skills: Object.fromEntries(choices.skills.map((skill) => [skill, 1])),
+    skills: Object.fromEntries([...(background?.skills ?? []), ...choices.skills].map((skill) => [skill, 1])),
     spellcastingAbility: info.spellcasting,
     spellSlots: {},
-    // Rasgos de nivel 1 de la clase que hay en el listado (p. ej. Furia, Tomar aliento).
-    features: featureCatalog.filter((feature) => feature.source === `${info.name} 1`).map((feature) => structuredClone(feature)),
+    // Rasgos de nivel 1 de la clase que hay en el listado (p. ej. Furia, Tomar aliento), de la especie y la dote de origen.
+    features: [
+      ...featureCatalog.filter((feature) => feature.source === `${info.name} 1`),
+      ...(species?.traits ?? []),
+      ...(background ? [background.feat] : []),
+    ].map((feature) => structuredClone(feature)),
     spells: [],
     weapons: [],
     inventory: [],

@@ -1,5 +1,6 @@
 // Formulario de /nueva-ficha: recoge las elecciones, muestra el resumen en vivo y crea la
-// ficha con la acción `importCharacter`, que la valida en el servidor.
+// ficha con la acción `importCharacter`, que la valida en el servidor. Con un trasfondo del
+// listado, sus habilidades quedan marcadas y el bonificador se limita a sus tres características.
 import { actions, isInputError } from 'astro:actions';
 import {
   buildCharacter,
@@ -11,6 +12,7 @@ import {
   standardArray,
   type CreationChoices,
 } from '../lib/create';
+import { findBackground, findSpecies } from '../data/origins';
 import { currentSchemaVersion } from '../lib/ids';
 import { abilities, abilityNames, abilityShort, armorClass, modifier, signed, skills, type Ability, type SkillId } from '../lib/sheet';
 
@@ -22,6 +24,10 @@ const bonusSelects = [0, 1, 2].map((i) => $<HTMLSelectElement>(`[data-bonus="${i
 const value = (name: string) => String(new FormData(form).get(name) ?? '').trim();
 const method = () => value('method') as 'standard' | 'pointbuy' | 'roll';
 const methodNames = { standard: 'matriz estándar', pointbuy: 'compra de puntos', roll: 'tiradas 4d6' };
+const skillInputs = [...form.querySelectorAll<HTMLInputElement>('input[name="skills"]')];
+const background = () => findBackground(value('background'));
+const species = () => findSpecies(value('species'));
+const listNames = (names: string[]) => names.join(', ').replace(/, ([^,]*)$/, ' y $1');
 
 let rolled: number[] = [];
 const pool = () => (method() === 'roll' ? rolled : [...standardArray]);
@@ -74,9 +80,12 @@ function readChoices(): { choices: CreationChoices | null; problems: string[] } 
     else if (cost > pointBuyBudget) problems.push(`Has gastado ${cost} de ${pointBuyBudget} puntos.`);
   }
   const picked = bonusSelects.slice(0, value('bonusMode') === '2-1' ? 2 : 3).map((select) => select.value);
+  const allowed = background()?.abilities;
   if (picked.some((ability) => !ability)) problems.push('Elige las características del bonificador del trasfondo.');
   else if (new Set(picked).size !== picked.length) problems.push('El bonificador del trasfondo va a características distintas.');
-  const chosenSkills = [...form.querySelectorAll<HTMLInputElement>('input[name="skills"]:checked')].map((input) => input.value as SkillId);
+  else if (allowed && picked.some((ability) => !allowed.includes(ability as Ability))) problems.push(`El bonificador de ${background()!.name} va a ${listNames(allowed.map((a) => abilityNames[a]))}.`);
+  // Las del trasfondo del listado están marcadas y bloqueadas: las añade `buildCharacter`.
+  const chosenSkills = skillInputs.filter((input) => input.checked && !input.disabled).map((input) => input.value as SkillId);
   if (problems.length || !scores) return { choices: null, problems };
   return {
     choices: {
@@ -99,7 +108,24 @@ function renderFacts(facts: [string, string][]) {
   $('#summary').replaceChildren(list);
 }
 
+/** Aplica el trasfondo del listado: marca y bloquea sus habilidades y limita el bonificador. Sin él, lo libera. */
+function applyBackground() {
+  const bg = background();
+  for (const input of skillInputs) {
+    const fromBackground = Boolean(bg?.skills.includes(input.value as SkillId));
+    if (fromBackground) input.checked = true;
+    else if (input.disabled) input.checked = false;
+    input.disabled = fromBackground;
+    input.parentElement!.title = fromBackground ? `Del trasfondo ${bg!.name}` : '';
+  }
+  for (const select of bonusSelects) {
+    for (const option of select.options) option.disabled = Boolean(bg && option.value && !bg.abilities.includes(option.value as Ability));
+    if (select.selectedOptions[0]?.disabled) select.value = '';
+  }
+}
+
 function render() {
+  applyBackground();
   const current = method();
   assignSelects.forEach((select) => (select.hidden = current === 'pointbuy'));
   buyInputs.forEach((input) => (input.hidden = current !== 'pointbuy'));
@@ -115,9 +141,18 @@ function render() {
   const classInfo = findClass(value('className'))!;
   const suggested = new Set<string>(classInfo.skillChoices);
   form.querySelectorAll<HTMLElement>('[data-skill]').forEach((label) => label.classList.toggle('suggested', suggested.has(label.dataset.skill!)));
-  const chosen = form.querySelectorAll('input[name="skills"]:checked').length;
+  const bg = background();
+  const chosen = skillInputs.filter((input) => input.checked && !input.disabled).length;
   $('#skillCount').textContent = `${chosen} elegidas`;
-  $('#skillHelp').textContent = `${classInfo.name}: elige ${classInfo.skillCount} entre las resaltadas. Tu trasfondo añade 2 más (cualquiera).`;
+  $('#skillHelp').textContent = `${classInfo.name}: elige ${classInfo.skillCount} entre las resaltadas. ${
+    bg ? `${bg.name} añade ${listNames(bg.skills.map((s) => skills[s].name))}.` : 'Tu trasfondo añade 2 más (cualquiera).'
+  }`;
+  $('#bonusHelp').textContent = bg ? `${bg.name}: ${listNames(bg.abilities.map((a) => abilityNames[a]))}` : '2024: elige según tu trasfondo';
+  const sp = species();
+  $('#originHelp').textContent = [
+    sp && `${sp.name}: ${sp.size.toLowerCase()}, velocidad ${sp.speed}, ${sp.traits.length} rasgos.`,
+    bg && `${bg.name}: ${listNames(bg.skills.map((s) => skills[s].name))} y la dote ${bg.feat.name}.`,
+  ].filter(Boolean).join(' ') || 'Elige una especie y un trasfondo del listado para aplicar sus datos, o escribe uno casero.';
 
   const scores = baseScores();
   for (const ability of abilities) {
@@ -136,10 +171,12 @@ function render() {
     ['PG', `${c.hp.max} = ${c.hitDice.die.slice(1)} + CON ${signed(modifier(c.abilities.con))}`],
     ['CA sin armadura', String(armorClass(c))],
     ['Salvaciones', c.savingThrows.map((a) => abilityNames[a]).join(' y ')],
-    ['Habilidades', choices.skills.map((s) => skills[s].name).join(', ') || 'Ninguna'],
+    ['Especie', sp ? `${sp.name} · ${sp.size} · ${c.speed}` : choices.species || '—'],
+    ['Trasfondo', bg ? `${bg.name} · dote de origen ${bg.feat.name}` : choices.background || '—'],
+    ['Habilidades', Object.keys(c.skills).map((s) => skills[s as SkillId].name).join(', ') || 'Ninguna'],
     ['Aptitud mágica', c.spellcastingAbility ? abilityNames[c.spellcastingAbility] : 'Ninguna'],
     ['Espacios', Object.entries(c.spellSlots).map(([level, slots]) => `${slots.max} de nivel ${level}`).join(', ') || 'Ninguno'],
-    ['Rasgos de nivel 1', c.features.map((f) => f.name).join(', ') || 'Añádelos desde la ficha'],
+    ['Rasgos', c.features.map((f) => f.name).join(', ') || 'Añádelos desde la ficha'],
   ]);
 }
 

@@ -6,6 +6,10 @@ Fichas de personaje de **Dragones y Mazmorras 2024 (5.5e)** para una partida ent
 
 - **Vista del máster** (`/`): resumen de todas las fichas (PG y PG temporales, CA, iniciativa, percepción pasiva, dados de golpe, espacios y recursos) con su estado en partida: salvaciones contra la muerte, concentración, estados y agotamiento. Al lado, las tiradas recientes de toda la mesa (personaje, qué tiró, resultado y hora). Todo se actualiza solo cada 10 s. Desde aquí se crean e importan fichas.
 - **Nueva ficha** (`/nueva-ficha`): personaje de nivel 1 con matriz estándar, compra de puntos (27) o tiradas 4d6, bonificador del trasfondo (+2/+1 o +1/+1/+1) y habilidades de la clase. Calcula PG, CA, salvaciones, aptitud mágica y espacios, y añade los rasgos de nivel 1 de la clase.
+  - Trasfondos del SRD 5.2 (Acólito, Criminal, Sabio y Soldado): al elegir uno del listado quedan marcadas sus dos habilidades, el bonificador solo deja elegir entre sus tres características y la ficha recibe su dote de origen.
+  - Especies del SRD 5.2 (Dracónido, Elfo, Enano, Gnomo, Goliat, Humano, Mediano, Orco y Tiflin): al elegir una del listado, la ficha recibe su velocidad y sus rasgos, con usos si los tienen. El tamaño se muestra en el resumen, pero la ficha no lo guarda.
+  - Se reconocen sin tildes ni mayúsculas y en femenino (Acólita, Enana…). Cualquier otro texto es un trasfondo o una especie casera y funciona como siempre: habilidades y bonificador libres, velocidad 9 m y sin rasgos.
+  - Las elecciones dentro de un rasgo (linaje élfico, ascendencia dracónida, legado infernal, habilidad de Sentidos agudos…) se explican en su descripción y se aplican a mano en la ficha. Tampoco se suma sola la Dureza enana (+1 PG por nivel).
 - **Ficha** (`/personajes/<id>`): editable como una de papel. Nombre, especie, clase, nivel, PX, características, velocidad, PG, dados de golpe, aptitud mágica y espacios se editan en el sitio. La CA se calcula con la armadura y el escudo equipados (o la Defensa sin armadura de bárbaros y monjes), más un campo «otros» para Armadura de mago u objetos mágicos. El resumen tiene tres columnas: la ficha con sus salvaciones (cada una con sus habilidades anidadas debajo), luego ataques, recursos y rasgos, y por último el grimorio. Las competencias en salvaciones y habilidades se marcan pulsando el círculo: ○ sin competencia, ● competente, ◆ pericia.
 - **Armas, conjuros, objetos y rasgos**: se añaden desde los listados del SRD 5.2 o se crean desde cero. Al pulsar una fila se abre su edición, y el botón «×» la quita sin abrirla. En Recursos, «×» quita un nivel de espacios o deja el rasgo u objeto sin usos. Todo se puede deshacer.
 - **Descripción al pasar el ratón** (o al enfocar con teclado): usos, daño, competencia y la característica que lo mejora, con el desglose del número. Por ejemplo, «Ataque +6 = FUE +3 + competencia +3», o «2d8 +4 curación · suma INT +4».
@@ -48,7 +52,7 @@ pnpm test        # unitarios (Vitest): reglas, migraciones, creación y almacena
 pnpm test:e2e    # de extremo a extremo (Playwright, Chromium)
 ```
 
-- `tests/unit/`: reglas de `sheet.ts` (incluido el estado en partida: PG temporales, salvaciones contra la muerte, concentración y agotamiento), descansos con recuperación parcial, migraciones v1, v2, v3 y v4, `create.ts` y `store.ts` (con el historial de tiradas). `store.ts` se prueba con un `DATA_DIR` temporal. `tests/fixtures/` guarda los ejemplos en formato v2 y el Hermano Tobías en formatos v3 y v4 para las migraciones.
+- `tests/unit/`: reglas de `sheet.ts` (incluido el estado en partida: PG temporales, salvaciones contra la muerte, concentración y agotamiento), descansos con recuperación parcial, migraciones v1, v2, v3 y v4, `create.ts` (con los trasfondos y especies del listado) y `store.ts` (con el historial de tiradas). `store.ts` se prueba con un `DATA_DIR` temporal. `tests/fixtures/` guarda los ejemplos en formato v2 y el Hermano Tobías en formatos v3 y v4 para las migraciones.
 - `tests/e2e/`: `pnpm test:e2e` compila el proyecto y arranca `dist/server/entry.mjs` en `127.0.0.1:4517` con un `DATA_DIR` temporal, que se borra al terminar. Cada test copia ahí su propia ficha de `data/ejemplos`, así que no tocan las fichas reales ni dependen del orden.
 - La primera vez, si no está el navegador: `pnpm exec playwright install chromium`. La versión de `@playwright/test` está fijada para que coincida con el navegador instalado.
 - Un archivo concreto: `pnpm test tests/unit/migrate.test.ts` o `pnpm test:e2e tests/e2e/armor.spec.ts`. Los detalles de los fallos quedan en `test-results/`.
@@ -138,6 +142,7 @@ Las pestañas que tuvieran la ficha abierta detectan el cambio de versión al gu
 - `src/lib/sheet.ts`: reglas 2024 (PX, competencia, habilidades, clases, espacios de lanzador completo, medio y de pacto, ataque y daño de armas, CD de conjuros, escalado de trucos, carga con monedas, estados, agotamiento, PG temporales, salvaciones contra la muerte y CD de concentración) y valores derivados. Lo comparten el servidor y el cliente.
 - `src/lib/describe.ts`: contenido de los tooltips y del resumen del diálogo de edición.
 - `src/data/catalog.ts` y `src/data/spells.ts`: listados de armas, armaduras y objetos, dotes, rasgos de clase y conjuros de nivel 0 a 9. Al añadir una entrada se copia a la ficha.
+- `src/data/origins.ts`: trasfondos (características, habilidades y dote de origen) y especies (tamaño, velocidad y rasgos) para la creación de personajes.
 - `src/lib/store.ts`: lectura y escritura de archivos: escritura atómica, guardados en serie por ficha, control de versión, instantáneas en `.historial/`, papelera e historial de tiradas (`.tiradas.json`).
 - `src/actions/index.ts`: acciones `saveCharacter`, `importCharacter`, `parseCharacter` (valida un archivo sin guardarlo), `deleteCharacter` y `logRoll` (apunta una tirada en el historial compartido).
 - `src/lib/create.ts` y `src/scripts/new-character.ts`: reglas y formulario de creación de personajes.
@@ -162,6 +167,6 @@ Las pestañas que tuvieran la ficha abierta detectan el cambio de versión al gu
 
 ## Licencia del contenido de reglas
 
-Los listados de armas, objetos, dotes, rasgos de clase y conjuros se basan en el SRD 5.2. Los nombres están en español y las descripciones son resúmenes propios, no el texto oficial.
+Los listados de armas, objetos, dotes, rasgos de clase, trasfondos, especies y conjuros se basan en el SRD 5.2. Los nombres están en español y las descripciones son resúmenes propios, no el texto oficial.
 
 This work includes material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.

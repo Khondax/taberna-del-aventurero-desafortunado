@@ -52,6 +52,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
 - Copias automáticas de cada ficha al guardar (`.historial/`, una cada 10 minutos como mucho, las 30 últimas) y papelera para las fichas eliminadas.
 - Tests en el repositorio: unitarios con Vitest (`pnpm test`) y de extremo a extremo con Playwright (`pnpm test:e2e`).
+- Trasfondos y especies del SRD 5.2 con sus datos en la creación (`src/data/origins.ts`): habilidades, bonificador limitado y dote de origen del trasfondo; velocidad y rasgos de la especie. Los caseros siguen siendo texto libre.
 - Recuperación parcial de usos («uno en descanso corto, todos en largo») para Furia, Canalizar divinidad, Forma salvaje y Tomar aliento, en los descansos, el diálogo de edición, el listado y la migración.
 - En partida: PG temporales, salvaciones contra la muerte, concentración con su salvación de Constitución, estados de 2024 y agotamiento por niveles (también en la tarjeta del máster), monedas que cuentan para la carga, historial de tiradas compartido en la vista del máster (`.tiradas.json`) y barra de acciones fija en móvil.
 
@@ -59,7 +60,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 
 - Multiclase y subclases lanzadoras (caballero arcano, embaucador arcano): sus espacios se ajustan a mano en el grimorio.
 - Muerte instantánea por daño masivo y críticos a 0 PG (dos fallos): el formulario de daño no sabe si el golpe es crítico ni lo aplica solo; se marcan a mano en las casillas.
-- Trasfondos y especies con sus datos (habilidades, bonificadores, dotes de origen): hoy se escriben a mano y se eligen libremente.
+- Elecciones dentro de los rasgos de especie (linajes, ascendencias, legados, habilidad de Sentidos agudos o Hábil, dote de Versátil) y Dureza enana: se explican en la descripción y se aplican a mano.
 
 ## Suposiciones
 

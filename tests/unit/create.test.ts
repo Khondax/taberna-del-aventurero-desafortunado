@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { backgroundCatalog, findBackground, findSpecies, speciesCatalog } from '../../src/data/origins';
 import { buildCharacter, findClass, pointBuyCost, type CreationChoices } from '../../src/lib/create';
 import { currentSchemaVersion, sheetFileSchema } from '../../src/lib/schema';
 import { armorClass, skillBonus } from '../../src/lib/sheet';
@@ -20,9 +21,9 @@ describe('pointBuyCost', () => {
 describe('buildCharacter', () => {
   const choices = (className: string, overrides: Partial<CreationChoices> = {}): CreationChoices => ({
     name: 'Pruebas Valientes',
-    species: 'Humano',
+    species: 'Casera',
     classInfo: findClass(className)!,
-    background: 'Soldado',
+    background: 'Casero',
     alignment: '',
     baseScores: { fue: 15, des: 14, con: 13, int: 8, sab: 12, car: 10 },
     backgroundBonus: { fue: 2, con: 1 },
@@ -60,5 +61,67 @@ describe('buildCharacter', () => {
     expect(c.hp.max).toBe(3); // d6 + CON −3
     const fragile = buildCharacter(choices('Mago', { baseScores: { fue: 8, des: 8, con: 1, int: 8, sab: 8, car: 8 }, backgroundBonus: {} }));
     expect(fragile.hp.max).toBe(1);
+  });
+});
+
+describe('trasfondos y especies del listado', () => {
+  const choices = (overrides: Partial<CreationChoices>): CreationChoices => ({
+    name: 'Pruebas Orígenes', species: '', classInfo: findClass('Mago')!, background: '', alignment: '',
+    baseScores: { fue: 8, des: 14, con: 13, int: 15, sab: 12, car: 10 }, backgroundBonus: { int: 2, sab: 1 },
+    skills: ['investigacion', 'medicina'], method: 'Matriz estándar', ...overrides,
+  });
+
+  it('los cuatro trasfondos del SRD 5.2: tres características, dos habilidades y una dote de origen', () => {
+    expect(backgroundCatalog.map((b) => [b.name, b.abilities, b.skills, b.feat.name])).toEqual([
+      ['Acólito', ['int', 'sab', 'car'], ['perspicacia', 'religion'], 'Iniciado en la magia (clérigo)'],
+      ['Criminal', ['des', 'con', 'int'], ['juegoDeManos', 'sigilo'], 'Alerta'],
+      ['Sabio', ['con', 'int', 'sab'], ['arcanos', 'historia'], 'Iniciado en la magia (mago)'],
+      ['Soldado', ['fue', 'des', 'con'], ['atletismo', 'intimidacion'], 'Atacante salvaje'],
+    ]);
+  });
+
+  it('las nueve especies del SRD 5.2 con tamaño, velocidad y rasgos', () => {
+    expect(speciesCatalog.map((s) => [s.name, s.size, s.speed])).toEqual([
+      ['Dracónido', 'Mediano', '9 m'], ['Elfo', 'Mediano', '9 m'], ['Enano', 'Mediano', '9 m'], ['Gnomo', 'Pequeño', '9 m'],
+      ['Goliat', 'Mediano', '10,5 m'], ['Humano', 'Mediano o Pequeño', '9 m'], ['Mediano', 'Pequeño', '9 m'], ['Orco', 'Mediano', '9 m'],
+      ['Tiflin', 'Mediano o Pequeño', '9 m'],
+    ]);
+    for (const species of speciesCatalog) {
+      expect(species.traits.length, species.name).toBeGreaterThanOrEqual(3);
+      for (const trait of species.traits) expect(trait.source).toBe(species.name);
+    }
+  });
+
+  it('se encuentran sin tildes, mayúsculas ni género', () => {
+    expect(findBackground('acolita')?.name).toBe('Acólito');
+    expect(findSpecies(' ENANA ')?.name).toBe('Enano');
+    expect(findSpecies('Elfo marino')).toBeUndefined();
+  });
+
+  it('sabio: añade sus habilidades a las elegidas y su dote de origen', () => {
+    const c = buildCharacter(choices({ background: 'Sabio' }));
+    expect(c.background).toBe('Sabio');
+    expect(c.skills).toEqual({ arcanos: 1, historia: 1, investigacion: 1, medicina: 1 });
+    const feat = c.features.find((f) => f.name === 'Iniciado en la magia (mago)');
+    expect(feat).toMatchObject({ source: 'Dote de origen · Sabio', uses: { current: 1, max: 1, recovery: 'largo' } });
+  });
+
+  it('goliat: velocidad y rasgos de la especie, con sus usos', () => {
+    const c = buildCharacter(choices({ species: 'Goliat' }));
+    expect(c.speed).toBe('10,5 m');
+    expect(c.features.filter((f) => f.source === 'Goliat').map((f) => [f.name, f.uses?.max ?? null])).toEqual([
+      ['Ascendencia gigante', 2], ['Forma grande', null], ['Complexión poderosa', null],
+    ]);
+    // Los rasgos son copias: cambiar la ficha no toca el listado.
+    c.features.find((f) => f.name === 'Ascendencia gigante')!.uses!.current = 0;
+    expect(findSpecies('Goliat')!.traits[0].uses!.current).toBe(2);
+  });
+
+  it('especie y trasfondo caseros: texto libre, velocidad 9 m y solo los rasgos de clase', () => {
+    const c = buildCharacter(choices({ species: 'Elfo marino', background: 'Pescador' }));
+    expect(c.species).toBe('Elfo marino');
+    expect(c.speed).toBe('9 m');
+    expect(c.skills).toEqual({ investigacion: 1, medicina: 1 });
+    expect(c.features.map((f) => f.source)).toEqual(['Mago 1']);
   });
 });

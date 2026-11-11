@@ -2,6 +2,7 @@
 // Asistente de creación de un personaje de nivel 1. La lógica vive en src/scripts/new-character.ts
 // y las reglas en src/lib/create.ts.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { backgroundCatalog, speciesCatalog } from '../data/origins';
 import { abilities, abilityNames, abilityShort, classList, skillIds, skills } from '../lib/sheet';
 ---
 <BaseLayout title="Nueva ficha" crumb="Nueva ficha">
@@ -16,9 +17,12 @@ import { abilities, abilityNames, abilityShort, classList, skillIds, skills } fr
         <div class="panel-body form-grid">
           <label>Nombre<input class="field" name="name" required autocomplete="off" /></label>
           <label>Clase<select class="field" name="className">{classList.map((info) => <option>{info.name}</option>)}</select></label>
-          <label>Especie<input class="field" name="species" placeholder="Humano, Elfo, Enano…" /></label>
-          <label>Trasfondo<input class="field" name="background" placeholder="Acólito, Sabio, Soldado…" /></label>
+          <label>Especie<input class="field" name="species" list="speciesList" autocomplete="off" placeholder="Del listado o casera" /></label>
+          <label>Trasfondo<input class="field" name="background" list="backgroundList" autocomplete="off" placeholder="Del listado o casero" /></label>
           <label>Alineamiento<input class="field" name="alignment" placeholder="Neutral bueno" /></label>
+          <datalist id="speciesList">{speciesCatalog.map((species) => <option value={species.name} />)}</datalist>
+          <datalist id="backgroundList">{backgroundCatalog.map((background) => <option value={background.name} />)}</datalist>
+          <p class="note span-all" id="originHelp"></p>
         </div>
       </section>
 
@@ -46,7 +50,7 @@ import { abilities, abilityNames, abilityShort, classList, skillIds, skills } fr
             ))}
           </div>
 
-          <div class="section-heading"><h3>Bonificador del trasfondo</h3><span>2024: elige según tu trasfondo</span></div>
+          <div class="section-heading"><h3>Bonificador del trasfondo</h3><span id="bonusHelp"></span></div>
           <div class="segmented" role="radiogroup" aria-label="Reparto del bonificador">
             <label class="option"><input type="radio" name="bonusMode" value="2-1" checked /> +2 y +1</label>
             <label class="option"><input type="radio" name="bonusMode" value="1-1-1" /> +1, +1 y +1</label>

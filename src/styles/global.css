@@ -305,6 +305,7 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .wizard-step legend, .wizard-step > p { margin-bottom: 10px; padding: 0; }
 .option { display: block; padding: 13px; background: var(--paper-low); border: 1px solid #d8cebe; border-radius: 5px; cursor: pointer; }
 .option:has(:checked) { border-color: var(--garnet); background: var(--garnet-soft); }
+.option:has(:disabled) { cursor: default; }
 .option input { accent-color: var(--garnet-mid); margin-right: 6px; }
 .option small { display: block; margin: 4px 0 0 24px; color: var(--muted); }
 .wizard-actions { display: flex; justify-content: space-between; margin-top: 24px; }

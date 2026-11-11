@@ -62,3 +62,46 @@ test('compra de puntos y tiradas', async ({ page }) => {
   const summary = page.locator('#summary');
   for (const text of ['2 de nivel 1', 'Inteligencia', 'Recuperación arcana']) await expect(summary).toContainText(text);
 });
+
+test('trasfondo y especie del listado: habilidades, bonificador, velocidad y rasgos', async ({ page }) => {
+  await page.goto('/nueva-ficha');
+  await page.fill('[name=name]', 'Goliat Soldado');
+  await page.selectOption('[name=className]', 'Guerrero');
+  for (const [index, ability] of abilities.entries()) await page.selectOption(`[data-assign=${ability}]`, { value: String(index) });
+
+  // Trasfondo del listado: sus habilidades quedan marcadas y bloqueadas, y el bonificador se limita a FUE, DES y CON.
+  await page.fill('[name=background]', 'Soldado');
+  for (const skill of ['atletismo', 'intimidacion']) {
+    await expect(page.locator(`[data-skill=${skill}] input`)).toBeChecked();
+    await expect(page.locator(`[data-skill=${skill}] input`)).toBeDisabled();
+  }
+  await expect(page.locator('#bonusHelp')).toHaveText('Soldado: Fuerza, Destreza y Constitución');
+  await expect(page.locator('[data-bonus="0"] option[value=int]')).toBeDisabled();
+  await expect(page.locator('#skillCount')).toHaveText('0 elegidas');
+
+  // Un trasfondo casero vuelve al comportamiento libre.
+  await page.fill('[name=background]', 'Pescador');
+  await expect(page.locator('[data-skill=atletismo] input')).not.toBeChecked();
+  await expect(page.locator('[data-skill=atletismo] input')).toBeEnabled();
+  await expect(page.locator('[data-bonus="0"] option[value=int]')).toBeEnabled();
+
+  await page.fill('[name=background]', 'Soldado');
+  await page.selectOption('[data-bonus="0"]', 'fue');
+  await page.selectOption('[data-bonus="1"]', 'con');
+  await page.check('[data-skill=percepcion] input');
+  await page.check('[data-skill=supervivencia] input');
+  await page.fill('[name=species]', 'Goliat');
+  await expect(page.locator('#originHelp')).toContainText('Goliat: mediano, velocidad 10,5 m');
+
+  const summary = page.locator('#summary');
+  for (const text of ['Goliat · Mediano · 10,5 m', 'dote de origen Atacante salvaje', 'Atletismo, Intimidación, Percepción, Supervivencia', 'Ascendencia gigante']) {
+    await expect(summary).toContainText(text);
+  }
+  await page.click('#createButton');
+  await page.waitForURL(/\/personajes\/goliat-soldado(-\d+)?$/);
+  await expect(page.locator('[data-path=speed]')).toHaveValue('10,5 m');
+  await expect(page.locator('[data-bind="skill-atletismo"]')).toHaveText('+5');
+  await expect(page.locator('[data-bind="skill-intimidacion"]')).toHaveText('+1'); // CAR 8
+  await expect(page.locator('#features')).toContainText('Atacante salvaje');
+  await expect(page.locator('#resources li:has-text("Ascendencia gigante") [data-field=count]')).toHaveText('2 / 2');
+});
