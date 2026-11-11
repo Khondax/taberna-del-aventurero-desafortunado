@@ -49,6 +49,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - Listados con conjuros de nivel 0 a 9 y los rasgos de clase principales de 2024, filtrables por clase.
 - CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
+- Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
 
 ## Pendiente
 

@@ -47,6 +47,37 @@ HOST=0.0.0.0 PORT=4321 DATA_DIR=/ruta/a/fichas pnpm start
 - Si la carpeta no existe, se crea con las fichas de `data/ejemplos`.
 - Para hacer copia de seguridad, basta con copiar esa carpeta.
 
+### Servicio permanente
+
+En mint-node, el build se sirve con la unidad de systemd de usuario `deploy/taberna.service`. Arranca con el sistema y se reinicia si falla. Sirve el checkout principal en el puerto 4321 y guarda las fichas en `~/.local/share/taberna/personajes`.
+
+La unidad usa la ruta absoluta de Node (`~/.nvm/versions/node/v26.12.0/bin/node`). Si cambias de versión de Node, actualiza `ExecStart` y vuelve a instalarla.
+
+Instalar y activar (desde el checkout principal):
+
+```bash
+pnpm install --frozen-lockfile && pnpm build
+systemctl --user stop taberna-dev                # libera el puerto 4321 si corre el servidor de desarrollo
+mkdir -p ~/.local/share/taberna
+cp -a data/personajes ~/.local/share/taberna/    # migra las fichas actuales ANTES del primer arranque
+cp deploy/taberna.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now taberna
+loginctl enable-linger "$USER"                   # para que arranque sin iniciar sesión (basta una vez)
+```
+
+Si `~/.local/share/taberna/personajes` no existe al arrancar, el servidor la crea con las fichas de ejemplo. Por eso hay que copiar las fichas reales antes de activarlo.
+
+Actualizar a una versión nueva:
+
+```bash
+git pull
+pnpm install --frozen-lockfile && pnpm build
+systemctl --user restart taberna
+```
+
+Estado y logs: `systemctl --user status taberna` y `journalctl --user -u taberna -f`. Si cambias la plantilla, vuelve a copiarla y ejecuta `systemctl --user daemon-reload` antes de reiniciar.
+
 ## Datos
 
 Cada personaje es un archivo `<id>.json` con esta forma:
@@ -81,6 +112,7 @@ Cada personaje es un archivo `<id>.json` con esta forma:
   - `entries.ts`: diálogo de edición y listados.
   - `tooltip.ts` y `level-up.ts`: el tooltip y el asistente de subida de nivel.
   - `manage.ts`: pestaña Gestión (exportar, importar y eliminar).
+- `deploy/taberna.service`: unidad de systemd de usuario del servicio de producción.
 - `stitch_gestor_de_rol_medieval/`: referencia visual (capturas, HTML y `tome_grimoire/DESIGN.md`).
 
 ## Forma de trabajar (personas y agentes)
