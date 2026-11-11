@@ -1,4 +1,4 @@
-// Conjuros de nivel 0 a 5 para añadir a la ficha. Basados en el SRD 5.2 de Wizards of
+// Conjuros de nivel 0 a 9 para añadir a la ficha. Basados en el SRD 5.2 de Wizards of
 // the Coast (CC-BY-4.0); las descripciones son resúmenes propios, no el texto oficial.
 import type { Spell } from '../lib/schema';
 
@@ -134,4 +134,39 @@ export const spellCatalog: Spell[] = [
   spell('Golpe flamígero', 5, 'Evocación', A, '18 m', 'V, S, M', 'Instantánea', 'Columna de fuego divino: 5d6 fuego y 5d6 radiante, mitad si supera.', { save: 'des', effect: fx('5d6', 'fuego (+5d6 radiante)'), higherLevels: '+1d6 fuego y +1d6 radiante por nivel por encima del 5.' }),
   spell('Revivir a los muertos', 5, 'Nigromancia', '1 hora', 'Toque', 'V, S, M (diamante de 500 po)', 'Instantánea', 'Devuelves la vida a una criatura muerta hace menos de 10 días, con penalizaciones que se reducen al descansar.'),
   spell('Sujetar monstruo', 5, 'Encantamiento', A, '27 m', 'V, S, M', '1 minuto', 'Una criatura queda paralizada; repite la salvación al final de cada uno de sus turnos.', { concentration: true, save: 'sab', higherLevels: '+1 criatura por cada nivel de espacio por encima del 5.' }),
+  // Nivel 6
+  spell('Cadena de relámpagos', 6, 'Evocación', A, '45 m', 'V, S, M', 'Instantánea', 'Un rayo alcanza a un objetivo y salta hasta a tres más a 9 m de él; mitad de daño si superan.', { save: 'des', effect: fx('10d8', 'relámpago'), higherLevels: '+1 objetivo adicional por cada nivel de espacio por encima del 6.' }),
+  spell('Curar', 6, 'Abjuración', A, '18 m', 'V, S', 'Instantánea', 'Una criatura recupera PG y se libra de la ceguera, la sordera y las enfermedades.', { effect: fx('70', 'curación'), higherLevels: '+10 PG por cada nivel de espacio por encima del 6.' }),
+  spell('Desintegrar', 6, 'Transmutación', A, '18 m', 'V, S, M', 'Instantánea', 'Un rayo verde; si el daño reduce al objetivo a 0 PG, queda reducido a polvo. También destruye objetos y muros de fuerza.', { save: 'des', effect: fx('10d6+40', 'fuerza'), higherLevels: '+3d6 por cada nivel de espacio por encima del 6.' }),
+  spell('Festín de héroes', 6, 'Conjuración', '10 minutos', '9 m', 'V, S, M (cuenco de 1.000 po)', 'Instantánea', 'Hasta doce criaturas que comen quedan inmunes a veneno y miedo y aumentan sus PG máximos en 2d10 durante 24 horas.'),
+  spell('Globo de invulnerabilidad', 6, 'Abjuración', A, 'Uno mismo (emanación de 3 m)', 'V, S, M', '1 minuto', 'Los conjuros de nivel 5 o menos lanzados desde fuera no afectan a nada dentro de la barrera.', { concentration: true, higherLevels: 'Bloquea un nivel de conjuro más por cada nivel de espacio por encima del 6.' }),
+  spell('Rayo solar', 6, 'Evocación', A, 'Uno mismo (línea de 18 m)', 'V, S, M', '1 minuto', 'Un haz de luz: quien falla sufre daño y queda cegado; mitad sin ceguera si supera. Puedes repetirlo cada turno.', { concentration: true, save: 'con', effect: fx('6d8', 'radiante') }),
+
+  // Nivel 7
+  spell('Bola de fuego de explosión retardada', 7, 'Evocación', A, '45 m', 'V, S, M', '1 minuto', 'Una perla de fuego que crece +1d6 por asalto hasta que estalla en una esfera de 6 m (mitad si superan).', { concentration: true, save: 'des', effect: fx('12d6', 'fuego'), higherLevels: '+1d6 por cada nivel de espacio por encima del 7.' }),
+  spell('Dedo de la muerte', 7, 'Nigromancia', A, '18 m', 'V, S', 'Instantánea', 'Energía negativa; mitad si supera. Un humanoide que muere así se alza como zombi bajo tu control.', { save: 'con', effect: fx('7d8+30', 'necrótico') }),
+  spell('Desplazamiento entre planos', 7, 'Conjuración', A, 'Toque', 'V, S, M', 'Instantánea', 'Tú y hasta ocho criaturas viajáis a otro plano de existencia, o destierras a una criatura que falla la salvación.', { save: 'car' }),
+  spell('Regenerar', 7, 'Transmutación', '1 minuto', 'Toque', 'V, S, M', '1 hora', 'La criatura recupera PG al instante y 1 PG al inicio de cada turno; los miembros perdidos vuelven a crecer.', { effect: fx('4d8+15', 'curación') }),
+  spell('Resurrección', 7, 'Nigromancia', '1 hora', 'Toque', 'V, S, M (diamante de 1.000 po)', 'Instantánea', 'Devuelves la vida a una criatura muerta hace menos de un siglo, con todos sus PG y miembros.'),
+  spell('Teletransporte', 7, 'Conjuración', A, '3 m', 'V', 'Instantánea', 'Tú y hasta ocho criaturas llegáis a un destino del mismo plano; cuanto peor lo conoces, más riesgo de error.'),
+
+  // Nivel 8
+  spell('Aura sagrada', 8, 'Abjuración', A, 'Uno mismo', 'V, S, M', '1 minuto', 'Tus aliados a 9 m tienen ventaja en las salvaciones y los ataques contra ellos tienen desventaja.', { concentration: true }),
+  spell('Dominar monstruo', 8, 'Encantamiento', A, '18 m', 'V, S', '1 hora', 'Una criatura queda hechizada y obedece tus órdenes; repite la salvación al recibir daño.', { concentration: true, save: 'sab' }),
+  spell('Explosión solar', 8, 'Evocación', A, '45 m', 'V, S, M', 'Instantánea', 'Luz cegadora en una esfera de 18 m: daño y ceguera 1 minuto; mitad sin ceguera si supera.', { save: 'con', effect: fx('12d6', 'radiante') }),
+  spell('Mente en blanco', 8, 'Abjuración', A, 'Toque', 'V, S', '24 horas', 'Inmunidad al daño psíquico, a leer la mente, a la adivinación y al estado hechizado.'),
+  spell('Nube incendiaria', 8, 'Conjuración', A, '45 m', 'V, S', '1 minuto', 'Una nube de ascuas de 6 m de radio que se desplaza 3 m por asalto (mitad si superan).', { concentration: true, save: 'des', effect: fx('10d8', 'fuego') }),
+  spell('Palabra de poder: aturdir', 8, 'Encantamiento', A, '18 m', 'V', 'Instantánea', 'Si el objetivo tiene 150 PG o menos queda aturdido; si no, su velocidad es 0 hasta tu próximo turno.'),
+  spell('Terremoto', 8, 'Transmutación', A, '150 m', 'V, S, M', '1 minuto', 'Un temblor en un círculo de 30 m derriba criaturas, rompe la concentración y daña estructuras.', { concentration: true, save: 'des' }),
+
+  // Nivel 9
+  spell('Cambiar de forma', 9, 'Transmutación', A, 'Uno mismo', 'V, S, M', '1 hora', 'Adoptas la forma de una criatura de valor de desafío igual o inferior a tu nivel y puedes cambiar de forma cada turno.', { concentration: true }),
+  spell('Curación en masa', 9, 'Abjuración', A, '18 m', 'V, S', 'Instantánea', 'Repartes hasta 700 PG entre las criaturas que elijas y les quitas ceguera, sordera y enfermedades.', { effect: fx('700', 'curación') }),
+  spell('Deseo', 9, 'Conjuración', A, 'Uno mismo', 'V', 'Instantánea', 'Duplicas cualquier conjuro de nivel 8 o menos sin componentes, o pides otro efecto a riesgo de no volver a lanzarlo.'),
+  spell('Detener el tiempo', 9, 'Transmutación', A, 'Uno mismo', 'V', 'Instantánea', 'Actúas durante 1d4 + 1 turnos seguidos mientras el tiempo se detiene para los demás.'),
+  spell('Lluvia de meteoritos', 9, 'Evocación', A, '1,5 km', 'V, S', 'Instantánea', 'Cuatro esferas de fuego de 12 m de radio: 20d6 fuego y 20d6 contundente, mitad si superan.', { save: 'des', effect: fx('20d6', 'fuego (+20d6 contundente)') }),
+  spell('Palabra de poder: matar', 9, 'Encantamiento', A, '18 m', 'V', 'Instantánea', 'Si el objetivo tiene 100 PG o menos muere; si no, sufre daño psíquico.', { effect: fx('12d12', 'psíquico') }),
+  spell('Portal', 9, 'Conjuración', A, '18 m', 'V, S, M (diamante de 5.000 po)', '1 minuto', 'Abres un portal a otro plano; puedes nombrar a una criatura para arrastrarla a través de él.', { concentration: true }),
+  spell('Presciencia', 9, 'Adivinación', '1 minuto', 'Toque', 'V, S, M', '8 horas', 'La criatura tiene ventaja en sus tiradas de d20 y los ataques contra ella tienen desventaja.'),
+  spell('Resurrección verdadera', 9, 'Nigromancia', '1 hora', 'Toque', 'V, S, M (diamantes de 25.000 po)', 'Instantánea', 'Devuelves la vida a una criatura muerta hace menos de 200 años, aunque no quede su cuerpo.'),
 ];

@@ -240,10 +240,16 @@ const pickerTitles: Record<Kind, string> = { weapons: 'Añadir arma', spells: 'A
 
 /** Filtros por tipo: [valor, etiqueta, predicado]. */
 const filters: Record<Kind, [string, string, (entry: Entry) => boolean][]> = {
-  spells: [['', 'Todos los niveles', () => true], ...Array.from({ length: 6 }, (_, l): [string, string, (e: Entry) => boolean] => [String(l), spellLevelText(l), (e) => (e as Spell).level === l])],
+  spells: [['', 'Todos los niveles', () => true], ...Array.from({ length: 10 }, (_, l): [string, string, (e: Entry) => boolean] => [String(l), spellLevelText(l), (e) => (e as Spell).level === l])],
   weapons: [['', 'Todas', () => true], ['sencilla', 'Sencillas', (e) => (e as Weapon).category === 'sencilla'], ['marcial', 'Marciales', (e) => (e as Weapon).category === 'marcial']],
   inventory: [['', 'Todo', () => true], ['armadura', 'Armaduras', (e) => /armadura|escudo/i.test((e as InventoryItem).kind)], ['otros', 'Equipo y consumibles', (e) => !/armadura|escudo/i.test((e as InventoryItem).kind)]],
-  features: [['', 'Todo', () => true]],
+  features: [
+    ['', 'Todo', () => true],
+    ['dotes', 'Dotes, estilos y reglas', (e) => /dote|estilo|regla/i.test((e as Feature).source)],
+    ...['Bárbaro', 'Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Guerrero', 'Hechicero', 'Mago', 'Monje', 'Paladín', 'Pícaro'].map(
+      (name): [string, string, (e: Entry) => boolean] => [name, name, (e) => (e as Feature).source.startsWith(name)],
+    ),
+  ],
 };
 
 function catalogDetail(kind: Kind, entry: Entry): string {

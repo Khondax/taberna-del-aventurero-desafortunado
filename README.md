@@ -66,7 +66,7 @@ Cada personaje es un archivo `<id>.json` con esta forma:
 - `src/lib/schema.ts`: esquema Zod del archivo de ficha. Solo lo usa el servidor. `src/lib/migrate.ts`: migraciones entre versiones.
 - `src/lib/sheet.ts`: reglas 2024 (PX, competencia, habilidades, clases, espacios de lanzador completo, medio y de pacto, ataque y daño de armas, CD de conjuros, escalado de trucos) y valores derivados. Lo comparten el servidor y el cliente.
 - `src/lib/describe.ts`: contenido de los tooltips y del resumen del diálogo de edición.
-- `src/data/catalog.ts` y `src/data/spells.ts`: listados de armas, objetos, dotes y conjuros (nivel 0 a 5). Al añadir una entrada se copia a la ficha.
+- `src/data/catalog.ts` y `src/data/spells.ts`: listados de armas, armaduras y objetos, dotes, rasgos de clase y conjuros de nivel 0 a 9. Al añadir una entrada se copia a la ficha.
 - `src/lib/store.ts`: lectura y escritura de archivos: escritura atómica, guardados en serie por ficha y control de versión.
 - `src/actions/index.ts`: acciones `saveCharacter` e `importCharacter`.
 - `src/pages/index.astro`: vista del máster. `src/pages/personajes/[slug].astro`: ficha.
@@ -79,6 +79,6 @@ Cada personaje es un archivo `<id>.json` con esta forma:
 
 ## Licencia del contenido de reglas
 
-Los listados de armas, objetos, dotes y conjuros se basan en el SRD 5.2. Los nombres están en español y las descripciones son resúmenes propios, no el texto oficial.
+Los listados de armas, objetos, dotes, rasgos de clase y conjuros se basan en el SRD 5.2. Los nombres están en español y las descripciones son resúmenes propios, no el texto oficial.
 
 This work includes material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.

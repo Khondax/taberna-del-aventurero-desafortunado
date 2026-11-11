@@ -1,7 +1,7 @@
-// Listados para añadir a la ficha: armas, objetos y dotes. Basados en el SRD 5.2 de
+// Listados para añadir a la ficha: armas, objetos, dotes y rasgos de clase. Basados en el SRD 5.2 de
 // Wizards of the Coast (CC-BY-4.0); las descripciones son resúmenes propios.
 // Al añadir una entrada se copia a la ficha, donde se puede editar sin afectar al listado.
-import type { Armor, Feature, InventoryItem, Weapon } from '../lib/schema';
+import type { Armor, Feature, InventoryItem, Uses, Weapon } from '../lib/schema';
 
 function weapon(
   name: string,
@@ -121,6 +121,7 @@ export const itemCatalog: InventoryItem[] = [
 ];
 
 const feat = (name: string, source: string, description: string, uses: Feature['uses'] = null): Feature => ({ name, source, description, uses });
+const uses = (max: number, recovery: Uses['recovery']): Uses => ({ current: max, max, recovery });
 
 export const featureCatalog: Feature[] = [
   feat('Alerta', 'Dote de origen', 'Sumas tu bonificador de competencia a la iniciativa y puedes intercambiar tu iniciativa con un aliado voluntario.'),
@@ -135,4 +136,41 @@ export const featureCatalog: Feature[] = [
   feat('Estilo de combate: Armas grandes', 'Estilo de combate', 'Con armas a dos manos o versátiles, los 1 y 2 en los dados de daño cuentan como 3.'),
   feat('Estilo de combate: Dos armas', 'Estilo de combate', 'Sumas tu modificador al daño del ataque adicional con un arma Ligera.'),
   feat('Inspiración heroica', 'Regla', 'Puedes gastarla para repetir cualquier tirada de d20 y quedarte el nuevo resultado.', { current: 1, max: 1, recovery: 'ninguna' }),
+
+  // Rasgos de clase. Los usos son los de los primeros niveles; la descripción indica cómo
+  // escalan y el asistente de subida de nivel permite ajustarlos. «Recuperas uno en descanso
+  // corto» se apunta a mano con el botón + del recurso.
+  feat('Furia', 'Bárbaro 1', 'Como acción adicional: resistencia a daño contundente, cortante y perforante, +2 al daño con Fuerza (+3 a nivel 9, +4 a nivel 16) y ventaja en pruebas y salvaciones de Fuerza. Usos: 2 (niv. 1–2), 3 (3–5), 4 (6–11), 5 (12–16), 6 (17+); recuperas uno en descanso corto.', uses(2, 'largo')),
+  feat('Defensa sin armadura (bárbaro)', 'Bárbaro 1', 'Sin armadura, tu CA es 10 + Des + Con, y puedes usar escudo. La ficha la calcula sola.'),
+  feat('Ataque temerario', 'Bárbaro 2', 'Tus ataques con Fuerza tienen ventaja este turno, pero los ataques contra ti también hasta tu próximo turno.'),
+  feat('Sentido del peligro', 'Bárbaro 2', 'Ventaja en las salvaciones de Destreza mientras no estés incapacitado.'),
+  feat('Inspiración bárdica', 'Bardo 1', 'Como acción adicional, un aliado a 18 m gana un dado (d6; d8 a nivel 5, d10 a 10, d12 a 15) para sumar a una tirada de d20 fallida. Usos: tu modificador de Carisma (mín. 1); desde nivel 5 se recuperan en descanso corto.', uses(3, 'largo')),
+  feat('Polifacético', 'Bardo 2', 'Sumas la mitad de tu bonificador de competencia a las pruebas de habilidad en las que no eres competente.'),
+  feat('Invocaciones sobrenaturales', 'Brujo 1', 'Fragmentos de saber prohibido que otorgan capacidades permanentes; ganas más al subir de nivel.'),
+  feat('Astucia mágica', 'Brujo 2', 'Con un rito de 1 minuto recuperas espacios de pacto hasta la mitad de tu máximo, redondeando hacia arriba.', uses(1, 'largo')),
+  feat('Orden divina', 'Clérigo 1', 'Protector (armadura pesada y armas marciales) o Taumaturgo (un truco extra y tu Sabiduría a Arcanos o Religión).'),
+  feat('Canalizar divinidad', 'Clérigo 2', 'Energía divina para efectos como Chispa divina o Expulsar muertos vivientes, y los de tu dominio. Usos: 2 (niv. 2–5), 3 (6–17), 4 (18+); recuperas uno en descanso corto.', uses(2, 'largo')),
+  feat('Expulsar muertos vivientes', 'Clérigo 2', 'Con Canalizar divinidad, los muertos vivientes a 9 m salvan Sabiduría o quedan asustados e incapacitados 1 minuto.'),
+  feat('Druídico', 'Druida 1', 'Conoces el idioma secreto de los druidas y siempre tienes preparado Hablar con los animales.'),
+  feat('Forma salvaje', 'Druida 2', 'Como acción adicional adoptas la forma de una bestia que conozcas. Usos: 2 (niv. 2–5), 3 (6–16), 4 (17+); recuperas uno en descanso corto.', uses(2, 'largo')),
+  feat('Enemigo predilecto', 'Explorador 1', 'Siempre tienes preparado Marca del cazador y puedes lanzarlo sin gastar espacio. Usos: 2 (niv. 1–4), 3 (5–8), 4 (9–12), 5 (13–16), 6 (17+).', uses(2, 'largo')),
+  feat('Explorador hábil', 'Explorador 2', 'Pericia en una habilidad en la que seas competente y dos idiomas adicionales.'),
+  feat('Tomar aliento', 'Guerrero 1', 'Como acción adicional recuperas 1d10 + tu nivel de guerrero en PG. Usos: 2 (niv. 1–3), 3 (4–9), 4 (10+); recuperas uno en descanso corto.', uses(2, 'largo')),
+  feat('Oleada de acción', 'Guerrero 2', 'En tu turno realizas una acción adicional (que no sea Magia). Dos usos a partir de nivel 17.', uses(1, 'corto')),
+  feat('Ataque adicional', 'Guerrero 5', 'Atacas dos veces al realizar la acción de Ataque (tres a nivel 11 y cuatro a nivel 20).'),
+  feat('Indomable', 'Guerrero 9', 'Repites una salvación fallida sumando tu nivel de guerrero. Usos: 1 (niv. 9–12), 2 (13–16), 3 (17+).', uses(1, 'largo')),
+  feat('Hechicería innata', 'Hechicero 1', 'Como acción adicional, durante 1 minuto tu CD de conjuro sube 1 y tus ataques de conjuro tienen ventaja.', uses(2, 'largo')),
+  feat('Fuente de magia', 'Hechicero 2', 'Puntos de hechicería igual a tu nivel de hechicero para crear espacios de conjuro o pagar metamagia.', uses(2, 'largo')),
+  feat('Metamagia', 'Hechicero 2', 'Gastas puntos de hechicería para alterar tus conjuros: distante, potenciado, rápido, sutil…'),
+  feat('Recuperación arcana', 'Mago 1', 'Una vez al día, tras un descanso corto, recuperas espacios cuyo nivel sumado no supere la mitad de tu nivel de mago.', uses(1, 'largo')),
+  feat('Erudito', 'Mago 2', 'Pericia en una de estas habilidades en las que seas competente: Arcanos, Historia, Investigación, Medicina, Naturaleza o Religión.'),
+  feat('Artes marciales', 'Monje 1', 'Usas Destreza con golpes sin armas y armas de monje, con un dado de artes marciales (d6; d8 a nivel 5, d10 a 11, d12 a 17), y un golpe sin armas como acción adicional.'),
+  feat('Defensa sin armadura (monje)', 'Monje 1', 'Sin armadura ni escudo, tu CA es 10 + Des + Sab. La ficha la calcula sola.'),
+  feat('Concentración del monje', 'Monje 2', 'Puntos de concentración igual a tu nivel de monje para Ráfaga de golpes, Defensa paciente o Paso del viento.', uses(2, 'corto')),
+  feat('Imposición de manos', 'Paladín 1', 'Reserva de curación de cinco veces tu nivel de paladín: como acción adicional curas PG de la reserva, o gastas 5 para terminar el estado envenenado.', uses(5, 'largo')),
+  feat('Canalizar divinidad (paladín)', 'Paladín 3', 'Energía divina para Sentido divino y los efectos de tu juramento. Usos: 2 (niv. 3–10), 3 (11+); recuperas uno en descanso corto.', uses(2, 'largo')),
+  feat('Aura de protección', 'Paladín 6', 'Tú y tus aliados a 3 m sumáis tu modificador de Carisma (mín. +1) a las salvaciones.'),
+  feat('Pericia', 'Pícaro 1', 'Doble competencia en dos habilidades en las que seas competente (márcalas con ◆). Dos más a nivel 6.'),
+  feat('Ataque furtivo', 'Pícaro 1', 'Una vez por turno, +1d6 de daño (1d6 más cada dos niveles) con un arma Sutil o a distancia si tienes ventaja o un aliado junto al objetivo.'),
+  feat('Acción astuta', 'Pícaro 2', 'Como acción adicional puedes Correr, Retirarte o Esconderte.'),
 ];
