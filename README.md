@@ -35,6 +35,18 @@ journalctl --user -u taberna-dev -f    # logs
 systemctl --user stop taberna-dev      # parar
 ```
 
+## Tests
+
+```bash
+pnpm test        # unitarios (Vitest): reglas, migraciones, creación y almacenamiento
+pnpm test:e2e    # de extremo a extremo (Playwright, Chromium)
+```
+
+- `tests/unit/`: reglas de `sheet.ts`, migraciones v1 y v2, `create.ts` y `store.ts`. `store.ts` se prueba con un `DATA_DIR` temporal. `tests/fixtures/` guarda los ejemplos en formato v2 para las migraciones.
+- `tests/e2e/`: `pnpm test:e2e` compila el proyecto y arranca `dist/server/entry.mjs` en `127.0.0.1:4517` con un `DATA_DIR` temporal, que se borra al terminar. Cada test copia ahí su propia ficha de `data/ejemplos`, así que no tocan las fichas reales ni dependen del orden.
+- La primera vez, si no está el navegador: `pnpm exec playwright install chromium`. La versión de `@playwright/test` está fijada para que coincida con el navegador instalado.
+- Un archivo concreto: `pnpm test tests/unit/migrate.test.ts` o `pnpm test:e2e tests/e2e/armor.spec.ts`. Los detalles de los fallos quedan en `test-results/`.
+
 ## Producción (mint-node)
 
 ```bash
@@ -129,6 +141,7 @@ Las pestañas que tuvieran la ficha abierta detectan el cambio de versión al gu
   - `entries.ts`: diálogo de edición y listados.
   - `tooltip.ts` y `level-up.ts`: el tooltip y el asistente de subida de nivel.
   - `manage.ts`: pestaña Gestión (exportar, importar y eliminar).
+- `tests/`: tests unitarios (`unit/`), de extremo a extremo (`e2e/`) y archivos de prueba (`fixtures/`).
 - `deploy/taberna.service`: unidad de systemd de usuario del servicio de producción.
 - `stitch_gestor_de_rol_medieval/`: referencia visual (capturas, HTML y `tome_grimoire/DESIGN.md`).
 
