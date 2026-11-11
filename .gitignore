@@ -2,6 +2,7 @@ node_modules/
 dist/
 .astro/
 .env
+.vercel/
 *.db
 D-D-2024-Manual-Jugador-ESP.pdf
 # Fichas de la partida en curso (se crean desde data/ejemplos en el primer arranque)

@@ -83,6 +83,14 @@ Cada personaje es un archivo `<id>.json` con esta forma:
   - `manage.ts`: pestaña Gestión (exportar, importar y eliminar).
 - `stitch_gestor_de_rol_medieval/`: referencia visual (capturas, HTML y `tome_grimoire/DESIGN.md`).
 
+## Forma de trabajar (personas y agentes)
+
+- Cada tarea va en una rama nueva creada desde `master`. `develop` ya no existe, y `backup/develop-wip` solo guarda trabajo antiguo obsoleto: no se parte de ella.
+- Un solo agente a la vez por zona del código: ficha (`src/scripts/sheet/`, `src/pages/personajes/`), esquema y datos (`src/lib/schema.ts`, `src/lib/migrate.ts`, `src/lib/store.ts`) o estilos (`src/styles/`). Solo se trabaja en paralelo en zonas que no se pisen.
+- Antes de integrar, rebasa la rama sobre `master` e intégrala con fast-forward (`git merge --ff-only`).
+- Antes de integrar tienen que pasar `pnpm check`, `pnpm build` y los tests.
+- No se hace push sin que lo pida Miguel.
+
 ## Licencia del contenido de reglas
 
 Los listados de armas, objetos, dotes, rasgos de clase y conjuros se basan en el SRD 5.2. Los nombres están en español y las descripciones son resúmenes propios, no el texto oficial.
