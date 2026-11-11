@@ -13,13 +13,15 @@ import {
   liveText,
   normalize,
   pips,
+  proficiencyLabels,
   resourceRows,
   rollExpression,
   saveBonus,
+  saveLevel,
   signed,
   skillBonus,
+  skillLevel,
   skills,
-  slotRows,
   spellAttackBonus,
   spellDice,
   spellcastingMod,
@@ -60,6 +62,7 @@ function fillRow(row: HTMLElement, data: Row, entry?: string, rollable = false) 
     roll.hidden = !rollable;
     roll.setAttribute('aria-label', `Tirar: ${data.title}`);
   }
+  row.querySelector('[data-remove]')?.setAttribute('aria-label', `Quitar: ${data.title}`);
 }
 
 function fillResource(row: HTMLElement, data: ResourceRow) {
@@ -67,8 +70,11 @@ function fillResource(row: HTMLElement, data: ResourceRow) {
   setFields(row, { title: data.title, detail: data.detail, pips: pips(data.pool), count: `${data.pool.current} / ${data.pool.max}` });
   row.querySelector('[data-delta="-1"]')!.setAttribute('aria-label', `Gastar: ${data.title}`);
   row.querySelector('[data-delta="1"]')!.setAttribute('aria-label', `Recuperar: ${data.title}`);
+  row.querySelector('[data-remove-resource]')!.setAttribute('aria-label', `Quitar: ${data.title}`);
   const max = row.querySelector<HTMLInputElement>('.max-input input')!;
-  if (data.key.startsWith('slot:')) {
+  const isSlot = data.key.startsWith('slot:');
+  max.parentElement!.hidden = !isSlot;
+  if (isSlot) {
     max.dataset.path = `spellSlots.${data.key.slice(5)}.max`;
     max.setAttribute('aria-label', `Máximo: ${data.title}`);
   } else delete max.dataset.path;
@@ -91,7 +97,6 @@ onRender(() => {
   renderList('inventory', 'entryTemplate', state.inventory, (row, item, i) => fillRow(row, itemRow(item), `inventory:${i}`));
   renderList('features', 'featureTemplate', state.features, (row, f, i) => fillRow(row, featureRow(f), `features:${i}`));
   renderList('resources', 'resourceTemplate', resourceRows(state), fillResource);
-  renderList('slotList', 'resourceTemplate', slotRows(state), fillResource);
   renderList('history', 'plainTemplate', state.history.map(historyRow).reverse(), (row, data) => fillRow(row, data));
   filterInputs.forEach(applyFilter);
 
@@ -107,7 +112,9 @@ onRender(() => {
   });
   document.querySelectorAll<HTMLElement>('[data-toggle]').forEach((button) => {
     const [kind, id] = button.dataset.toggle!.split(':');
-    const level = kind === 'saves' ? Number(state.savingThrows.includes(id as Ability)) : state.skills[id as SkillId] ?? 0;
+    const level = kind === 'saves' ? saveLevel(state, id as Ability) : skillLevel(state, id as SkillId);
+    button.dataset.level = String(level);
+    button.title = proficiencyLabels[level];
     button.setAttribute('aria-pressed', String(level > 0));
   });
 
@@ -288,6 +295,23 @@ root.addEventListener('click', (event) => {
   const pool = poolFor(step.closest<HTMLElement>('[data-key]')!.dataset.key!);
   const next = clamp(pool.current + Number(step.dataset.delta), 0, pool.max);
   if (next !== pool.current) update(() => (pool.current = next));
+});
+
+// Quitar un recurso: un nivel de espacios desaparece; un rasgo u objeto se queda, pero sin usos.
+root.addEventListener('click', (event) => {
+  const button = (event.target as Element).closest<HTMLElement>('[data-remove-resource]');
+  if (!button) return;
+  const [kind, id] = button.closest<HTMLElement>('[data-key]')!.dataset.key!.split(':');
+  update(() => {
+    if (kind === 'slot') {
+      delete state.spellSlots[id];
+      log('Espacios quitados', `Nivel ${id}`);
+    } else {
+      const entry = (kind === 'features' ? state.features : state.inventory)[Number(id)];
+      entry.uses = null;
+      log('Usos quitados', entry.name);
+    }
+  });
 });
 
 $('#addSlotLevel').addEventListener('click', () => {

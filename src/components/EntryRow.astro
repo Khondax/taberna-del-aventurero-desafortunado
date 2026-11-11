@@ -1,7 +1,7 @@
 ---
 // Fila de lista. Con `entry` (p. ej. `spells:3`) muestra su descripción al pasar el ratón y,
-// si es `editable`, abre su edición al pulsarla. Sin `row` sirve de plantilla para el cliente
-// (ver `fillRow` en scripts/sheet.ts).
+// si es `editable`, abre su edición al pulsarla y tiene un botón para quitarla. Sin `row` sirve
+// de plantilla para el cliente (ver `fillRow` en scripts/sheet/main.ts).
 import type { Row } from '../lib/sheet';
 
 interface Props {
@@ -22,6 +22,7 @@ const Main = editable ? 'button' : 'div';
   </Main>
   <span class="row-end">
     <span class="tag" data-field="tag">{row.tag}</span>
-    {editable && <button type="button" class="icon-button" data-roll hidden={!rollable} aria-label={`Tirar: ${row.title}`}>⚄</button>}
+    {editable && <button type="button" class="icon-button roll-button" data-roll hidden={!rollable} aria-label={`Tirar: ${row.title}`}><span class="die" aria-hidden="true"></span></button>}
+    {editable && <button type="button" class="icon-button remove-button" data-remove aria-label={`Quitar: ${row.title}`}>×</button>}
   </span>
 </li>

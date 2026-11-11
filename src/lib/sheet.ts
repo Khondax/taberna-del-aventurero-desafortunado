@@ -278,7 +278,9 @@ export const initials = (name: string) =>
 export const classLine = (c: Character) => [c.species, `${c.className} ${c.subclass.toLowerCase()}`.trim()].filter(Boolean).join(' · ');
 export const recoveryText = (uses: Uses) =>
   uses.recovery === 'ninguna' ? 'No se recupera' : `Descanso ${uses.recovery}`;
-export const proficiencyMark = (level: number) => ['○', '●', '◆'][level] ?? '○';
+/** Nombre de cada nivel de competencia (0, 1 o 2); las marcas ○ ● ◆ se dibujan con CSS según `data-level`. */
+export const proficiencyLabels = ['Sin competencia', 'Competente', 'Pericia'];
+export const saveLevel = (c: Character, ability: Ability) => Number(c.savingThrows.includes(ability));
 export const spellLevelText = (level: number) => (level === 0 ? 'Truco' : `Nivel ${level}`);
 
 // --- Filas de listas --------------------------------------------------------
@@ -365,11 +367,9 @@ export function liveText(c: Character): Record<string, string> {
   for (const ability of abilities) {
     text[`mod-${ability}`] = signed(abilityMod(c, ability));
     text[`save-${ability}`] = signed(saveBonus(c, ability));
-    text[`saveMark-${ability}`] = proficiencyMark(c.savingThrows.includes(ability) ? 1 : 0);
   }
   for (const skill of skillIds) {
     text[`skill-${skill}`] = signed(skillBonus(c, skill));
-    text[`skillMark-${skill}`] = proficiencyMark(skillLevel(c, skill));
   }
   return text;
 }

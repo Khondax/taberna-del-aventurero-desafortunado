@@ -9,17 +9,18 @@ import { readSheet } from '../../lib/store';
 import {
   abilities,
   abilityNames,
-  abilityShort,
   featureRow,
   historyRow,
   initials,
   itemRow,
   liveBars,
   liveText,
+  proficiencyLabels,
   resourceRows,
+  saveLevel,
+  skillLevel,
   skillIds,
   skills,
-  slotRows,
   spellRow,
   weaponRow,
 } from '../../lib/sheet';
@@ -32,7 +33,6 @@ const text = liveText(c);
 const bars = liveBars(c);
 const tabs = [
   { id: 'resumen', label: 'Resumen' },
-  { id: 'grimorio', label: 'Grimorio' },
   { id: 'inventario', label: 'Inventario' },
   { id: 'notas', label: 'Notas e historial' },
 ];
@@ -66,7 +66,7 @@ const identity = [
       ))}
     </div>
 
-    <section class="sheet-grid" id="resumen" role="tabpanel" aria-labelledby="tab-resumen">
+    <section class="sheet-grid summary-grid" id="resumen" role="tabpanel" aria-labelledby="tab-resumen">
       <div class="column">
         <article class="panel"><div class="panel-body">
           <div class="character-head">
@@ -113,7 +113,7 @@ const identity = [
             </span>
           </div>
           <div class="bar blue"><span data-bar="hitDice" style={`width:${bars.hitDice}`}></span></div>
-          <button class="button ghost" id="spendHitDie">Gastar dado de golpe</button>
+          <button class="button ghost die-hint" id="spendHitDie">Gastar dado de golpe</button>
 
           <div class="bar-label">
             <span>Experiencia</span>
@@ -126,7 +126,7 @@ const identity = [
             {abilities.map((key) => (
               <div class="ability" data-entry={`abilities:${key}`} data-tip="entry">
                 <small>{abilityNames[key]}</small>
-                <button class="mod" data-roll={`abilities:${key}`} data-bind={`mod-${key}`} aria-label={`Prueba de ${abilityNames[key]}`}>{text[`mod-${key}`]}</button>
+                <button class="mod die-hint" data-roll={`abilities:${key}`} data-bind={`mod-${key}`} aria-label={`Prueba de ${abilityNames[key]}`}>{text[`mod-${key}`]}</button>
                 <input class="edit narrow" type="number" min="1" max="30" data-path={`abilities.${key}`} value={c.abilities[key]} aria-label={`Puntuación de ${abilityNames[key]}`} />
               </div>
             ))}
@@ -135,26 +135,31 @@ const identity = [
 
         <article class="panel">
           <div class="panel-header"><h2>Salvaciones y habilidades</h2><span class="tag">○ sin · ● competente · ◆ pericia</span></div>
-          <div class="panel-body proficiency-grid">
-            <ul class="check-list" aria-label="Tiradas de salvación">
-              {abilities.map((key) => (
-                <li class="check-row" data-entry={`saves:${key}`} data-tip="entry">
-                  <button class="mark" data-toggle={`saves:${key}`} data-bind={`saveMark-${key}`} aria-label={`Competencia en salvación de ${abilityNames[key]}`}>{text[`saveMark-${key}`]}</button>
-                  <button class="check-name" data-roll={`saves:${key}`}>{abilityNames[key]}</button>
-                  <span class="bonus" data-bind={`save-${key}`}>{text[`save-${key}`]}</span>
+          <ul class="panel-body proficiency-list" aria-label="Tiradas de salvación y sus habilidades">
+            {abilities.map((key) => {
+              const abilitySkills = skillIds.filter((id) => skills[id].ability === key);
+              return (
+                <li class="proficiency-group">
+                  <div class="check-row save-row" data-entry={`saves:${key}`} data-tip="entry">
+                    <button class="mark" data-toggle={`saves:${key}`} data-level={saveLevel(c, key)} title={proficiencyLabels[saveLevel(c, key)]} aria-pressed={saveLevel(c, key) > 0 ? 'true' : 'false'} aria-label={`Competencia en salvación de ${abilityNames[key]}`}></button>
+                    <button class="check-name die-hint" data-roll={`saves:${key}`}>{abilityNames[key]} <small>salvación</small></button>
+                    <span class="bonus" data-bind={`save-${key}`}>{text[`save-${key}`]}</span>
+                  </div>
+                  {abilitySkills.length > 0 && (
+                    <ul class="check-list" aria-label={`Habilidades de ${abilityNames[key]}`}>
+                      {abilitySkills.map((id) => (
+                        <li class="check-row" data-entry={`skills:${id}`} data-tip="entry">
+                          <button class="mark" data-toggle={`skills:${id}`} data-level={skillLevel(c, id)} title={proficiencyLabels[skillLevel(c, id)]} aria-pressed={skillLevel(c, id) > 0 ? 'true' : 'false'} aria-label={`Competencia en ${skills[id].name}`}></button>
+                          <button class="check-name die-hint" data-roll={`skills:${id}`}>{skills[id].name}</button>
+                          <span class="bonus" data-bind={`skill-${id}`}>{text[`skill-${id}`]}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
-              ))}
-            </ul>
-            <ul class="check-list" aria-label="Habilidades">
-              {skillIds.map((id) => (
-                <li class="check-row" data-entry={`skills:${id}`} data-tip="entry">
-                  <button class="mark" data-toggle={`skills:${id}`} data-bind={`skillMark-${id}`} aria-label={`Competencia en ${skills[id].name}`}>{text[`skillMark-${id}`]}</button>
-                  <button class="check-name" data-roll={`skills:${id}`}>{skills[id].name} <small>{abilityShort(skills[id].ability)}</small></button>
-                  <span class="bonus" data-bind={`skill-${id}`}>{text[`skill-${id}`]}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+              );
+            })}
+          </ul>
         </article>
       </div>
 
@@ -169,7 +174,7 @@ const identity = [
         <aside class="panel">
           <div class="panel-header">
             <h2>Recursos</h2>
-            <span class="header-actions"><button class="button ghost" id="shortRest">Descanso corto</button><button class="button ghost" id="longRest">Descanso largo</button></span>
+            <span class="header-actions"><button class="button ghost" id="addSlotLevel" title="Añadir un nivel de espacios de conjuro">＋ Espacio</button><button class="button ghost" id="shortRest">Descanso corto</button><button class="button ghost" id="longRest">Descanso largo</button></span>
           </div>
           <div class="panel-body"><ul class="item-list" id="resources" data-empty="Sin recursos. Añade usos a un rasgo u objeto.">
             {resourceRows(c).map((row) => <ResourceRow row={row} />)}
@@ -183,40 +188,31 @@ const identity = [
           </ul></div>
         </aside>
       </div>
-    </section>
 
-    <section class="sheet-grid" id="grimorio" role="tabpanel" aria-labelledby="tab-grimorio" hidden>
-      <article class="panel">
-        <div class="panel-header">
-          <div><div class="eyebrow" data-bind="spellCount">{text.spellCount}</div><h2>Conjuros</h2></div>
-          <button class="button ghost" data-pick="spells">＋ Añadir conjuro</button>
-        </div>
-        <div class="panel-body">
-          <div class="casting-strip">
-            <label class="stat-box"><small>Aptitud mágica</small>
-              <select class="edit" data-path="spellcastingAbility">
-                <option value="" selected={!c.spellcastingAbility}>Ninguna</option>
-                {abilities.map((key) => <option value={key} selected={c.spellcastingAbility === key}>{abilityNames[key]}</option>)}
-              </select>
-            </label>
-            <div class="stat-box"><small>CD de salvación</small><strong data-bind="spellDC">{text.spellDC}</strong></div>
-            <div class="stat-box"><small>Ataque de conjuro</small><strong data-bind="spellAttack">{text.spellAttack}</strong></div>
+      <div class="column">
+        <article class="panel" id="grimorio">
+          <div class="panel-header">
+            <div><div class="eyebrow" data-bind="spellCount">{text.spellCount}</div><h2>Conjuros</h2></div>
+            <button class="button ghost" data-pick="spells">＋ Añadir conjuro</button>
           </div>
-          <input class="field" type="search" data-filter="spells" placeholder="Buscar por nombre, nivel o escuela…" aria-label="Buscar conjuros" />
-          <ul class="item-list" id="spells" data-empty="Sin conjuros. Añade uno del listado.">
-            {c.spells.map((spell, i) => <EntryRow row={spellRow(c, spell)} entry={`spells:${i}`} editable rollable={!!spell.effect || spell.attack} />)}
-          </ul>
-        </div>
-      </article>
-      <aside class="panel">
-        <div class="panel-header"><h2>Espacios</h2><button class="button ghost" id="addSlotLevel">＋ Nivel</button></div>
-        <div class="panel-body">
-          <ul class="item-list" id="slotList" data-empty="Sin espacios de conjuro.">
-            {slotRows(c).map((row) => <ResourceRow row={row} />)}
-          </ul>
-          <p class="note">Pon el máximo a 0 para quitar un nivel. Al subir de nivel se actualizan con la tabla de tu clase (lanzador completo, medio o brujo).</p>
-        </div>
-      </aside>
+          <div class="panel-body">
+            <div class="casting-strip">
+              <label class="stat-box"><small>Aptitud mágica</small>
+                <select class="edit" data-path="spellcastingAbility">
+                  <option value="" selected={!c.spellcastingAbility}>Ninguna</option>
+                  {abilities.map((key) => <option value={key} selected={c.spellcastingAbility === key}>{abilityNames[key]}</option>)}
+                </select>
+              </label>
+              <div class="stat-box"><small>CD de salvación</small><strong data-bind="spellDC">{text.spellDC}</strong></div>
+              <div class="stat-box"><small>Ataque de conjuro</small><strong data-bind="spellAttack">{text.spellAttack}</strong></div>
+            </div>
+            <input class="field" type="search" data-filter="spells" placeholder="Buscar por nombre, nivel o escuela…" aria-label="Buscar conjuros" />
+            <ul class="item-list" id="spells" data-empty="Sin conjuros. Añade uno del listado.">
+              {c.spells.map((spell, i) => <EntryRow row={spellRow(c, spell)} entry={`spells:${i}`} editable rollable={!!spell.effect || spell.attack} />)}
+            </ul>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section class="panel" id="inventario" role="tabpanel" aria-labelledby="tab-inventario" hidden>
@@ -263,7 +259,7 @@ const identity = [
         <fieldset class="wizard-step" data-step>
           <legend>¿Cómo aumentan tus puntos de golpe?</legend>
           <label class="option"><input type="radio" name="hp" value="average" checked /> <span id="hpAverageLabel"></span></label>
-          <label class="option"><input type="radio" name="hp" value="roll" /> <span id="hpRollLabel"></span></label>
+          <label class="option"><input type="radio" name="hp" value="roll" /> <span class="die-hint" id="hpRollLabel"></span></label>
         </fieldset>
         <fieldset class="wizard-step" data-step hidden>
           <legend>Rasgos y usos del nuevo nivel</legend>

@@ -28,11 +28,11 @@ import { abilities, abilityNames, abilityShort, classList, skillIds, skills } fr
           <div class="segmented" role="radiogroup" aria-label="Método">
             <label class="option"><input type="radio" name="method" value="standard" checked /> Matriz estándar</label>
             <label class="option"><input type="radio" name="method" value="pointbuy" /> Compra de puntos</label>
-            <label class="option"><input type="radio" name="method" value="roll" /> Tiradas</label>
+            <label class="option"><input type="radio" name="method" value="roll" /> <span class="die-hint">Tiradas</span></label>
           </div>
           <p class="note" id="methodHelp"></p>
           <div class="inline-form" id="rollPanel" hidden>
-            <button type="button" class="button secondary" id="rollScores">Tirar 4d6 × 6</button>
+            <button type="button" class="button secondary die-hint" id="rollScores">Tirar 4d6 × 6</button>
             <span class="note" id="rollDetail"></span>
           </div>
           <div class="ability-assign">

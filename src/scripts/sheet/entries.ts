@@ -210,14 +210,25 @@ editForm.addEventListener('submit', (event) => {
   editDialog.close();
 });
 
-$('#editDelete').addEventListener('click', () => {
-  if (!editing || editing.index === null) return;
-  const { kind, index } = editing;
+function remove(kind: Kind, index: number) {
   update(() => {
     const [removed] = listFor(kind).splice(index, 1);
     log(`${kinds[kind].singular} quitado`, removed.name);
   });
+}
+
+$('#editDelete').addEventListener('click', () => {
+  if (!editing || editing.index === null) return;
+  remove(editing.kind, editing.index);
   editDialog.close();
+});
+
+// Botón «×» de cada fila: quita la entrada sin abrir el diálogo (se puede deshacer).
+root.addEventListener('click', (event) => {
+  const button = (event.target as Element).closest('[data-remove]');
+  if (!button) return;
+  const [kind, id] = button.closest<HTMLElement>('[data-entry]')!.dataset.entry!.split(':') as [Kind, string];
+  remove(kind, Number(id));
 });
 
 root.addEventListener('click', (event) => {
