@@ -310,8 +310,8 @@ export const concentrationDC = (damage: number) => Math.min(30, Math.max(10, Mat
 
 /**
  * Recibe daño: primero se gastan los PG temporales. A 0 PG, el daño que pase de los temporales
- * es un fallo de salvación contra la muerte y quita la estabilidad. Caer a 0 PG deja inconsciente
- * y termina la concentración. Devuelve la CD de concentración si sigue concentrándose.
+ * es un fallo de salvación contra la muerte y quita la estabilidad. Caer a 0 PG termina la
+ * concentración (quedas inconsciente). Devuelve la CD de concentración si sigue concentrándose.
  */
 export function takeDamage(c: Character, amount: number): number | null {
   if (amount <= 0) return null;
