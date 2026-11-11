@@ -34,7 +34,7 @@ interface Field {
 const usesFields: Field[] = [
   { path: 'uses.max', label: 'Usos máximos (0 = sin usos)', type: 'number', min: 0 },
   { path: 'uses.current', label: 'Usos disponibles', type: 'number', min: 0 },
-  { path: 'uses.recovery', label: 'Se recuperan', type: 'select', options: [['largo', 'Descanso largo'], ['corto', 'Descanso corto'], ['ninguna', 'No se recuperan']] },
+  { path: 'uses.recovery', label: 'Se recuperan', type: 'select', options: [['largo', 'Descanso largo'], ['uno-corto', 'Uno en descanso corto, todos en largo'], ['corto', 'Descanso corto'], ['ninguna', 'No se recuperan']] },
 ];
 const saveOptions: [string, string][] = [['', 'Ninguna'], ...abilities.map((a): [string, string] => [a, abilityNames[a]])];
 

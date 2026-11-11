@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { migrate } from '../../src/lib/migrate';
 import { currentSchemaVersion, sheetFileSchema } from '../../src/lib/schema';
 import { armorClass, skillBonus } from '../../src/lib/sheet';
-import { example, v2Example, v3Example } from './fixtures';
+import { example, v2Example, v3Example, v4Example } from './fixtures';
 
 const toCurrent = (file: unknown) => sheetFileSchema.parse(migrate(file));
 
@@ -25,10 +25,9 @@ const v1 = (character: Record<string, unknown>) => ({
 describe('migrate', () => {
   it('v3 → v4 añade el estado en partida y las monedas sin tocar el resto', () => {
     const old = v3Example('hermano-tobias');
-    const file = toCurrent(old);
-    expect(file.schemaVersion).toBe(4);
-    expect(file.version).toBe(old.version);
-    const { hp, deathSaves, concentration, conditions, exhaustion, coins, ...rest } = file.character;
+    const v4 = v4Example('hermano-tobias');
+    // El archivo v4 guardado es justo esta migración: se compara con él y luego se llevan los dos al formato actual.
+    const { hp, deathSaves, concentration, conditions, exhaustion, coins, ...rest } = v4.character;
     expect(hp).toEqual({ ...old.character.hp, temp: 0 });
     expect({ deathSaves, concentration, conditions, exhaustion, coins }).toEqual({
       deathSaves: { successes: 0, failures: 0, stable: false },
@@ -39,8 +38,27 @@ describe('migrate', () => {
     });
     const { hp: _hp, ...oldRest } = old.character;
     expect(rest).toEqual(oldRest);
-    // El ejemplo de data/ejemplos es justo esta migración.
-    expect(file.character).toEqual(example('hermano-tobias'));
+    const file = toCurrent(old);
+    expect(file.version).toBe(old.version);
+    expect(file).toEqual(toCurrent(v4));
+  });
+
+  it('v4 → v5: los ejemplos de data/ejemplos son la migración real', () => {
+    expect(toCurrent(v4Example('hermano-tobias')).character).toEqual(example('hermano-tobias'));
+  });
+
+  it('v4 → v5 marca la recuperación parcial solo en los rasgos del listado que seguían en descanso largo', () => {
+    const old = v4Example('hermano-tobias');
+    const uses = (recovery: string) => ({ current: 1, max: 2, recovery });
+    old.character.features = [
+      { name: 'Canalizar divinidad', source: '', description: '', uses: uses('largo') },
+      { name: 'Tomar aliento', source: '', description: '', uses: uses('corto') }, // elegido a mano: se respeta
+      { name: 'furia', source: '', description: '', uses: uses('largo') }, // no coincide exactamente
+      { name: 'Canalizar divinidad (paladín)', source: '', description: '', uses: uses('largo') },
+      { name: 'Recuperación arcana', source: '', description: '', uses: uses('largo') }, // no es parcial
+    ];
+    const { character } = toCurrent(old);
+    expect(character.features.map((f) => f.uses?.recovery)).toEqual(['uno-corto', 'corto', 'largo', 'uno-corto', 'largo']);
   });
 
   it('v2 → v4 no cambia la CA de los ejemplos', () => {

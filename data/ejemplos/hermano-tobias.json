@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "version": 0,
   "character": {
     "name": "Hermano Tobías",
@@ -95,7 +95,7 @@
         "uses": {
           "current": 1,
           "max": 2,
-          "recovery": "largo"
+          "recovery": "uno-corto"
         }
       }
     ],

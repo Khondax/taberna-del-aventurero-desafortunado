@@ -144,6 +144,19 @@ test('espacios, objetos propios, rasgos con usos y descansos', async ({ page }) 
   await expect(page.locator('#features')).toContainText('Inspiración heroica');
 });
 
+test('recuperación parcial: uno en descanso corto, todos en largo', async ({ page }) => {
+  await page.goto(seed('ficha-parcial', 'hermano-tobias', (c) => (c.features.find((f: { name: string }) => f.name === 'Canalizar divinidad').uses.current = 0)));
+  const channel = page.locator('#resources li:has-text("Canalizar divinidad")');
+  await expect(channel).toContainText('Uno en descanso corto, todos en largo');
+  await expect(channel.locator('[data-field=count]')).toHaveText('0 / 2');
+  await page.click('#shortRest');
+  await expect(channel.locator('[data-field=count]')).toHaveText('1 / 2');
+  await page.click('#longRest');
+  await expect(channel.locator('[data-field=count]')).toHaveText('2 / 2');
+  await page.click('#tab-notas');
+  await expect(page.locator('#history')).toContainText('Recuperado: Canalizar divinidad (+1)');
+});
+
 test('subida de nivel con espacios de lanzador completo', async ({ page }) => {
   await page.goto(seed('ficha-nivel', 'arannis-valebright'));
   await page.click('#openLevelUp');
@@ -155,7 +168,7 @@ test('subida de nivel con espacios de lanzador completo', async ({ page }) => {
   await expect(page.locator('[data-path=level]')).toHaveValue('6');
   await saved(page);
   const file = disk('ficha-nivel');
-  expect(file).toMatchObject({ schemaVersion: 4, character: { level: 6, spellSlots: { 3: { max: 3 } } } });
+  expect(file).toMatchObject({ schemaVersion: 5, character: { level: 6, spellSlots: { 3: { max: 3 } } } });
 });
 
 test('importar un archivo v1 desde la mesa lo migra', async ({ page }) => {

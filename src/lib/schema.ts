@@ -2,7 +2,7 @@
 // importar); el cliente importa únicamente los tipos para no cargar Zod en el navegador.
 // Los archivos de versiones anteriores se convierten en `migrate.ts` antes de validar.
 import { z } from 'astro/zod';
-import { abilities, conditionIds, currentSchemaVersion, skillIds } from './ids';
+import { abilities, conditionIds, currentSchemaVersion, recoveryIds, skillIds } from './ids';
 
 // Mensajes de validación en español (se muestran al importar un archivo inválido).
 z.config(z.locales.es());
@@ -15,7 +15,7 @@ const score = z.number().int().min(1).max(30);
 const pool = z.object({ current: count, max: count });
 
 /** Usos de un rasgo u objeto y el descanso que los recupera. */
-const usesSchema = pool.extend({ recovery: z.enum(['corto', 'largo', 'ninguna']) });
+const usesSchema = pool.extend({ recovery: z.enum(recoveryIds) });
 
 const featureSchema = z.object({
   name,

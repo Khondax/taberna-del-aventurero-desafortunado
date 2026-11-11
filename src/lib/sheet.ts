@@ -363,6 +363,47 @@ export function deathSave(c: Character, die: number): DeathSaveOutcome {
   return saves.failures === 3 ? 'muerte' : 'fallo';
 }
 
+/** Rasgos y objetos que tienen usos. */
+const usesEntries = (c: Character) => [...c.features, ...c.inventory].filter((entry): entry is (Feature | InventoryItem) & { uses: Uses } => Boolean(entry.uses));
+
+/**
+ * Descanso corto: recupera todos los usos de `corto`, uno de los de `uno-corto` y los espacios
+ * de pacto. Devuelve lo recuperado para el historial.
+ */
+export function shortRest(c: Character): string[] {
+  const recovered: string[] = [];
+  for (const { name, uses } of usesEntries(c)) {
+    if (uses.current >= uses.max) continue;
+    if (uses.recovery === 'corto') {
+      uses.current = uses.max;
+      recovered.push(name);
+    } else if (uses.recovery === 'uno-corto') {
+      uses.current += 1;
+      recovered.push(`${name} (+1)`);
+    }
+  }
+  if (hasPactMagic(c) && Object.values(c.spellSlots).some((slots) => slots.current < slots.max)) {
+    Object.values(c.spellSlots).forEach((slots) => (slots.current = slots.max));
+    recovered.push('espacios de pacto');
+  }
+  return recovered;
+}
+
+/**
+ * Descanso largo: PG (los temporales se pierden), dados de golpe, espacios y todos los usos que
+ * se recuperan, y quita un nivel de agotamiento. Devuelve el detalle para el historial.
+ */
+export function longRest(c: Character): string {
+  c.hp.current = c.hp.max;
+  c.hp.temp = 0;
+  c.hitDice.current = c.hitDice.max;
+  Object.values(c.spellSlots).forEach((slots) => (slots.current = slots.max));
+  for (const { uses } of usesEntries(c)) if (uses.recovery !== 'ninguna') uses.current = uses.max;
+  const exhausted = c.exhaustion > 0;
+  if (exhausted) c.exhaustion -= 1;
+  return `PG, dados de golpe, espacios y usos restaurados${exhausted ? ' · agotamiento −1' : ''}`;
+}
+
 /** Conjuros en los que puede concentrarse (los de concentración), más el actual si ya no está en el grimorio. */
 export function concentrationOptions(c: Character): string[] {
   const names = new Set(c.spells.filter((spell) => spell.concentration).map((spell) => spell.name));
@@ -392,8 +433,13 @@ export const percent = ({ current, max }: Pool) => `${max ? Math.min(100, (curre
 export const initials = (name: string) =>
   name.split(/\s+/).slice(0, 2).map((word) => word[0]?.toUpperCase() ?? '').join('');
 export const classLine = (c: Character) => [c.species, `${c.className} ${c.subclass.toLowerCase()}`.trim()].filter(Boolean).join(' · ');
-export const recoveryText = (uses: Uses) =>
-  uses.recovery === 'ninguna' ? 'No se recupera' : `Descanso ${uses.recovery}`;
+const recoveryTexts: Record<Uses['recovery'], string> = {
+  corto: 'Descanso corto',
+  'uno-corto': 'Uno en descanso corto, todos en largo',
+  largo: 'Descanso largo',
+  ninguna: 'No se recupera',
+};
+export const recoveryText = (uses: Uses) => recoveryTexts[uses.recovery];
 /** Nombre de cada nivel de competencia (0, 1 o 2); las marcas ○ ● ◆ se dibujan con CSS según `data-level`. */
 export const proficiencyLabels = ['Sin competencia', 'Competente', 'Pericia'];
 export const saveLevel = (c: Character, ability: Ability) => Number(c.savingThrows.includes(ability));

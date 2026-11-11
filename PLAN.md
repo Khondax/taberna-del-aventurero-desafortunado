@@ -45,18 +45,18 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - Ficha editable en el sitio: identidad, nivel, PX, características, CA, velocidad, PG, dados de golpe, competencias en salvaciones y habilidades, aptitud mágica y espacios.
 - Armas, conjuros, objetos y rasgos desde los listados del SRD 5.2 o personalizados, con diálogo de edición y tooltip con desglose de cada número.
 - Tiradas de características, salvaciones, habilidades, ataques y conjuros. Recursos, descansos, subida de nivel, deshacer, exportación y guardado automático con detección de conflictos.
-- Formato v4 con migración automática desde v1, v2 y v3.
+- Formato v5 con migración automática desde v1, v2, v3 y v4.
 - Listados con conjuros de nivel 0 a 9 y los rasgos de clase principales de 2024, filtrables por clase.
 - CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
 - Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
 - Copias automáticas de cada ficha al guardar (`.historial/`, una cada 10 minutos como mucho, las 30 últimas) y papelera para las fichas eliminadas.
 - Tests en el repositorio: unitarios con Vitest (`pnpm test`) y de extremo a extremo con Playwright (`pnpm test:e2e`).
+- Recuperación parcial de usos («uno en descanso corto, todos en largo») para Furia, Canalizar divinidad, Forma salvaje y Tomar aliento, en los descansos, el diálogo de edición, el listado y la migración.
 - En partida: PG temporales, salvaciones contra la muerte, concentración con su salvación de Constitución, estados de 2024 y agotamiento por niveles (también en la tarjeta del máster), monedas que cuentan para la carga, historial de tiradas compartido en la vista del máster (`.tiradas.json`) y barra de acciones fija en móvil.
 
 ## Pendiente
 
-- Recuperaciones parciales: los rasgos que «recuperan uno en descanso corto» (Furia, Canalizar divinidad…) se marcan como de descanso largo y el uso extra se suma a mano.
 - Multiclase y subclases lanzadoras (caballero arcano, embaucador arcano): sus espacios se ajustan a mano en el grimorio.
 - Muerte instantánea por daño masivo y críticos a 0 PG (dos fallos): el formulario de daño no sabe si el golpe es crítico ni lo aplica solo; se marcan a mano en las casillas.
 - Trasfondos y especies con sus datos (habilidades, bonificadores, dotes de origen): hoy se escriben a mano y se eligen libremente.

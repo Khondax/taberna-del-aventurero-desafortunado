@@ -10,7 +10,10 @@ import {
   gainTempHp,
   heal,
   liveText,
+  longRest,
+  recoveryText,
   rollExpression,
+  shortRest,
   slotTableAt,
   spellDice,
   takeDamage,
@@ -276,5 +279,44 @@ describe('monedas', () => {
     const c = character({ weapons: [], coins: { pc: 20, pp: 0, pe: 0, po: 30, ppt: 0 } });
     expect(carriedWeight(c)).toBe(0.5);
     expect(liveText(c).weight).toBe('Carga · 0,5 kg (monedas 0,5 kg)');
+  });
+});
+
+describe('descansos y recuperación parcial', () => {
+  const uses = (current: number, max: number, recovery: 'corto' | 'uno-corto' | 'largo' | 'ninguna') => ({ current, max, recovery });
+  const feature = (name: string, u: ReturnType<typeof uses>) => ({ name, source: '', description: '', uses: u });
+  const resting = () =>
+    character({
+      className: 'Bárbaro',
+      spellSlots: {},
+      exhaustion: 0,
+      features: [
+        feature('Furia', uses(0, 3, 'uno-corto')),
+        feature('Oleada de acción', uses(0, 1, 'corto')),
+        feature('Recuperación arcana', uses(0, 1, 'largo')),
+        feature('Inspiración heroica', uses(0, 1, 'ninguna')),
+        feature('Tomar aliento', uses(2, 2, 'uno-corto')),
+      ],
+    });
+  const currents = (c: ReturnType<typeof resting>) => c.features.map((f) => f.uses!.current);
+
+  it('descanso corto: uno de los parciales, todos los de descanso corto', () => {
+    const c = resting();
+    expect(shortRest(c)).toEqual(['Furia (+1)', 'Oleada de acción']);
+    expect(currents(c)).toEqual([1, 1, 0, 0, 2]);
+    shortRest(c);
+    expect(currents(c)).toEqual([2, 1, 0, 0, 2]);
+  });
+
+  it('descanso largo: todos menos los que no se recuperan', () => {
+    const c = resting();
+    longRest(c);
+    expect(currents(c)).toEqual([3, 1, 1, 0, 2]);
+  });
+
+  it('texto de la recuperación', () => {
+    expect(recoveryText(uses(1, 2, 'uno-corto'))).toBe('Uno en descanso corto, todos en largo');
+    expect(recoveryText(uses(1, 2, 'corto'))).toBe('Descanso corto');
+    expect(recoveryText(uses(1, 2, 'ninguna'))).toBe('No se recupera');
   });
 });

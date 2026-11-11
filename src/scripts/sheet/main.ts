@@ -10,12 +10,12 @@ import {
   featureRow,
   gainTempHp,
   heal,
-  hasPactMagic,
   historyRow,
   initials,
   itemRow,
   liveBars,
   liveText,
+  longRest,
   normalize,
   pips,
   proficiencyLabels,
@@ -23,6 +23,7 @@ import {
   rollExpression,
   saveBonus,
   saveLevel,
+  shortRest,
   signed,
   skillBonus,
   skillLevel,
@@ -454,33 +455,16 @@ $('#addSlotLevel').addEventListener('click', () => {
   if (next) update(() => (state.spellSlots[next] = { current: 1, max: 1 }));
 });
 
-const usesEntries = () => [...state.features, ...state.inventory].filter((entry) => entry.uses);
-
 $('#shortRest').addEventListener('click', () => {
-  const recovered = usesEntries()
-    .filter((entry) => entry.uses!.recovery === 'corto' && entry.uses!.current < entry.uses!.max)
-    .map((entry) => entry.name);
-  const pact = hasPactMagic(state) && Object.values(state.spellSlots).some((slots) => slots.current < slots.max);
-  if (pact) recovered.push('espacios de pacto');
   update(() => {
-    for (const entry of usesEntries()) if (entry.uses!.recovery === 'corto') entry.uses!.current = entry.uses!.max;
-    if (hasPactMagic(state)) Object.values(state.spellSlots).forEach((slots) => (slots.current = slots.max));
+    const recovered = shortRest(state);
     log('Descanso corto', recovered.length ? `Recuperado: ${recovered.join(', ')}` : 'Sin recursos que recuperar');
   });
   showResult('Descanso corto · gasta dados de golpe para curarte', '✓');
 });
 
 $('#longRest').addEventListener('click', () => {
-  update(() => {
-    state.hp.current = state.hp.max;
-    state.hp.temp = 0;
-    state.hitDice.current = state.hitDice.max;
-    Object.values(state.spellSlots).forEach((slots) => (slots.current = slots.max));
-    usesEntries().forEach((entry) => entry.uses!.recovery !== 'ninguna' && (entry.uses!.current = entry.uses!.max));
-    const exhausted = state.exhaustion > 0;
-    if (exhausted) state.exhaustion -= 1;
-    log('Descanso largo', `PG, dados de golpe, espacios y usos restaurados${exhausted ? ' · agotamiento −1' : ''}`);
-  });
+  update(() => log('Descanso largo', longRest(state)));
   showResult('Descanso largo · todo restaurado', '✓');
 });
 

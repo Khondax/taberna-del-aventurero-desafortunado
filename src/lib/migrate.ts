@@ -1,7 +1,7 @@
 // Convierte archivos de ficha de versiones anteriores a la actual antes de validarlos.
 // Los datos vienen de disco o de un archivo importado, así que se tratan como `any` y
 // el esquema actual los valida después.
-import { itemCatalog, weaponCatalog } from '../data/catalog';
+import { featureCatalog, itemCatalog, weaponCatalog } from '../data/catalog';
 import { spellCatalog } from '../data/spells';
 import { armorClass, classInfo, defaultWeaponProficiency, normalize } from './sheet';
 import type { Character, Feature, Spell, Weapon } from './schema';
@@ -106,7 +106,23 @@ function v3ToV4(file: any): any {
   };
 }
 
-const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3, 3: v3ToV4 };
+/** Rasgos del listado que recuperan uno en descanso corto y todos en largo. */
+const partialRecovery = new Set(featureCatalog.filter((f) => f.uses?.recovery === 'uno-corto').map((f) => f.name));
+
+/**
+ * v4 → v5: recuperación parcial (`uno-corto`). Solo cambia los rasgos cuyo nombre coincide
+ * exactamente con uno del listado que la usa y que siguen en descanso largo, que es como los
+ * añadía el listado hasta ahora. Si alguien eligió otra recuperación a mano, se respeta.
+ */
+function v4ToV5(file: any): any {
+  const c = file.character ?? {};
+  const features = (c.features ?? []).map((f: any) =>
+    f.uses?.recovery === 'largo' && partialRecovery.has(f.name) ? { ...f, uses: { ...f.uses, recovery: 'uno-corto' } } : f,
+  );
+  return { ...file, schemaVersion: 5, character: { ...c, features } };
+}
+
+const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3, 3: v3ToV4, 4: v4ToV5 };
 
 /** Aplica los pasos necesarios hasta la versión actual. Lo que no sea un objeto se devuelve tal cual. */
 export function migrate(raw: unknown): unknown {
