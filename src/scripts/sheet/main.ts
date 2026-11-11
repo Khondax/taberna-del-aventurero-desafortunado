@@ -44,7 +44,8 @@ import {
   type Row,
   type SkillId,
 } from '../../lib/sheet';
-import { $, canUndo, clamp, commit, getPath, log, onRender, render, root, setPath, state, undo, update } from './state';
+import { actions } from 'astro:actions';
+import { $, canUndo, clamp, commit, getPath, log, onRender, render, root, setPath, slug, state, undo, update } from './state';
 import './tooltip';
 import './entries';
 import './level-up';
@@ -247,17 +248,28 @@ function showResult(label: string, value: string, action?: { label: string; run:
   toast.hidden = false;
 }
 toastAction.addEventListener('click', () => runToastAction?.());
+
+/**
+ * Muestra una tirada y la apunta en el historial compartido de la mesa (`.tiradas.json`).
+ * Si no se puede apuntar, la tirada sigue valiendo: el historial es solo para consultar.
+ */
+function showRoll(label: string, value: string) {
+  showResult(label, value);
+  actions.logRoll({ slug, name: state.name, label: label.slice(0, 400), result: value.slice(0, 80) }).catch(() => {});
+}
 $('#closeRoll').addEventListener('click', () => (toast.hidden = true));
 
 const d20 = () => rollExpression('1d20')!.total;
 /** Texto del agotamiento para las tiradas d20, que ya lo restan en `bonus`. */
 const exhaustionText = () => (state.exhaustion ? ` (agotamiento −${exhaustionPenalty(state)})` : '');
-/** Prueba d20 + `bonus` − agotamiento. Devuelve el total. */
-const check = (label: string, bonus: number) => {
+/** Prueba d20 + `bonus` − agotamiento. `verdict` añade al texto lo que significa el total. Devuelve el total. */
+const check = (label: string, bonus: number, verdict?: (total: number) => string) => {
   const die = d20();
-  const total = bonus - exhaustionPenalty(state);
-  showResult(`${label} · d20 [${die}] ${signed(total)}${exhaustionText()}${die === 20 ? ' · ¡20 natural!' : die === 1 ? ' · 1 natural' : ''}`, String(die + total));
-  return die + total;
+  const total = die + bonus - exhaustionPenalty(state);
+  const natural = die === 20 ? ' · ¡20 natural!' : die === 1 ? ' · 1 natural' : '';
+  const meaning = verdict ? ` · ${verdict(total)}` : '';
+  showRoll(`${label} · d20 [${die}] ${signed(bonus - exhaustionPenalty(state))}${exhaustionText()}${natural}${meaning}`, String(total));
+  return total;
 };
 /** Tira daño; en un crítico se duplican los dados (no el modificador). */
 function rollDamage(dice: string, bonus: number, critical: boolean) {
@@ -276,7 +288,7 @@ function rollEntry(key: string) {
     const die = d20();
     const bonus = weaponAttack(state, weapon) - exhaustionPenalty(state);
     const damage = rollDamage(weapon.damage, weaponDamageBonus(state, weapon), die === 20);
-    return showResult(
+    return showRoll(
       `${weapon.name} · ataque d20 [${die}] ${signed(bonus)}${exhaustionText()} = ${die + bonus}${die === 20 ? ' · ¡crítico!' : ''} · daño ${damage?.text ?? weapon.damage}`,
       `${damage?.total ?? '?'} ${weapon.damageType}`.trim(),
     );
@@ -299,7 +311,7 @@ function rollEntry(key: string) {
       parts.push(state.concentration ? `concentración (sustituye a ${state.concentration})` : 'concentración');
       update(() => (state.concentration = spell.name));
     }
-    return showResult(parts.join(' · '), effect ? `${effect.total} ${spell.effect!.type}` : '—');
+    return showRoll(parts.join(' · '), effect ? `${effect.total} ${spell.effect!.type}` : '—');
   }
 }
 
@@ -317,11 +329,11 @@ const hpText = () => `${state.hp.current} PG${state.hp.temp ? ` + ${state.hp.tem
 function rollConcentration(dc: number) {
   const spell = state.concentration;
   if (!spell) return;
-  const total = check(`Concentración en ${spell} · salvación de Constitución CD ${dc}`, saveBonus(state, 'con'));
-  if (total < dc) {
-    update(() => (state.concentration = null));
-    $('#rollLabel').textContent += ` · pierdes la concentración`;
-  } else $('#rollLabel').textContent += ` · mantienes la concentración`;
+  const keeps = (total: number) => total >= dc;
+  const total = check(`Concentración en ${spell} · salvación de Constitución CD ${dc}`, saveBonus(state, 'con'), (total) =>
+    keeps(total) ? 'mantienes la concentración' : 'pierdes la concentración',
+  );
+  if (!keeps(total)) update(() => (state.concentration = null));
 }
 
 /** Daño, curación o PG temporales desde los formularios de PG (`.hp-form`). */
@@ -370,7 +382,7 @@ $('#rollDeathSave').addEventListener('click', () => {
   update(() => (outcome = deathSave(state, die)));
   const penalty = state.exhaustion ? ` ${signed(-exhaustionPenalty(state))}${exhaustionText()}` : '';
   const result = die === 1 ? '1 natural: dos fallos' : deathSaveText[outcome];
-  showResult(`Salvación contra la muerte · d20 [${die}]${penalty} · ${result}`, outcome === 'recupera' ? '1 PG' : String(die - exhaustionPenalty(state)));
+  showRoll(`Salvación contra la muerte · d20 [${die}]${penalty} · ${result}`, outcome === 'recupera' ? '1 PG' : String(die - exhaustionPenalty(state)));
 });
 
 $('#endConcentration').addEventListener('click', () => update(() => (state.concentration = null)));
@@ -397,7 +409,7 @@ $('#spendHitDie').addEventListener('click', () => {
     state.hitDice.current -= 1;
     state.hp.current = Math.min(state.hp.max, state.hp.current + healed);
   });
-  showResult(`Dado de golpe · ${state.hitDice.die} [${die}] ${signed(abilityMod(state, 'con'))}`, `+${healed} PG`);
+  showRoll(`Dado de golpe · ${state.hitDice.die} [${die}] ${signed(abilityMod(state, 'con'))}`, `+${healed} PG`);
 });
 
 function poolFor(key: string): Pool {

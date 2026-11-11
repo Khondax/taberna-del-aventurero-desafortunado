@@ -89,4 +89,25 @@ describe('store', () => {
     expect(slugs.every((slug) => !slug.startsWith('.'))).toBe(true);
     expect(await store.readSheet('brunilda-martillo-de-hierro')).toBeNull();
   });
+
+  it('apunta las tiradas aparte, conserva las últimas y no las confunde con una ficha', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-03-04T20:00:00Z'));
+    const before = (await store.listSheets()).map((entry) => entry.slug);
+    for (let n = 1; n <= store.rollLimit + 5; n++) {
+      await store.logRoll({ slug: 'hermano-tobias', name: 'Hermano Tobías', label: `Tirada ${n}`, result: String(n) });
+    }
+    const rolls = await store.recentRolls();
+    expect(rolls).toHaveLength(store.rollLimit);
+    expect(rolls[0]).toEqual({ date: '2026-03-04T20:00:00.000Z', slug: 'hermano-tobias', name: 'Hermano Tobías', label: `Tirada ${store.rollLimit + 5}`, result: String(store.rollLimit + 5) });
+    expect(rolls.at(-1)!.label).toBe('Tirada 6');
+    expect(existsSync(path.join(dataDir, '.tiradas.json'))).toBe(true);
+    expect((await store.listSheets()).map((entry) => entry.slug)).toEqual(before);
+  });
+
+  it('las tiradas simultáneas no se pisan', async () => {
+    await Promise.all(Array.from({ length: 10 }, (_, n) => store.logRoll({ slug: 'arannis-valebright', name: 'Arannis', label: `Simultánea ${n}`, result: '1' })));
+    const labels = (await store.recentRolls()).map((roll) => roll.label);
+    for (let n = 0; n < 10; n++) expect(labels).toContain(`Simultánea ${n}`);
+  });
 });

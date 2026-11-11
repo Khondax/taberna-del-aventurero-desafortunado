@@ -1,4 +1,5 @@
-// En partida: PG temporales, salvaciones contra la muerte, concentración, estados, agotamiento y monedas.
+// En partida: PG temporales, salvaciones contra la muerte, concentración, estados, agotamiento, monedas
+// e historial de tiradas compartido.
 // El Hermano Tobías es un clérigo de nivel 5 con 38 PG, CON 14 (+2, sin competencia en su salvación).
 import type { Page } from '@playwright/test';
 import { disk, expect, saved, seed, test, tip } from './helpers';
@@ -131,4 +132,21 @@ test('las monedas se editan en el inventario y cuentan para la carga', async ({ 
   await expect(page.locator('[data-bind=weight]')).toContainText('(monedas 1,5 kg)');
   await saved(page);
   expect(disk('partida-monedas').character.coins).toEqual({ pc: 0, pp: 30, pe: 0, po: 120, ppt: 0 });
+});
+
+test('las tiradas de la ficha se ven en la vista del máster', async ({ page }) => {
+  await fixDice(page, 0.5); // d20 = 11
+  await page.goto(seed('partida-tiradas', 'hermano-tobias', (c) => (c.name = 'Tobías Tirador')));
+  const logged = page.waitForResponse((response) => response.url().includes('logRoll'));
+  await page.click('[data-roll="skills:religion"]');
+  expect((await logged).ok()).toBe(true);
+
+  await page.goto('/');
+  const last = page.locator('#rolls li').first();
+  await expect(last).toContainText('Tobías Tirador');
+  await expect(last).toContainText('Religión · d20 [11] +3');
+  await expect(last.locator('.roll-end strong')).toHaveText('14');
+  await expect(last.locator('time')).toHaveText(/^\d{2}:\d{2}$/);
+  // La tirada no cambia la versión de la ficha.
+  expect(disk('partida-tiradas').version).toBe(0);
 });

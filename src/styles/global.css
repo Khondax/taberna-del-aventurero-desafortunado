@@ -219,7 +219,15 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .form-grid label.check { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 13px; }
 .form-grid input[type="checkbox"] { accent-color: var(--garnet-mid); }
 
-/* Vista del máster */
+/* Vista del máster: tarjetas y, a la derecha (debajo en pantallas estrechas), las tiradas de toda la mesa. */
+.table-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+.roll-log #rolls { max-height: 75vh; overflow-y: auto; padding-block: 6px; }
+.roll-log .item { align-items: flex-start; }
+.roll-log small { display: block; line-height: 1.4; }
+.roll-end { display: grid; justify-items: end; gap: 2px; white-space: nowrap; }
+.roll-end strong { color: var(--garnet); font: 700 16px var(--font-mono); }
+.roll-end time { color: var(--muted); font: 10px var(--font-mono); }
+@media (max-width: 1200px) { .table-layout { grid-template-columns: minmax(0, 1fr); } }
 .party-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
 .party-card { display: block; padding: 20px 22px; color: inherit; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
 .party-card:hover { border-color: var(--brass); box-shadow: 0 4px 12px #2d1e0f14; }

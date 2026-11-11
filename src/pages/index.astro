@@ -1,9 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CharacterCard from '../components/CharacterCard.astro';
-import { listSheets } from '../lib/store';
+import { formatTime } from '../lib/sheet';
+import { listSheets, recentRolls } from '../lib/store';
 
 const sheets = await listSheets();
+const rolls = await recentRolls();
 ---
 <BaseLayout title="Vista del máster" crumb="Vista del máster">
   <div class="title-row">
@@ -16,19 +18,33 @@ const sheets = await listSheets();
   </div>
   <p class="note" id="importStatus" role="status"></p>
 
-  <div class="party-grid" id="party">
-    {sheets.map((entry) =>
-      'sheet' in entry ? (
-        <CharacterCard slug={entry.slug} character={entry.sheet.character} />
-      ) : (
-        <article class="panel party-card invalid">
-          <div class="eyebrow">Archivo no válido</div>
-          <h2>{entry.slug}.json</h2>
-          <p class="note">{entry.error}</p>
-        </article>
-      ),
-    )}
-    {sheets.length === 0 && <p class="note">Todavía no hay fichas. Crea una nueva o importa un archivo exportado.</p>}
+  <div class="table-layout">
+    <div class="party-grid" id="party">
+      {sheets.map((entry) =>
+        'sheet' in entry ? (
+          <CharacterCard slug={entry.slug} character={entry.sheet.character} />
+        ) : (
+          <article class="panel party-card invalid">
+            <div class="eyebrow">Archivo no válido</div>
+            <h2>{entry.slug}.json</h2>
+            <p class="note">{entry.error}</p>
+          </article>
+        ),
+      )}
+      {sheets.length === 0 && <p class="note">Todavía no hay fichas. Crea una nueva o importa un archivo exportado.</p>}
+    </div>
+
+    <aside class="panel roll-log">
+      <div class="panel-header"><div><div class="eyebrow">Toda la mesa</div><h2>Tiradas recientes</h2></div></div>
+      <ol class="panel-body item-list" id="rolls" data-empty="Todavía no hay tiradas.">
+        {rolls.map((roll) => (
+          <li class="item">
+            <div class="row-main"><strong>{roll.name}</strong><small>{roll.label}</small></div>
+            <span class="roll-end"><strong>{roll.result}</strong><time datetime={roll.date}>{formatTime(roll.date)}</time></span>
+          </li>
+        ))}
+      </ol>
+    </aside>
   </div>
 
   <script>
@@ -38,13 +54,18 @@ const sheets = await listSheets();
     const status = document.querySelector<HTMLElement>('#importStatus')!;
     const fileInput = document.querySelector<HTMLInputElement>('#importFile')!;
 
-    // Refresca las tarjetas cada 10 s con el HTML del servidor, sin recargar la página.
+    const rolls = document.querySelector<HTMLElement>('#rolls')!;
+
+    // Refresca las tarjetas y las tiradas cada 10 s con el HTML del servidor, sin recargar la página.
     setInterval(async () => {
       if (document.hidden) return;
       const response = await fetch(location.href).catch(() => null);
       if (!response?.ok) return;
-      const next = new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('#party');
-      if (next) party.innerHTML = next.innerHTML;
+      const next = new DOMParser().parseFromString(await response.text(), 'text/html');
+      for (const target of [party, rolls]) {
+        const fresh = next.getElementById(target.id);
+        if (fresh) target.innerHTML = fresh.innerHTML;
+      }
     }, 10_000);
 
     document.querySelector('#importButton')!.addEventListener('click', () => fileInput.click());

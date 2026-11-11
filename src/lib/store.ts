@@ -4,22 +4,27 @@
 // versiones anteriores se migran al leerlos y se reescriben en el formato actual al guardar.
 // Antes de guardar se conserva una instantánea del archivo en `.historial/<slug>/`, y al
 // eliminar una ficha se mueve a `.papelera/`. Ambas carpetas están dentro de `DATA_DIR`.
+// Las últimas tiradas de todas las fichas se guardan aparte, en `.tiradas.json`.
 import { copyFile, cp, mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { migrate } from './migrate';
-import { currentSchemaVersion, sheetFileSchema, type Character, type SheetFile } from './schema';
+import { z } from 'astro/zod';
+import { currentSchemaVersion, rollEntrySchema, sheetFileSchema, type Character, type RollEntry, type SheetFile } from './schema';
 import { normalize } from './sheet';
 
 const dataDir = path.resolve(process.env.DATA_DIR ?? 'data/personajes');
 const samplesDir = path.resolve('data/ejemplos');
 const historyDir = path.join(dataDir, '.historial');
 const trashDir = path.join(dataDir, '.papelera');
+const rollsFile = path.join(dataDir, '.tiradas.json');
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** Como mucho una instantánea por ficha en este intervalo, y solo las últimas `snapshotLimit`. */
 export const snapshotInterval = 10 * 60 * 1000;
 export const snapshotLimit = 30;
+/** Tiradas que se conservan en `.tiradas.json`. */
+export const rollLimit = 50;
 
 export type StoredSheet = { slug: string; sheet: SheetFile } | { slug: string; error: string };
 export type SaveResult = { ok: true; version: number } | { ok: false; reason: 'not-found' | 'conflict' };
@@ -46,9 +51,9 @@ const fileFor = (slug: string) => {
 };
 
 /** Escribe en un temporal y lo renombra, para que un corte nunca deje un archivo a medias. */
-async function writeAtomic(file: string, sheet: SheetFile) {
+async function writeAtomic(file: string, data: unknown) {
   const tmp = `${file}.${process.pid}.tmp`;
-  await writeFile(tmp, `${JSON.stringify(sheet, null, 2)}\n`);
+  await writeFile(tmp, `${JSON.stringify(data, null, 2)}\n`);
   await rename(tmp, file);
 }
 
@@ -142,5 +147,29 @@ export function deleteCharacter(slug: string): Promise<boolean> {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
       throw error;
     }
+  });
+}
+
+/** Tiradas guardadas, de la más antigua a la más reciente. Si el archivo falta o está dañado, no hay ninguna. */
+async function readRolls(): Promise<RollEntry[]> {
+  try {
+    return z.array(rollEntrySchema).parse(JSON.parse(await readFile(rollsFile, 'utf8')));
+  } catch {
+    return [];
+  }
+}
+
+/** Las últimas tiradas de todas las fichas, la más reciente primero. */
+export async function recentRolls(): Promise<RollEntry[]> {
+  await ensureDataDir();
+  return (await readRolls()).reverse();
+}
+
+/** Añade una tirada con la hora del servidor y conserva solo las últimas `rollLimit`. */
+export function logRoll(roll: Omit<RollEntry, 'date'>): Promise<void> {
+  return serialized(rollsFile, async () => {
+    await ensureDataDir();
+    const rolls = [...(await readRolls()), { date: new Date().toISOString(), ...roll }];
+    await writeAtomic(rollsFile, rolls.slice(-rollLimit));
   });
 }

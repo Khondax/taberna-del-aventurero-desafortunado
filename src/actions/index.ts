@@ -2,8 +2,8 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro/zod';
 import { migrate } from '../lib/migrate';
-import { importSchema, sheetFileSchema } from '../lib/schema';
-import { createCharacter, deleteCharacter, saveCharacter } from '../lib/store';
+import { importSchema, rollEntrySchema, sheetFileSchema } from '../lib/schema';
+import { createCharacter, deleteCharacter, logRoll, saveCharacter } from '../lib/store';
 
 export const server = {
   /** Guarda la ficha completa. Devuelve la nueva versión o CONFLICT si el archivo cambió entretanto. */
@@ -35,5 +35,11 @@ export const server = {
     handler: async ({ slug }) => {
       if (!(await deleteCharacter(slug))) throw new ActionError({ code: 'NOT_FOUND', message: 'La ficha ya no existe.' });
     },
+  }),
+
+  /** Apunta una tirada en el historial compartido que ve la mesa. No toca la ficha. */
+  logRoll: defineAction({
+    input: rollEntrySchema.omit({ date: true }),
+    handler: (roll) => logRoll(roll),
   }),
 };
