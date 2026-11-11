@@ -1,14 +1,14 @@
 ---
-// Recurso gastable (espacio de conjuro o usos de un rasgo u objeto) con botones para gastar y
-// recuperar, y otro para quitarlo. Los espacios de conjuro también muestran el máximo editable.
+// Recurso gastable (espacios de conjuro o de pacto, o usos de un rasgo u objeto) con botones para
+// gastar y recuperar, y otro para quitarlo. Los espacios también muestran el máximo editable.
 // Sin props sirve de plantilla para el cliente (ver `fillResource` en scripts/sheet/main.ts).
-import { pips, type ResourceRow } from '../lib/sheet';
+import { pips, slotMaxPath, type ResourceRow } from '../lib/sheet';
 
 interface Props {
   row?: ResourceRow;
 }
 const { row } = Astro.props;
-const slotLevel = row?.key.startsWith('slot:') ? row.key.slice(5) : undefined;
+const maxPath = row ? slotMaxPath(row.key) : undefined;
 ---
 <li class="item" data-key={row?.key}>
   <div class="row-main">
@@ -19,7 +19,7 @@ const slotLevel = row?.key.startsWith('slot:') ? row.key.slice(5) : undefined;
     <button type="button" class="icon-button" data-delta="-1" aria-label={`Gastar: ${row?.title ?? ''}`}>−</button>
     <span class="tag" data-field="count">{row && `${row.pool.current} / ${row.pool.max}`}</span>
     <button type="button" class="icon-button" data-delta="1" aria-label={`Recuperar: ${row?.title ?? ''}`}>+</button>
-    <label class="max-input" hidden={!slotLevel}>máx.<input class="edit narrow" type="number" min="0" max="9" data-path={slotLevel && `spellSlots.${slotLevel}.max`} value={row?.pool.max} aria-label={`Máximo: ${row?.title ?? ''}`} /></label>
+    <label class="max-input" hidden={!maxPath}>máx.<input class="edit narrow" type="number" min="0" max="9" data-path={maxPath} value={row?.pool.max} aria-label={`Máximo: ${row?.title ?? ''}`} /></label>
     <button type="button" class="icon-button remove-button" data-remove-resource aria-label={`Quitar: ${row?.title ?? ''}`}>×</button>
   </span>
 </li>

@@ -36,7 +36,7 @@ describe('buildCharacter', () => {
     const c = buildCharacter(choices('Guerrero'));
     expect(c.abilities).toEqual({ fue: 17, des: 14, con: 14, int: 8, sab: 12, car: 10 });
     expect(c.hp).toEqual({ current: 12, max: 12, temp: 0 });
-    expect(c.hitDice).toEqual({ current: 1, max: 1, die: 'd10' });
+    expect(c.hitDice).toEqual([{ current: 1, max: 1, die: 'd10' }]);
     expect(c.savingThrows).toEqual(['fue', 'con']);
     expect(skillBonus(c, 'atletismo')).toBe(5);
     expect(c.features.map((f) => f.name)).toContain('Tomar aliento');

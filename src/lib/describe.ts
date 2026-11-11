@@ -6,6 +6,7 @@ import {
   abilityNames,
   abilityShort,
   armorClassBreakdown,
+  characterLevel,
   conditions,
   damageText,
   exhaustionDescription,
@@ -13,7 +14,7 @@ import {
   exhaustionSpeed,
   formatNumber,
   hasProperty,
-  proficiencyBonus,
+  proficiency,
   recoveryText,
   saveBonus,
   signed,
@@ -57,7 +58,7 @@ export const masteries: Record<string, string> = {
 const part = (label: string, value: number) => `${label} ${signed(value)}`;
 const sum = (total: number, parts: string[]) => `${signed(total)} = ${parts.join(' + ')}`;
 const proficiencyPart = (c: Character, times = 1) =>
-  part(times === 2 ? 'pericia' : 'competencia', proficiencyBonus(c.level) * times);
+  part(times === 2 ? 'pericia' : 'competencia', proficiency(c) * times);
 
 function describeWeapon(c: Character, i: number): Description | null {
   const w = c.weapons[i];
@@ -93,7 +94,7 @@ function describeSpell(c: Character, i: number): Description | null {
   const noAbility = 'Elige la aptitud mágica en el grimorio';
   let effect = '';
   if (s.effect) {
-    const scaled = spellDice(c, s) !== s.effect.dice ? ` (truco a nivel ${c.level})` : '';
+    const scaled = spellDice(c, s) !== s.effect.dice ? ` (truco a nivel ${characterLevel(c)})` : '';
     effect = damageText(spellDice(c, s), s.effect.addModifier ? spellcastingMod(c) : 0, s.effect.type) + scaled;
     if (s.effect.addModifier) effect += ability ? ` · suma ${part(abilityShort(ability), spellcastingMod(c))}` : ` · ${noAbility}`;
   }

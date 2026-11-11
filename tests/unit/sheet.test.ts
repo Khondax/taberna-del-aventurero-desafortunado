@@ -14,20 +14,27 @@ import {
   recoveryText,
   rollExpression,
   shortRest,
-  slotTableAt,
+  spellSlotTable,
+  pactSlotTable,
+  characterLevel,
+  proficiency,
+  classText,
+  defaultWeaponProficiency,
+  castingByClass,
   spellDice,
   takeDamage,
   weaponAbility,
   weaponAttack,
 } from '../../src/lib/sheet';
-import { character, equipped } from './fixtures';
+import { character, equipped, singleClass } from './fixtures';
 
 /** Arma del listado con competencia (el listado las trae sin ella; la decide la clase al añadirla). */
 const weapon = (name: string) => ({ ...weaponCatalog.find((entry) => entry.name === name)!, proficient: true });
 const spell = (name: string) => spellCatalog.find((entry) => entry.name === name)!;
-const slots = (className: string, level: number) => slotTableAt(character({ className }), level);
+const classes = (...entries: [string, number][]) => entries.map(([name, level]) => ({ name, subclass: '', level }));
+const slots = (className: string, level: number) => spellSlotTable(classes([className, level]));
 
-describe('slotTableAt', () => {
+describe('spellSlotTable', () => {
   it('lanzador completo', () => {
     expect(slots('Mago', 1)).toEqual([2]);
     expect(slots('Clérigo', 5)).toEqual([4, 3, 2]);
@@ -41,16 +48,87 @@ describe('slotTableAt', () => {
     expect(slots('Explorador', 20)).toEqual([4, 3, 3, 3, 2]);
   });
 
-  it('magia de pacto: todos los espacios del mismo nivel', () => {
-    expect(slots('Brujo', 1)).toEqual([1]);
-    expect(slots('Brujo', 3)).toEqual([0, 2]);
-    expect(slots('Bruja', 11)).toEqual([0, 0, 0, 0, 3]);
-    expect(slots('Brujo', 20)).toEqual([0, 0, 0, 0, 4]);
+  it('las clases sin conjuros, el brujo y las caseras no tienen tabla', () => {
+    expect(slots('Guerrera', 5)).toBeNull();
+    expect(slots('Brujo', 5)).toBeNull();
+    expect(slots('Inventada', 5)).toBeNull();
   });
 
-  it('las clases sin conjuros no tienen tabla', () => {
-    expect(slots('Guerrera', 5)).toBeNull();
-    expect(slots('Inventada', 5)).toBeNull();
+  it('multiclase: completos enteros y medios la mitad redondeando hacia arriba, con la tabla completa', () => {
+    expect(spellSlotTable(classes(['Mago', 3], ['Paladín', 2]))).toEqual([4, 3]); // lanzador de nivel 4
+    expect(spellSlotTable(classes(['Clérigo', 1], ['Explorador', 3]))).toEqual([4, 2]); // 1 + 2 = nivel 3
+    expect(spellSlotTable(classes(['Paladín', 1], ['Explorador', 1]))).toEqual([3]); // 1 + 1, cada clase por separado
+  });
+
+  it('multiclase con una sola clase lanzadora: su propia tabla', () => {
+    expect(spellSlotTable(classes(['Mago', 3], ['Guerrero', 2]))).toEqual([4, 2]);
+    expect(spellSlotTable(classes(['Guerrero', 2], ['Paladín', 5]))).toEqual([4, 2]);
+  });
+});
+
+describe('pactSlotTable', () => {
+  it('magia de pacto: todos los espacios del mismo nivel', () => {
+    expect(pactSlotTable(classes(['Brujo', 1]))).toEqual({ level: 1, max: 1 });
+    expect(pactSlotTable(classes(['Brujo', 3]))).toEqual({ level: 2, max: 2 });
+    expect(pactSlotTable(classes(['Bruja', 11]))).toEqual({ level: 5, max: 3 });
+    expect(pactSlotTable(classes(['Brujo', 20]))).toEqual({ level: 5, max: 4 });
+    expect(pactSlotTable(classes(['Mago', 5]))).toBeNull();
+  });
+
+  it('Brujo 2 / Hechicero 3: el pacto va aparte de los espacios del hechicero', () => {
+    const multi = classes(['Brujo', 2], ['Hechicero', 3]);
+    expect(pactSlotTable(multi)).toEqual({ level: 1, max: 2 });
+    expect(spellSlotTable(multi)).toEqual([4, 2]);
+  });
+});
+
+describe('multiclase', () => {
+  const multi = character({ classes: classes(['Mago', 3], ['Guerrero', 2]) });
+
+  it('el nivel y la competencia dependen del nivel total', () => {
+    expect(characterLevel(multi)).toBe(5);
+    expect(proficiency(multi)).toBe(3);
+    expect(liveText(multi).eyebrow).toBe('Nivel 5 · competencia +3');
+  });
+
+  it('las clases se muestran con su nivel; con una sola, con la subclase', () => {
+    expect(classText(multi)).toBe('Mago 3 / Guerrero 2');
+    expect(classText(character({ classes: [{ name: 'Mago', subclass: 'Evocador', level: 5 }] }))).toBe('Mago evocador');
+  });
+
+  it('una sola Defensa sin armadura: la de la primera clase que la da', () => {
+    const abilities = { fue: 10, des: 14, con: 16, int: 10, sab: 16, car: 10 };
+    expect(armorClassBreakdown(character({ abilities, classes: classes(['Monje', 2], ['Bárbaro', 1]) })).parts).toContain('SAB +3');
+    expect(armorClassBreakdown(character({ abilities, classes: classes(['Mago', 2], ['Bárbaro', 1]) })).parts).toContain('CON +3');
+  });
+
+  it('las armas marciales vienen de la primera clase o de una posterior que las dé todas', () => {
+    const longsword = weaponCatalog.find((w) => w.name === 'Espada larga')!;
+    expect(defaultWeaponProficiency(character(singleClass('Mago')), longsword)).toBe(false);
+    expect(defaultWeaponProficiency(multi, longsword)).toBe(true);
+  });
+
+  it('CD y ataque por clase solo con aptitudes distintas', () => {
+    const arannis = character({ classes: classes(['Mago', 3], ['Clérigo', 2]), spellcastingAbility: 'int' });
+    expect(castingByClass(arannis)).toBe('Mago (INT): CD 15, ataque +7 · Clérigo (SAB): CD 12, ataque +4');
+    expect(castingByClass(character({ classes: classes(['Mago', 3], ['Guerrero', 2]), spellcastingAbility: 'int' }))).toBe('');
+  });
+
+  it('descansos: el pacto vuelve en descanso corto y todos los dados de golpe en largo', () => {
+    const c = character({
+      classes: classes(['Brujo', 2], ['Hechicero', 3]),
+      spellSlots: { 1: { current: 0, max: 4 } },
+      pactSlots: { level: 1, current: 0, max: 2 },
+      hitDice: [{ die: 'd8', current: 0, max: 2 }, { die: 'd6', current: 1, max: 3 }],
+      features: [],
+      inventory: [],
+    });
+    expect(shortRest(c)).toEqual(['espacios de pacto']);
+    expect(c.pactSlots!.current).toBe(2);
+    expect(c.spellSlots[1].current).toBe(0);
+    longRest(c);
+    expect(c.spellSlots[1].current).toBe(4);
+    expect(c.hitDice.map((d) => d.current)).toEqual([2, 3]);
   });
 });
 
@@ -86,14 +164,14 @@ describe('armorClassBreakdown', () => {
   });
 
   it('Defensa sin armadura del bárbaro: 10 + DES + CON, también con escudo', () => {
-    expect(armorClassBreakdown(character({ className: 'Bárbaro', abilities: dex14 })).total).toBe(15);
-    expect(armorClassBreakdown(character({ className: 'Bárbara', abilities: dex14, inventory: [equipped('Escudo')] })).total).toBe(17);
-    expect(armorClassBreakdown(character({ className: 'Bárbaro', abilities: dex14, inventory: [equipped('Cota de mallas')] })).total).toBe(16);
+    expect(armorClassBreakdown(character({ ...singleClass('Bárbaro'), abilities: dex14 })).total).toBe(15);
+    expect(armorClassBreakdown(character({ ...singleClass('Bárbara'), abilities: dex14, inventory: [equipped('Escudo')] })).total).toBe(17);
+    expect(armorClassBreakdown(character({ ...singleClass('Bárbaro'), abilities: dex14, inventory: [equipped('Cota de mallas')] })).total).toBe(16);
   });
 
   it('Defensa sin armadura del monje: 10 + DES + SAB, que se pierde con escudo', () => {
-    expect(armorClassBreakdown(character({ className: 'Monje', abilities: dex14 }))).toEqual({ total: 15, parts: ['sin armadura 10', 'DES +2', 'SAB +3'] });
-    expect(armorClassBreakdown(character({ className: 'Monja', abilities: dex14, inventory: [equipped('Escudo')] })).total).toBe(14);
+    expect(armorClassBreakdown(character({ ...singleClass('Monje'), abilities: dex14 }))).toEqual({ total: 15, parts: ['sin armadura 10', 'DES +2', 'SAB +3'] });
+    expect(armorClassBreakdown(character({ ...singleClass('Monja'), abilities: dex14, inventory: [equipped('Escudo')] })).total).toBe(14);
   });
 });
 
@@ -122,13 +200,13 @@ describe('weaponAttack', () => {
 describe('spellDice', () => {
   it('los trucos escalan a nivel 5, 11 y 17', () => {
     const fireBolt = spell('Rayo de fuego');
-    expect([1, 4, 5, 10, 11, 16, 17, 20].map((level) => spellDice(character({ level }), fireBolt))).toEqual([
+    expect([1, 4, 5, 10, 11, 16, 17, 20].map((level) => spellDice(character(singleClass('Mago', level)), fireBolt))).toEqual([
       '1d10', '1d10', '2d10', '2d10', '3d10', '3d10', '4d10', '4d10',
     ]);
   });
 
   it('los conjuros con nivel no escalan', () => {
-    expect(spellDice(character({ level: 17 }), spell('Manos ardientes'))).toBe('3d6');
+    expect(spellDice(character(singleClass('Mago', 17)), spell('Manos ardientes'))).toBe('3d6');
   });
 });
 
@@ -287,7 +365,7 @@ describe('descansos y recuperación parcial', () => {
   const feature = (name: string, u: ReturnType<typeof uses>) => ({ name, source: '', description: '', uses: u });
   const resting = () =>
     character({
-      className: 'Bárbaro',
+      ...singleClass('Bárbaro'),
       spellSlots: {},
       exhaustion: 0,
       features: [

@@ -3,12 +3,16 @@
 // `data-entry` muestran su descripción al pasar el ratón y abren su edición al pulsarlas.
 // Toda la interacción vive en src/scripts/sheet/.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ClassRow from '../../components/ClassRow.astro';
 import EntryRow from '../../components/EntryRow.astro';
+import HitDiceRow from '../../components/HitDiceRow.astro';
 import ResourceRow from '../../components/ResourceRow.astro';
 import { readSheet } from '../../lib/store';
 import {
   abilities,
+  abilityMod,
   abilityNames,
+  characterLevel,
   coinIds,
   coinNames,
   concentrationOptions,
@@ -23,6 +27,7 @@ import {
   proficiencyLabels,
   resourceRows,
   saveLevel,
+  signed,
   skillLevel,
   skillIds,
   skills,
@@ -42,13 +47,10 @@ const tabs = [
   { id: 'notas', label: 'Notas e historial' },
   { id: 'gestion', label: 'Gestión' },
 ];
-const identity = [
-  { path: 'species', label: 'Especie' },
-  { path: 'className', label: 'Clase' },
-  { path: 'subclass', label: 'Subclase' },
-  { path: 'background', label: 'Trasfondo' },
-  { path: 'alignment', label: 'Alineamiento' },
-] as const;
+const level = characterLevel(c);
+// Con varias clases, cada una muestra su nivel y la insignia muestra el total (no editable).
+const multi = c.classes.length > 1;
+const spendLabel = (die: string) => `Gastar dado de golpe (${die} ${signed(abilityMod(c, 'con'))})`;
 ---
 <BaseLayout title={c.name} crumb="Ficha de personaje">
   <span slot="actions" class="save-state" id="saveState" role="status" data-state="ok">Guardado</span>
@@ -61,7 +63,7 @@ const identity = [
       </div>
       <div class="title-actions">
         <button class="button ghost" id="undo" disabled>↶ Deshacer</button>
-        <button class="button primary" id="openLevelUp" disabled={c.level >= 20}>＋ Subir de nivel</button>
+        <button class="button primary" id="openLevelUp" disabled={level >= 20}>＋ Subir de nivel</button>
       </div>
     </div>
 
@@ -77,13 +79,20 @@ const identity = [
           <div class="character-head">
             <div class="character-meta">
               <div class="portrait" aria-hidden="true" data-bind="initials">{initials(c.name)}</div>
-              <div class="identity">
-                {identity.map((field) => (
-                  <label><span>{field.label}</span><input class="edit" data-path={field.path} value={c[field.path]} placeholder="—" /></label>
-                ))}
+              <div class:list={['identity', { multiclass: multi }]} id="identity">
+                <label><span>Especie</span><input class="edit" data-path="species" value={c.species} placeholder="—" /></label>
+                <div class="class-list" id="classes">
+                  {c.classes.map((entry, i) => <ClassRow entry={entry} index={i} multi={multi} maxLevel={20 - level + entry.level} />)}
+                </div>
+                <label><span>Trasfondo</span><input class="edit" data-path="background" value={c.background} placeholder="—" /></label>
+                <label><span>Alineamiento</span><input class="edit" data-path="alignment" value={c.alignment} placeholder="—" /></label>
               </div>
             </div>
-            <label class="level-badge"><input class="edit" type="number" min="1" max="20" data-path="level" value={c.level} aria-label="Nivel" /><span>Nivel</span></label>
+            <label class="level-badge">
+              <input class="edit" type="number" min="1" max="20" data-path={multi ? undefined : 'classes.0.level'} value={c.classes[0].level} hidden={multi} aria-label="Nivel" id="levelInput" />
+              <strong data-bind="level" hidden={!multi} id="levelTotal">{level}</strong>
+              <span>Nivel</span>
+            </label>
           </div>
 
           <div class="stat-strip">
@@ -125,18 +134,9 @@ const identity = [
             <button type="button" class="button secondary die-hint" id="rollDeathSave">Tirar salvación</button>
           </fieldset>
 
-          <div class="bar-label">
-            <span>Dados de golpe</span>
-            <span class="pair">
-              <input class="edit narrow" type="number" min="0" data-path="hitDice.current" value={c.hitDice.current} aria-label="Dados de golpe disponibles" /> /
-              <input class="edit narrow" type="number" min="1" max="20" data-path="hitDice.max" value={c.hitDice.max} aria-label="Dados de golpe máximos" /> ·
-              <select class="edit" data-path="hitDice.die" aria-label="Dado de golpe">
-                {['d6', 'd8', 'd10', 'd12'].map((die) => <option selected={c.hitDice.die === die}>{die}</option>)}
-              </select>
-            </span>
+          <div id="hitDice">
+            {c.hitDice.map((pool, i) => <HitDiceRow pool={pool} index={i} spendLabel={spendLabel(pool.die)} />)}
           </div>
-          <div class="bar blue"><span data-bar="hitDice" style={`width:${bars.hitDice}`}></span></div>
-          <button class="button ghost die-hint" id="spendHitDie">Gastar dado de golpe</button>
 
           <div class="bar-label">
             <span>Experiencia</span>
@@ -258,6 +258,7 @@ const identity = [
               <div class="stat-box"><small>CD de salvación</small><strong data-bind="spellDC">{text.spellDC}</strong></div>
               <div class="stat-box"><small>Ataque de conjuro</small><strong data-bind="spellAttack">{text.spellAttack}</strong></div>
             </div>
+            <p class="note casting-note" data-bind="castingByClass" title="Las tiradas usan la aptitud mágica elegida arriba">{text.castingByClass}</p>
             <input class="field" type="search" data-filter="spells" placeholder="Buscar por nombre, nivel o escuela…" aria-label="Buscar conjuros" />
             <ul class="item-list" id="spells" data-empty="Sin conjuros. Añade uno del listado.">
               {c.spells.map((spell, i) => <EntryRow row={spellRow(c, spell)} entry={`spells:${i}`} editable rollable={!!spell.effect || spell.attack} />)}
@@ -344,11 +345,14 @@ const identity = [
         <button type="button" class="button ghost" data-close aria-label="Cerrar">×</button>
       </div>
       <div class="panel-body">
-        <fieldset class="wizard-step" data-step>
-          <legend>¿Cómo aumentan tus puntos de golpe?</legend>
-          <label class="option"><input type="radio" name="hp" value="average" checked /> <span id="hpAverageLabel"></span></label>
-          <label class="option"><input type="radio" name="hp" value="roll" /> <span class="die-hint" id="hpRollLabel"></span></label>
-        </fieldset>
+        <div class="wizard-step" data-step>
+          <label class="stacked">¿En qué clase subes?<select class="field" name="levelClass" id="levelClass"></select></label>
+          <fieldset class="wizard-step">
+            <legend>¿Cómo aumentan tus puntos de golpe?</legend>
+            <label class="option"><input type="radio" name="hp" value="average" checked /> <span id="hpAverageLabel"></span></label>
+            <label class="option"><input type="radio" name="hp" value="roll" /> <span class="die-hint" id="hpRollLabel"></span></label>
+          </fieldset>
+        </div>
         <fieldset class="wizard-step" data-step hidden>
           <legend>Rasgos y usos del nuevo nivel</legend>
           <label class="stacked">Rasgo nuevo (opcional)<input class="field" name="featureName" placeholder="Nombre del rasgo" /></label>
@@ -423,6 +427,8 @@ const identity = [
   <template id="featureTemplate"><EntryRow editable variant="feature" /></template>
   <template id="plainTemplate"><EntryRow /></template>
   <template id="resourceTemplate"><ResourceRow /></template>
+  <template id="classTemplate"><ClassRow /></template>
+  <template id="hitDiceTemplate"><HitDiceRow /></template>
 
   <script>
     import '../../scripts/sheet/main';

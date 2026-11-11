@@ -2,7 +2,7 @@
 // recoge las elecciones y `buildCharacter` produce la ficha que se envía a `importCharacter`.
 import { featureCatalog } from '../data/catalog';
 import { findBackground, findSpecies } from '../data/origins';
-import { abilities, classList, modifier, slotTableAt, type Ability, type Character, type ClassInfo, type SkillId } from './sheet';
+import { abilities, classList, modifier, pactSlotTable, spellSlotTable, type Ability, type Character, type ClassInfo, type SkillId } from './sheet';
 
 export const standardArray = [15, 14, 13, 12, 10, 8] as const;
 export const pointBuyBudget = 27;
@@ -60,17 +60,15 @@ export function buildCharacter(choices: CreationChoices): Character {
   const character: Character = {
     name: choices.name,
     species: choices.species,
-    className: info.name,
-    subclass: '',
+    classes: [{ name: info.name, subclass: '', level: 1 }],
     background: choices.background,
     alignment: choices.alignment,
-    level: 1,
     xp: 0,
     abilities: scores,
     acBonus: 0,
     speed: species?.speed ?? '9 m',
     hp: { current: hpMax, max: hpMax, temp: 0 },
-    hitDice: { current: 1, max: 1, die: info.hitDie },
+    hitDice: [{ current: 1, max: 1, die: info.hitDie }],
     deathSaves: { successes: 0, failures: 0, stable: false },
     concentration: null,
     conditions: [],
@@ -79,6 +77,7 @@ export function buildCharacter(choices: CreationChoices): Character {
     skills: Object.fromEntries([...(background?.skills ?? []), ...choices.skills].map((skill) => [skill, 1])),
     spellcastingAbility: info.spellcasting,
     spellSlots: {},
+    pactSlots: null,
     // Rasgos de nivel 1 de la clase que hay en el listado (p. ej. Furia, Tomar aliento), de la especie y la dote de origen.
     features: [
       ...featureCatalog.filter((feature) => feature.source === `${info.name} 1`),
@@ -92,8 +91,10 @@ export function buildCharacter(choices: CreationChoices): Character {
     history: [{ date: new Date().toISOString(), title: 'Personaje creado', detail: `${info.name} de nivel 1 · ${choices.method}` }],
     notes: '',
   };
-  slotTableAt(character, 1)?.forEach((max, i) => {
+  spellSlotTable(character.classes)?.forEach((max, i) => {
     if (max) character.spellSlots[String(i + 1)] = { current: max, max };
   });
+  const pact = pactSlotTable(character.classes);
+  if (pact) character.pactSlots = { ...pact, current: pact.max };
   return character;
 }

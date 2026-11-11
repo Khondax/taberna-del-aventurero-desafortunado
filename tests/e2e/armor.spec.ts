@@ -39,7 +39,7 @@ test('una armadura del listado se equipa sola', async ({ page }) => {
 
 test('Defensa sin armadura del bárbaro', async ({ page }) => {
   await page.goto(seed('armadura-barbaro', 'brunilda-martillo-de-hierro', (c) => {
-    Object.assign(c, { name: 'Gorka', className: 'Bárbaro', inventory: [] });
+    Object.assign(c, { name: 'Gorka', classes: [{ name: 'Bárbaro', subclass: '', level: 5 }], inventory: [] });
     Object.assign(c.abilities, { des: 14, con: 16 });
   }));
   await expect(page.locator('[data-bind=armorClass]')).toHaveText('15');

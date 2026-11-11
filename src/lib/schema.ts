@@ -72,14 +72,19 @@ const itemSchema = z.object({
   armor: z.object({ kind: z.enum(['ligera', 'intermedia', 'pesada', 'escudo']), base: z.number().int().min(0).max(30) }).nullable(),
 });
 
+/** Una clase del personaje. En multiclase van en el orden en que se tomaron: la primera da las salvaciones. */
+const classSchema = z.object({ name: text, subclass: text, level: z.number().int().min(1).max(20) });
+
 const characterSchema = z.object({
   name,
   species: text,
-  className: text,
-  subclass: text,
+  /** El nivel del personaje es la suma de los niveles de sus clases, como mucho 20. */
+  classes: z
+    .array(classSchema)
+    .min(1)
+    .refine((classes) => classes.reduce((total, k) => total + k.level, 0) <= 20, 'El nivel total no puede pasar de 20'),
   background: text,
   alignment: text,
-  level: z.number().int().min(1).max(20),
   xp: count,
   abilities: z.object({ fue: score, des: score, con: score, int: score, sab: score, car: score }),
   /** Bonificadores a la CA que no vienen de la armadura (Armadura de mago, objetos, estilos…). */
@@ -87,7 +92,8 @@ const characterSchema = z.object({
   speed: text,
   /** `temp`: PG temporales. El daño los gasta primero y no se acumulan (se queda el mayor). */
   hp: pool.extend({ temp: count }),
-  hitDice: pool.extend({ die: z.enum(['d6', 'd8', 'd10', 'd12']) }),
+  /** Dados de golpe, uno por tipo de dado (en multiclase con clases de dados distintos hay varios). */
+  hitDice: z.array(pool.extend({ die: z.enum(['d6', 'd8', 'd10', 'd12']) })).min(1),
   /** Salvaciones contra la muerte a 0 PG. `stable`: tres éxitos, ya no tira. */
   deathSaves: z.object({ successes: z.number().int().min(0).max(3), failures: z.number().int().min(0).max(3), stable: z.boolean() }),
   /** Nombre del conjuro en el que se concentra, o `null`. */
@@ -101,6 +107,8 @@ const characterSchema = z.object({
   spellcastingAbility: ability.nullable(),
   /** Espacios de conjuro indexados por nivel de conjuro ("1" a "9"). */
   spellSlots: z.record(z.string().regex(/^[1-9]$/), pool),
+  /** Magia de pacto del brujo, aparte de los demás espacios: todos del mismo nivel y se recuperan en descanso corto. */
+  pactSlots: pool.extend({ level: z.number().int().min(1).max(5) }).nullable(),
   features: z.array(featureSchema),
   spells: z.array(spellSchema),
   weapons: z.array(weaponSchema),
@@ -139,6 +147,8 @@ export const rollEntrySchema = z.object({
 
 export type { Ability, CoinId, ConditionId, SkillId } from './ids';
 export type Character = z.infer<typeof characterSchema>;
+export type CharacterClass = Character['classes'][number];
+export type HitDice = Character['hitDice'][number];
 export type Feature = z.infer<typeof featureSchema>;
 export type Spell = z.infer<typeof spellSchema>;
 export type Weapon = z.infer<typeof weaponSchema>;

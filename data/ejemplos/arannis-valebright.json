@@ -4,11 +4,15 @@
   "character": {
     "name": "Arannis Valebright",
     "species": "Elfo",
-    "className": "Mago",
-    "subclass": "Evocador",
+    "classes": [
+      {
+        "name": "Mago",
+        "subclass": "Evocador",
+        "level": 5
+      }
+    ],
     "background": "Sabio",
     "alignment": "Neutral bueno",
-    "level": 5,
     "xp": 7240,
     "abilities": {
       "fue": 10,
@@ -25,11 +29,13 @@
       "max": 27,
       "temp": 0
     },
-    "hitDice": {
-      "current": 3,
-      "max": 5,
-      "die": "d6"
-    },
+    "hitDice": [
+      {
+        "current": 3,
+        "max": 5,
+        "die": "d6"
+      }
+    ],
     "deathSaves": {
       "successes": 0,
       "failures": 0,
@@ -63,6 +69,7 @@
         "max": 2
       }
     },
+    "pactSlots": null,
     "features": [
       {
         "name": "Recuperación arcana",

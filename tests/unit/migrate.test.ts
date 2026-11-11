@@ -47,6 +47,22 @@ describe('migrate', () => {
     expect(toCurrent(v4Example('hermano-tobias')).character).toEqual(example('hermano-tobias'));
   });
 
+  it('v4 → v5: una única clase con su subclase y nivel, y los dados de golpe en una lista', () => {
+    const old = v4Example('hermano-tobias');
+    const { character } = toCurrent(old);
+    expect(character.classes).toEqual([{ name: 'Clérigo', subclass: 'Dominio de la Vida', level: 5 }]);
+    expect(character.hitDice).toEqual([old.character.hitDice]);
+    expect(character.spellSlots).toEqual(old.character.spellSlots);
+    expect(character.pactSlots).toBeNull();
+    for (const key of ['className', 'subclass', 'level']) expect(character).not.toHaveProperty(key);
+  });
+
+  it('v4 → v5: los espacios del brujo pasan a la magia de pacto', () => {
+    const old = v4Example('hermano-tobias');
+    Object.assign(old.character, { className: 'Bruja', level: 3, spellSlots: { 2: { current: 1, max: 2 } } });
+    expect(toCurrent(old).character).toMatchObject({ spellSlots: {}, pactSlots: { level: 2, current: 1, max: 2 } });
+  });
+
   it('v4 → v5 marca la recuperación parcial solo en los rasgos del listado que seguían en descanso largo', () => {
     const old = v4Example('hermano-tobias');
     const uses = (recovery: string) => ({ current: 1, max: 2, recovery });

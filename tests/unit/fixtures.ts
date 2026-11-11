@@ -13,6 +13,9 @@ export const v2Example = (slug: string) => read(`../fixtures/v2-${slug}.json`);
 export const v3Example = (slug: string) => read(`../fixtures/v3-${slug}.json`);
 export const v4Example = (slug: string) => read(`../fixtures/v4-${slug}.json`);
 
+/** Clases de una ficha con una sola clase, para `character({ ...singleClass('Bárbaro') })`. */
+export const singleClass = (name: string, level = 5): Pick<Character, 'classes'> => ({ classes: [{ name, subclass: '', level }] });
+
 /** Ficha de prueba: Arannis (maga de nivel 5) sin inventario, con lo que se indique encima. */
 export const character = (overrides: Partial<Character> = {}): Character => ({ ...example('arannis-valebright'), inventory: [], ...overrides });
 

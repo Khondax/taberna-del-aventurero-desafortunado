@@ -1,11 +1,11 @@
 // Reglas D&D 2024 y valores derivados de una ficha. Lo comparten el render en servidor
 // y el script de cliente, para que ambos muestren exactamente lo mismo.
 import { abilities, coinIds, conditionIds, skillIds, type Ability, type CoinId, type ConditionId, type SkillId } from './ids';
-import type { Character, Feature, InventoryItem, Pool, Spell, Uses, Weapon } from './schema';
+import type { Character, CharacterClass, Feature, HitDice, InventoryItem, Pool, Spell, Uses, Weapon } from './schema';
 
 export { abilities, coinIds, conditionIds, skillIds };
 export type { Ability, CoinId, ConditionId, SkillId };
-export type { Character, Feature, InventoryItem, Pool, SheetFile, Spell, Uses, Weapon } from './schema';
+export type { Character, CharacterClass, Feature, HitDice, InventoryItem, Pool, SheetFile, Spell, Uses, Weapon } from './schema';
 
 export const abilityNames: Record<Ability, string> = {
   fue: 'Fuerza',
@@ -98,7 +98,7 @@ type Caster = 'completo' | 'medio' | 'pacto' | null;
 
 export interface ClassInfo {
   name: string;
-  hitDie: Character['hitDice']['die'];
+  hitDie: HitDice['die'];
   /** Habilidades entre las que elige la clase a nivel 1 y cuántas. */
   skillChoices: readonly SkillId[];
   skillCount: number;
@@ -171,35 +171,51 @@ export const classInfo = (className: string): ClassInfo | undefined => {
   return Object.entries(classes).find(([prefix]) => key.startsWith(prefix))?.[1];
 };
 
+/** Nivel del personaje: la suma de los niveles de sus clases. */
+export const characterLevel = (c: Pick<Character, 'classes'>) => c.classes.reduce((total, k) => total + k.level, 0);
+/** Datos de cada clase reconocida del personaje, en el orden en que se tomaron. */
+const classInfos = (classes: CharacterClass[]) => classes.flatMap((k) => classInfo(k.name) ?? []);
+
 /**
- * Espacios máximos por nivel de conjuro (índice 0 = nivel 1) que da la clase a cierto nivel,
- * o `null` si la clase no lanza conjuros con espacios. Los niveles sin espacios valen 0.
+ * Espacios máximos por nivel de conjuro (índice 0 = nivel 1), sin la magia de pacto, o `null`
+ * si ninguna clase lanza conjuros con espacios. Con una sola clase lanzadora se usa su tabla
+ * (completa o media). Con varias, la de lanzador completo con el nivel combinado: los niveles
+ * de las clases completas enteros y los de paladín y explorador la mitad, redondeando hacia
+ * arriba (cada clase por separado).
  */
-export function slotTableAt(c: Character, level: number): number[] | null {
-  const caster = classInfo(c.className)?.caster;
-  if (caster === 'completo') return fullCasterSlots[level - 1];
-  if (caster === 'medio') return halfCasterSlots[level - 1];
-  if (caster === 'pacto') {
-    const [count, slotLevel] = pactSlots[level - 1];
-    return Array.from({ length: slotLevel }, (_, i) => (i === slotLevel - 1 ? count : 0));
-  }
-  return null;
+export function spellSlotTable(classes: CharacterClass[]): number[] | null {
+  const casters = classes.flatMap((k) => {
+    const caster = classInfo(k.name)?.caster;
+    return caster === 'completo' || caster === 'medio' ? [{ caster, level: k.level }] : [];
+  });
+  if (!casters.length) return null;
+  if (casters.length === 1) return (casters[0].caster === 'completo' ? fullCasterSlots : halfCasterSlots)[Math.min(20, casters[0].level) - 1];
+  const level = casters.reduce((total, k) => total + (k.caster === 'completo' ? k.level : Math.ceil(k.level / 2)), 0);
+  return fullCasterSlots[Math.min(20, level) - 1];
 }
-/** Los espacios de la magia de pacto se recuperan también en un descanso corto. */
-export const hasPactMagic = (c: Character) => classInfo(c.className)?.caster === 'pacto';
+
+/** Magia de pacto según los niveles de brujo: cuántos espacios y de qué nivel, o `null` sin brujo. */
+export function pactSlotTable(classes: CharacterClass[]): { level: number; max: number } | null {
+  const level = classes.filter((k) => classInfo(k.name)?.caster === 'pacto').reduce((total, k) => total + k.level, 0);
+  if (!level) return null;
+  const [max, slotLevel] = pactSlots[Math.min(20, level) - 1];
+  return { level: slotLevel, max };
+}
 
 export const modifier = (score: number) => Math.floor((score - 10) / 2);
 export const proficiencyBonus = (level: number) => Math.ceil(level / 4) + 1;
 export const xpForNextLevel = (level: number): number | null => xpByLevel[level] ?? null;
 /** Media fija de PG por nivel según el dado de golpe (d6 → 4, d8 → 5…). */
-export const hitDieAverage = (die: Character['hitDice']['die']) => Number(die.slice(1)) / 2 + 1;
+export const hitDieAverage = (die: HitDice['die']) => Number(die.slice(1)) / 2 + 1;
 export const abilityMod = (c: Character, ability: Ability) => modifier(c.abilities[ability]);
 export const initiative = (c: Character) => abilityMod(c, 'des');
+/** Bonificador de competencia del personaje: depende del nivel total, también en multiclase. */
+export const proficiency = (c: Character) => proficiencyBonus(characterLevel(c));
 export const saveBonus = (c: Character, ability: Ability) =>
-  abilityMod(c, ability) + (c.savingThrows.includes(ability) ? proficiencyBonus(c.level) : 0);
+  abilityMod(c, ability) + (c.savingThrows.includes(ability) ? proficiency(c) : 0);
 export const skillLevel = (c: Character, skill: SkillId) => c.skills[skill] ?? 0;
 export const skillBonus = (c: Character, skill: SkillId) =>
-  abilityMod(c, skills[skill].ability) + skillLevel(c, skill) * proficiencyBonus(c.level);
+  abilityMod(c, skills[skill].ability) + skillLevel(c, skill) * proficiency(c);
 export const passivePerception = (c: Character) => 10 + skillBonus(c, 'percepcion');
 /**
  * CA y su desglose: armadura equipada (o 10 + Des y la Defensa sin armadura de la clase),
@@ -219,7 +235,8 @@ export function armorClassBreakdown(c: Character): { total: number; parts: strin
   } else {
     total = 10 + dex;
     parts.push('sin armadura 10', `DES ${signed(dex)}`);
-    const extra = classInfo(c.className)?.unarmored;
+    // Solo una Defensa sin armadura: la de la primera clase que la da.
+    const extra = classInfos(c.classes).find((info) => info.unarmored)?.unarmored;
     // El monje pierde su Defensa sin armadura si lleva escudo.
     if (extra && !(extra === 'sab' && shield)) {
       total += abilityMod(c, extra);
@@ -254,15 +271,20 @@ export function weaponAbility(c: Character, weapon: Weapon): Ability {
   return weapon.ranged ? 'des' : 'fue';
 }
 export const weaponAttack = (c: Character, weapon: Weapon) =>
-  abilityMod(c, weaponAbility(c, weapon)) + (weapon.proficient ? proficiencyBonus(c.level) : 0) + weapon.magicBonus;
+  abilityMod(c, weaponAbility(c, weapon)) + (weapon.proficient ? proficiency(c) : 0) + weapon.magicBonus;
 export const weaponDamageBonus = (c: Character, weapon: Weapon) => abilityMod(c, weaponAbility(c, weapon)) + weapon.magicBonus;
 export const damageText = (dice: string, bonus: number, type: string) =>
   [`${dice}${bonus ? ` ${signed(bonus)}` : ''}`, type].filter(Boolean).join(' ');
 
-/** Competencia por defecto al añadir un arma, según la clase. */
+/**
+ * Competencia por defecto al añadir un arma, según la primera clase. En multiclase, las clases
+ * posteriores que dan todas las armas marciales (bárbaro, explorador, guerrero, paladín) también cuentan.
+ */
 export function defaultWeaponProficiency(c: Character, weapon: Weapon) {
   if (weapon.category === 'sencilla') return true;
-  switch (classInfo(c.className)?.martialWeapons) {
+  const [first, ...later] = c.classes.map((k) => classInfo(k.name));
+  if (later.some((info) => info?.martialWeapons === 'todas')) return true;
+  switch (first?.martialWeapons) {
     case 'todas': return true;
     case 'ligeras': return hasProperty(weapon, 'ligera');
     case 'sutiles-o-ligeras': return hasProperty(weapon, 'sutil') || hasProperty(weapon, 'ligera');
@@ -271,15 +293,32 @@ export function defaultWeaponProficiency(c: Character, weapon: Weapon) {
 }
 
 export const spellcastingMod = (c: Character) => (c.spellcastingAbility ? abilityMod(c, c.spellcastingAbility) : 0);
-export const spellSaveDC = (c: Character) => 8 + proficiencyBonus(c.level) + spellcastingMod(c);
-export const spellAttackBonus = (c: Character) => proficiencyBonus(c.level) + spellcastingMod(c);
+export const spellSaveDC = (c: Character) => 8 + proficiency(c) + spellcastingMod(c);
+export const spellAttackBonus = (c: Character) => proficiency(c) + spellcastingMod(c);
+
+/**
+ * En multiclase con aptitudes mágicas distintas (p. ej. Mago y Clérigo), la CD y el ataque de
+ * conjuro de cada clase lanzadora. Las tiradas del grimorio usan la aptitud elegida en él; esto
+ * es la referencia para los conjuros de las otras clases. Cadena vacía si solo hay una aptitud.
+ */
+export function castingByClass(c: Character): string {
+  const casters = c.classes.flatMap((k) => {
+    const ability = classInfo(k.name)?.spellcasting;
+    return ability ? [{ name: k.name, ability }] : [];
+  });
+  if (new Set([c.spellcastingAbility, ...casters.map((k) => k.ability)].filter(Boolean)).size < 2) return '';
+  return casters
+    .map(({ name, ability }) => `${name} (${abilityShort(ability)}): CD ${8 + proficiency(c) + abilityMod(c, ability)}, ataque ${signed(proficiency(c) + abilityMod(c, ability))}`)
+    .join(' · ');
+}
 
 /** Dados del efecto de un conjuro; los trucos multiplican sus dados a nivel 5, 11 y 17. */
 export function spellDice(c: Character, spell: Spell): string {
   const dice = spell.effect?.dice ?? '';
   const match = /^(\d+)d(\d+)(.*)$/.exec(dice);
   if (spell.level !== 0 || !match) return dice;
-  const tier = c.level >= 17 ? 4 : c.level >= 11 ? 3 : c.level >= 5 ? 2 : 1;
+  const level = characterLevel(c);
+  const tier = level >= 17 ? 4 : level >= 11 ? 3 : level >= 5 ? 2 : 1;
   return `${Number(match[1]) * tier}d${match[2]}${match[3]}`;
 }
 export const spellEffectText = (c: Character, spell: Spell) =>
@@ -382,8 +421,8 @@ export function shortRest(c: Character): string[] {
       recovered.push(`${name} (+1)`);
     }
   }
-  if (hasPactMagic(c) && Object.values(c.spellSlots).some((slots) => slots.current < slots.max)) {
-    Object.values(c.spellSlots).forEach((slots) => (slots.current = slots.max));
+  if (c.pactSlots && c.pactSlots.current < c.pactSlots.max) {
+    c.pactSlots.current = c.pactSlots.max;
     recovered.push('espacios de pacto');
   }
   return recovered;
@@ -396,8 +435,9 @@ export function shortRest(c: Character): string[] {
 export function longRest(c: Character): string {
   c.hp.current = c.hp.max;
   c.hp.temp = 0;
-  c.hitDice.current = c.hitDice.max;
+  c.hitDice.forEach((dice) => (dice.current = dice.max));
   Object.values(c.spellSlots).forEach((slots) => (slots.current = slots.max));
+  if (c.pactSlots) c.pactSlots.current = c.pactSlots.max;
   for (const { uses } of usesEntries(c)) if (uses.recovery !== 'ninguna') uses.current = uses.max;
   const exhausted = c.exhaustion > 0;
   if (exhausted) c.exhaustion -= 1;
@@ -432,7 +472,12 @@ export const pips = ({ current, max }: Pool) => '●'.repeat(Math.min(current, m
 export const percent = ({ current, max }: Pool) => `${max ? Math.min(100, (current / max) * 100) : 0}%`;
 export const initials = (name: string) =>
   name.split(/\s+/).slice(0, 2).map((word) => word[0]?.toUpperCase() ?? '').join('');
-export const classLine = (c: Character) => [c.species, `${c.className} ${c.subclass.toLowerCase()}`.trim()].filter(Boolean).join(' · ');
+/** Clases del personaje: «Mago evocador» con una sola clase; «Mago 3 / Guerrero 2» en multiclase. */
+export const classText = (c: Pick<Character, 'classes'>) =>
+  c.classes.length === 1
+    ? `${c.classes[0].name} ${c.classes[0].subclass.toLowerCase()}`.trim()
+    : c.classes.map((k) => `${k.name} ${k.level}`).join(' / ');
+export const classLine = (c: Character) => [c.species, classText(c)].filter(Boolean).join(' · ');
 const recoveryTexts: Record<Uses['recovery'], string> = {
   corto: 'Descanso corto',
   'uno-corto': 'Uno en descanso corto, todos en largo',
@@ -484,7 +529,7 @@ export const historyRow = (entry: Character['history'][number]): Row => ({
   tag: formatDate(entry.date),
 });
 
-/** Fila de un recurso gastable. `key` identifica qué contador modifica: `slot:3`, `features:0` o `inventory:2`. */
+/** Fila de un recurso gastable. `key` identifica qué contador modifica: `slot:3`, `pact:`, `features:0` o `inventory:2`. */
 export interface ResourceRow {
   key: string;
   title: string;
@@ -492,15 +537,16 @@ export interface ResourceRow {
   pool: Pool;
 }
 
-export const slotRows = (c: Character): ResourceRow[] =>
-  Object.entries(c.spellSlots)
+export const slotRows = (c: Character): ResourceRow[] => [
+  ...Object.entries(c.spellSlots)
     .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([level, slots]) => ({
-      key: `slot:${level}`,
-      title: `Espacios de nivel ${level}`,
-      detail: hasPactMagic(c) ? 'Descanso corto' : 'Descanso largo',
-      pool: slots,
-    }));
+    .map(([level, slots]) => ({ key: `slot:${level}`, title: `Espacios de nivel ${level}`, detail: 'Descanso largo', pool: slots })),
+  ...(c.pactSlots ? [{ key: 'pact:', title: `Espacios de pacto de nivel ${c.pactSlots.level}`, detail: 'Descanso corto', pool: c.pactSlots }] : []),
+];
+
+/** Ruta del máximo editable de una fila de espacios (`spellSlots.3.max` o `pactSlots.max`); `undefined` si no es de espacios. */
+export const slotMaxPath = (key: string) =>
+  key.startsWith('slot:') ? `spellSlots.${key.slice(5)}.max` : key === 'pact:' ? 'pactSlots.max' : undefined;
 
 export const resourceRows = (c: Character): ResourceRow[] => [
   ...slotRows(c),
@@ -513,10 +559,12 @@ export const resourceRows = (c: Character): ResourceRow[] => [
  * los pinta al renderizar y el cliente los reescribe tras cada cambio.
  */
 export function liveText(c: Character): Record<string, string> {
-  const next = xpForNextLevel(c.level);
+  const level = characterLevel(c);
+  const next = xpForNextLevel(level);
   const text: Record<string, string> = {
-    eyebrow: `Nivel ${c.level} · competencia ${signed(proficiencyBonus(c.level))}`,
-    nextLevel: String(Math.min(20, c.level + 1)),
+    eyebrow: `Nivel ${level} · competencia ${signed(proficiency(c))}`,
+    level: String(level),
+    nextLevel: String(Math.min(20, level + 1)),
     xpNext: next === null ? 'nivel máximo' : `/ ${formatNumber(next)} PX`,
     initiative: signed(initiative(c)),
     armorClass: String(armorClass(c)),
@@ -525,6 +573,7 @@ export function liveText(c: Character): Record<string, string> {
     weight: `Carga · ${formatNumber(carriedWeight(c))} kg${coinWeight(c) ? ` (monedas ${formatNumber(coinWeight(c))} kg)` : ''}`,
     spellDC: c.spellcastingAbility ? String(spellSaveDC(c)) : '—',
     spellAttack: c.spellcastingAbility ? signed(spellAttackBonus(c)) : '—',
+    castingByClass: castingByClass(c),
     speedNote: speedNote(c),
     exhaustion: `${c.exhaustion} / 6`,
     exhaustionNote: c.exhaustion ? `−${exhaustionPenalty(c)} a pruebas d20 · −${formatNumber(exhaustionSpeed(c))} m${c.exhaustion === 6 ? ' · muerte' : ''}` : 'sin agotamiento',
@@ -552,12 +601,11 @@ function speedNote(c: Character): string {
 
 /** Anchuras de las barras de progreso, indexadas por la clave de `data-bar`. */
 export function liveBars(c: Character): Record<string, string> {
-  const next = xpForNextLevel(c.level);
+  const next = xpForNextLevel(characterLevel(c));
   return {
     hp: percent(c.hp),
     // Los PG temporales se pintan a continuación de los actuales, dentro de la misma barra.
     hpTemp: percent({ current: c.hp.temp, max: c.hp.max }),
-    hitDice: percent(c.hitDice),
     xp: next === null ? '100%' : percent({ current: c.xp, max: next }),
   };
 }

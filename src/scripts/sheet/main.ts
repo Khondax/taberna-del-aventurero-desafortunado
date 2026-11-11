@@ -4,6 +4,7 @@
 import {
   abilityMod,
   abilityNames,
+  characterLevel,
   concentrationOptions,
   deathSave,
   exhaustionPenalty,
@@ -17,6 +18,7 @@ import {
   liveText,
   longRest,
   normalize,
+  percent,
   pips,
   proficiencyLabels,
   resourceRows,
@@ -28,6 +30,7 @@ import {
   skillBonus,
   skillLevel,
   skills,
+  slotMaxPath,
   spellAttackBonus,
   spellDice,
   spellcastingMod,
@@ -38,8 +41,10 @@ import {
   weaponDamageBonus,
   weaponRow,
   type Ability,
+  type CharacterClass,
   type ConditionId,
   type DeathSaveOutcome,
+  type HitDice,
   type Pool,
   type ResourceRow,
   type Row,
@@ -83,12 +88,36 @@ function fillResource(row: HTMLElement, data: ResourceRow) {
   row.querySelector('[data-delta="1"]')!.setAttribute('aria-label', `Recuperar: ${data.title}`);
   row.querySelector('[data-remove-resource]')!.setAttribute('aria-label', `Quitar: ${data.title}`);
   const max = row.querySelector<HTMLInputElement>('.max-input input')!;
-  const isSlot = data.key.startsWith('slot:');
-  max.parentElement!.hidden = !isSlot;
-  if (isSlot) {
-    max.dataset.path = `spellSlots.${data.key.slice(5)}.max`;
+  const path = slotMaxPath(data.key);
+  max.parentElement!.hidden = !path;
+  if (path) {
+    max.dataset.path = path;
     max.setAttribute('aria-label', `Máximo: ${data.title}`);
   } else delete max.dataset.path;
+}
+
+/** Fila de una clase (ver ClassRow.astro). Con una sola clase, el nivel se edita en la insignia. */
+function fillClass(row: HTMLElement, entry: CharacterClass, i: number) {
+  const multi = state.classes.length > 1;
+  const suffix = multi ? ` (${entry.name || 'clase'})` : '';
+  for (const input of row.querySelectorAll<HTMLInputElement>('[data-class-field]')) {
+    const field = input.dataset.classField!;
+    if (field === 'level' && !multi) delete input.dataset.path;
+    else input.dataset.path = `classes.${i}.${field}`;
+    if (field !== 'name') input.setAttribute('aria-label', `${field === 'level' ? 'Nivel' : 'Subclase'}${suffix}`);
+  }
+  const level = row.querySelector<HTMLInputElement>('[data-class-field="level"]')!;
+  level.max = String(20 - characterLevel(state) + entry.level);
+  level.parentElement!.hidden = !multi;
+}
+
+/** Fila de dados de golpe de un tipo (ver HitDiceRow.astro). */
+function fillHitDice(row: HTMLElement, pool: HitDice, i: number) {
+  for (const input of row.querySelectorAll<HTMLInputElement>('[data-hit-field]')) input.dataset.path = `hitDice.${i}.${input.dataset.hitField}`;
+  row.querySelector<HTMLElement>('[data-field="bar"]')!.style.width = percent(pool);
+  const spend = row.querySelector<HTMLButtonElement>('[data-spend-hit-die]')!;
+  spend.textContent = `Gastar dado de golpe (${pool.die} ${signed(abilityMod(state, 'con'))})`;
+  spend.disabled = pool.current === 0 || state.hp.current === state.hp.max;
 }
 
 /** Sincroniza una lista con `items`, reutilizando las filas existentes para no perder el foco. */
@@ -103,6 +132,14 @@ function renderList<T>(listId: string, templateId: string, items: T[], fill: (ro
 }
 
 onRender(() => {
+  const multi = state.classes.length > 1;
+  $('#identity').classList.toggle('multiclass', multi);
+  renderList('classes', 'classTemplate', state.classes, fillClass);
+  $('#levelInput').hidden = multi;
+  $('#levelTotal').hidden = !multi;
+  if (multi) delete $('#levelInput').dataset.path;
+  else $('#levelInput').dataset.path = 'classes.0.level';
+  renderList('hitDice', 'hitDiceTemplate', state.hitDice, fillHitDice);
   renderList('weapons', 'entryTemplate', state.weapons, (row, w, i) => fillRow(row, weaponRow(state, w), `weapons:${i}`, true));
   renderList('spells', 'entryTemplate', state.spells, (row, s, i) => fillRow(row, spellRow(state, s), `spells:${i}`, Boolean(s.effect) || s.attack));
   renderList('inventory', 'entryTemplate', state.inventory, (row, item, i) => fillRow(row, itemRow(item), `inventory:${i}`));
@@ -149,9 +186,7 @@ onRender(() => {
   $<HTMLButtonElement>('[data-exhaustion="1"]').disabled = state.exhaustion === 6;
 
   $<HTMLButtonElement>('#undo').disabled = !canUndo();
-  $<HTMLButtonElement>('#spendHitDie').disabled = state.hitDice.current === 0 || state.hp.current === state.hp.max;
-  $('#spendHitDie').textContent = `Gastar dado de golpe (${state.hitDice.die} ${signed(abilityMod(state, 'con'))})`;
-  $<HTMLButtonElement>('#openLevelUp').disabled = state.level >= 20;
+  $<HTMLButtonElement>('#openLevelUp').disabled = characterLevel(state) >= 20;
   document.title = `${state.name} · La Taberna`;
 });
 
@@ -409,19 +444,24 @@ root.addEventListener('click', (event) => {
   update(() => (state.exhaustion = clamp(state.exhaustion + Number(step.dataset.exhaustion), 0, 6)));
 });
 
-$('#spendHitDie').addEventListener('click', () => {
-  const die = rollExpression(`1${state.hitDice.die}`)!.total;
+// Gastar un dado de golpe del tipo de su fila (en multiclase puede haber varios tipos).
+root.addEventListener('click', (event) => {
+  const button = (event.target as Element).closest('[data-spend-hit-die]');
+  if (!button) return;
+  const pool = state.hitDice[[...$('#hitDice').children].indexOf(button.closest('.hit-dice')!)];
+  const die = rollExpression(`1${pool.die}`)!.total;
   const healed = Math.max(1, die + abilityMod(state, 'con'));
   update(() => {
-    state.hitDice.current -= 1;
+    pool.current -= 1;
     state.hp.current = Math.min(state.hp.max, state.hp.current + healed);
   });
-  showRoll(`Dado de golpe · ${state.hitDice.die} [${die}] ${signed(abilityMod(state, 'con'))}`, `+${healed} PG`);
+  showRoll(`Dado de golpe · ${pool.die} [${die}] ${signed(abilityMod(state, 'con'))}`, `+${healed} PG`);
 });
 
 function poolFor(key: string): Pool {
   const [kind, id] = key.split(':');
   if (kind === 'slot') return state.spellSlots[id];
+  if (kind === 'pact') return state.pactSlots!;
   return (kind === 'features' ? state.features : state.inventory)[Number(id)].uses!;
 }
 
@@ -433,7 +473,7 @@ root.addEventListener('click', (event) => {
   if (next !== pool.current) update(() => (pool.current = next));
 });
 
-// Quitar un recurso: un nivel de espacios desaparece; un rasgo u objeto se queda, pero sin usos.
+// Quitar un recurso: un nivel de espacios (o los de pacto) desaparece; un rasgo u objeto se queda, pero sin usos.
 root.addEventListener('click', (event) => {
   const button = (event.target as Element).closest<HTMLElement>('[data-remove-resource]');
   if (!button) return;
@@ -442,6 +482,9 @@ root.addEventListener('click', (event) => {
     if (kind === 'slot') {
       delete state.spellSlots[id];
       log('Espacios quitados', `Nivel ${id}`);
+    } else if (kind === 'pact') {
+      state.pactSlots = null;
+      log('Espacios quitados', 'Pacto');
     } else {
       const entry = (kind === 'features' ? state.features : state.inventory)[Number(id)];
       entry.uses = null;

@@ -32,7 +32,7 @@ En total, unas 230 líneas (alrededor del 18 % del cliente) son fontanería que 
 
 **Recomendación.** Ahora no: la ficha tiene listas planas y un solo repintado, y el código actual se entiende bien. Merece la pena migrar la ficha entera a una isla `client:load` (la vista del máster y la creación pueden seguir como están) cuando se cumpla una de estas condiciones:
 
-- Se aborda la multiclase o los trasfondos y especies con datos, que traen bloques repetidos y anidados (varias clases con sus rasgos y espacios), justo lo que `renderList` no cubre.
+- Las clases o los orígenes pasan a tener bloques anidados propios (rasgos o espacios dentro de cada clase), justo lo que `renderList` no cubre. La multiclase y los trasfondos y especies se hicieron sin framework porque caben en listas planas: una fila por clase y por tipo de dado de golpe (`ClassRow` y `HitDiceRow`), y los datos de origen solo se aplican al crear.
 - Las filas necesitan estado propio: edición en línea, reordenar o desplegar.
 - Aparecen fallos repetidos por desajustes entre la plantilla Astro y `fillRow`, `fillResource` o `renderPicker`.
 
@@ -49,6 +49,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - Listados con conjuros de nivel 0 a 9 y los rasgos de clase principales de 2024, filtrables por clase.
 - CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
+- Multiclase: clases con subclase y nivel, nivel total, salvaciones de la primera clase, dados de golpe por tipo, espacios con el nivel de lanzador combinado, magia de pacto aparte (`pactSlots`), CD y ataque por clase si las aptitudes difieren, y subida de nivel que pregunta en qué clase se sube.
 - Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
 - Copias automáticas de cada ficha al guardar (`.historial/`, una cada 10 minutos como mucho, las 30 últimas) y papelera para las fichas eliminadas.
 - Tests en el repositorio: unitarios con Vitest (`pnpm test`) y de extremo a extremo con Playwright (`pnpm test:e2e`).
@@ -58,7 +59,8 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 
 ## Pendiente
 
-- Multiclase y subclases lanzadoras (caballero arcano, embaucador arcano): sus espacios se ajustan a mano en el grimorio.
+- Subclases lanzadoras (caballero arcano, embaucador arcano): no cuentan para la tabla de espacios, ni solas ni en multiclase; sus espacios se ajustan a mano en el grimorio.
+- Multiclase: no se comprueban los requisitos de característica (13 en la principal) ni se añaden las competencias que da la clase nueva (armaduras, herramientas, habilidad), salvo las armas marciales por defecto. Las tiradas de conjuro usan una sola aptitud mágica (la del grimorio).
 - Muerte instantánea por daño masivo y críticos a 0 PG (dos fallos): el formulario de daño no sabe si el golpe es crítico ni lo aplica solo; se marcan a mano en las casillas.
 - Elecciones dentro de los rasgos de especie (linajes, ascendencias, legados, habilidad de Sentidos agudos o Hábil, dote de Versátil) y Dureza enana: se explican en la descripción y se aplican a mano.
 

@@ -4,11 +4,15 @@
   "character": {
     "name": "Hermano Tobías",
     "species": "Humano",
-    "className": "Clérigo",
-    "subclass": "Dominio de la Vida",
+    "classes": [
+      {
+        "name": "Clérigo",
+        "subclass": "Dominio de la Vida",
+        "level": 5
+      }
+    ],
     "background": "Acólito",
     "alignment": "Neutral bueno",
-    "level": 5,
     "xp": 7000,
     "abilities": {
       "fue": 14,
@@ -25,11 +29,13 @@
       "max": 38,
       "temp": 0
     },
-    "hitDice": {
-      "current": 5,
-      "max": 5,
-      "die": "d8"
-    },
+    "hitDice": [
+      {
+        "current": 5,
+        "max": 5,
+        "die": "d8"
+      }
+    ],
     "deathSaves": {
       "successes": 0,
       "failures": 0,
@@ -63,6 +69,7 @@
         "max": 2
       }
     },
+    "pactSlots": null,
     "features": [
       {
         "name": "Discípulo de la vida",

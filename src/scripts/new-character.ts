@@ -166,16 +166,19 @@ function render() {
   if (!choices) return renderFacts([['Clase', `${classInfo.name} · dado de golpe ${classInfo.hitDie}`]]);
   const c = buildCharacter(choices);
   renderFacts([
-    ['Clase', `${c.className} de nivel 1 · dado de golpe ${c.hitDice.die}`],
+    ['Clase', `${classInfo.name} de nivel 1 · dado de golpe ${classInfo.hitDie}`],
     ['Características', abilities.map((a) => `${abilityShort(a)} ${c.abilities[a]}`).join(' · ')],
-    ['PG', `${c.hp.max} = ${c.hitDice.die.slice(1)} + CON ${signed(modifier(c.abilities.con))}`],
+    ['PG', `${c.hp.max} = ${classInfo.hitDie.slice(1)} + CON ${signed(modifier(c.abilities.con))}`],
     ['CA sin armadura', String(armorClass(c))],
     ['Salvaciones', c.savingThrows.map((a) => abilityNames[a]).join(' y ')],
     ['Especie', sp ? `${sp.name} · ${sp.size} · ${c.speed}` : choices.species || '—'],
     ['Trasfondo', bg ? `${bg.name} · dote de origen ${bg.feat.name}` : choices.background || '—'],
     ['Habilidades', Object.keys(c.skills).map((s) => skills[s as SkillId].name).join(', ') || 'Ninguna'],
     ['Aptitud mágica', c.spellcastingAbility ? abilityNames[c.spellcastingAbility] : 'Ninguna'],
-    ['Espacios', Object.entries(c.spellSlots).map(([level, slots]) => `${slots.max} de nivel ${level}`).join(', ') || 'Ninguno'],
+    ['Espacios', [
+      ...Object.entries(c.spellSlots).map(([level, slots]) => `${slots.max} de nivel ${level}`),
+      ...(c.pactSlots ? [`${c.pactSlots.max} de pacto de nivel ${c.pactSlots.level}`] : []),
+    ].join(', ') || 'Ninguno'],
     ['Rasgos', c.features.map((f) => f.name).join(', ') || 'Añádelos desde la ficha'],
   ]);
 }

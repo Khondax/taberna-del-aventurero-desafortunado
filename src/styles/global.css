@@ -133,6 +133,10 @@ textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
 .identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; }
 .identity label { display: grid; }
 .identity span { color: var(--leather); font: 9px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
+/* Con una clase, sus campos fluyen en la rejilla como los demás; en multiclase, una fila por clase (clase, subclase y nivel). */
+.class-list, .class-row { display: contents; }
+.identity.multiclass .class-list { display: grid; grid-column: 1 / -1; gap: 2px; }
+.identity.multiclass .class-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2.6em; gap: 0 10px; }
 .level-badge { text-align: right; }
 .level-badge strong, .level-badge input { display: block; width: 2.4em; margin-left: auto; color: var(--garnet); font: 700 30px var(--font-mono); text-align: right; }
 .level-badge span { color: var(--muted); font: 10px var(--font-mono); text-transform: uppercase; }
@@ -268,6 +272,8 @@ button.row-main:hover strong { color: var(--garnet-mid); text-decoration: underl
 .coin-strip .stat-box > .edit { font-size: 20px; }
 .casting-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
 .casting-strip strong { font-size: 20px; }
+.casting-note { margin: -6px 0 12px; }
+.casting-note:empty { display: none; }
 
 /* Tooltip y descripciones */
 .tooltip { position: fixed; inset: auto; margin: 0; width: min(380px, calc(100vw - 16px)); padding: 12px 14px; border: 1px solid var(--brass); border-radius: 6px; background: var(--paper); color: var(--ink); box-shadow: 0 16px 32px -4px #23140a29; pointer-events: none; }

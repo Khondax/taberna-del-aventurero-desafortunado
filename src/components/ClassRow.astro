@@ -1,0 +1,23 @@
+---
+// Una clase en la identidad de la ficha: nombre, subclase y, en multiclase, su nivel. Con una
+// sola clase el nivel se edita en la insignia y la fila se ve como dos campos más de la
+// identidad. Sin props sirve de plantilla para el cliente (ver `fillClass` en scripts/sheet/main.ts).
+import type { CharacterClass } from '../lib/sheet';
+
+interface Props {
+  entry?: CharacterClass;
+  index?: number;
+  /** El personaje tiene más de una clase. */
+  multi?: boolean;
+  /** Nivel máximo de esta clase para que el total no pase de 20. */
+  maxLevel?: number;
+}
+const { entry, index, multi = false, maxLevel = 20 } = Astro.props;
+const path = (field: string) => (index === undefined ? undefined : `classes.${index}.${field}`);
+const suffix = multi && entry ? ` (${entry.name || 'clase'})` : '';
+---
+<div class="class-row">
+  <label><span>Clase</span><input class="edit" data-class-field="name" data-path={path('name')} value={entry?.name} placeholder="—" /></label>
+  <label><span>Subclase</span><input class="edit" data-class-field="subclass" data-path={path('subclass')} value={entry?.subclass} placeholder="—" aria-label={`Subclase${suffix}`} /></label>
+  <label class="class-level" hidden={!multi}><span>Nivel</span><input class="edit narrow" type="number" min="1" max={maxLevel} data-class-field="level" data-path={multi ? path('level') : undefined} value={entry?.level} aria-label={`Nivel${suffix}`} /></label>
+</div>

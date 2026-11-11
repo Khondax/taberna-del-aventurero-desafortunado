@@ -4,6 +4,7 @@
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { campaign } from '../config';
+import { characterLevel, classText } from '../lib/sheet';
 import { listSheets } from '../lib/store';
 
 interface Props {
@@ -36,7 +37,7 @@ const current = Astro.url.pathname;
           <div class="sidebar-label">Personajes</div>
           {sheets.map((entry) => 'sheet' in entry && (
             <a class="nav-item" href={`/personajes/${entry.slug}`} aria-current={current === `/personajes/${entry.slug}` ? 'page' : undefined}>
-              <strong>{entry.sheet.character.name}</strong><small>{entry.sheet.character.className} · nivel {entry.sheet.character.level}</small>
+              <strong>{entry.sheet.character.name}</strong><small>{classText(entry.sheet.character)} · nivel {characterLevel(entry.sheet.character)}</small>
             </a>
           ))}
           <a class="nav-item" href="/nueva-ficha" aria-current={current === '/nueva-ficha' ? 'page' : undefined}><strong>＋ Nueva ficha</strong></a>

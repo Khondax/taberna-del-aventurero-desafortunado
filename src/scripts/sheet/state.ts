@@ -2,7 +2,7 @@
 // guarda una copia para deshacer, normaliza, vuelve a pintar y programa el guardado.
 import { actions, getActionPath } from 'astro:actions';
 import { currentSchemaVersion } from '../../lib/ids';
-import { noDeathSaves, type Character, type Pool, type SheetFile } from '../../lib/sheet';
+import { characterLevel, noDeathSaves, type Character, type Pool, type SheetFile } from '../../lib/sheet';
 
 export const $ = <T extends Element = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -101,18 +101,26 @@ const undoStack: Character[] = [];
 export const canUndo = () => undoStack.length > 0;
 
 /**
- * Mantiene los contadores dentro de sus límites y quita los niveles de espacio a 0. Con PG,
- * las salvaciones contra la muerte vuelven a cero (cubre también editar los PG a mano).
+ * Mantiene los contadores dentro de sus límites y quita los niveles de espacio a 0. El nivel
+ * total no pasa de 20 (si se pasa, se recorta de la última clase). Con PG, las salvaciones
+ * contra la muerte vuelven a cero (cubre también editar los PG a mano).
  */
 function normalize() {
   const clampPool = (pool: Pool) => {
     pool.max = Math.max(0, pool.max);
     pool.current = clamp(pool.current, 0, pool.max);
   };
-  state.level = clamp(state.level, 1, 20);
+  for (const k of state.classes) k.level = clamp(k.level, 1, 20);
+  for (let i = state.classes.length - 1, excess = characterLevel(state) - 20; i >= 0 && excess > 0; i--) {
+    const cut = Math.min(excess, state.classes[i].level - 1);
+    state.classes[i].level -= cut;
+    excess -= cut;
+  }
   clampPool(state.hp);
   if (state.hp.current > 0) state.deathSaves = noDeathSaves();
-  clampPool(state.hitDice);
+  state.hitDice.forEach(clampPool);
+  if (state.pactSlots) clampPool(state.pactSlots);
+  if (state.pactSlots?.max === 0) state.pactSlots = null;
   for (const [level, slots] of Object.entries(state.spellSlots)) {
     if (slots.max <= 0) delete state.spellSlots[level];
     else clampPool(slots);

@@ -30,7 +30,7 @@ function v1ToV2(file: any): any {
     name: s.name, level: s.level, school: s.school, casting: s.casting,
   }));
 
-  const character = { className: c.className ?? '' } as Character;
+  const character = { classes: [{ name: c.className ?? '', subclass: '', level: 1 }] } as Character;
   const weapons: Weapon[] = [];
   const inventory: any[] = []; // forma v2: sin `equipped` ni `armor`, que añade v2ToV3
   for (const item of c.inventory ?? []) {
@@ -84,7 +84,9 @@ function v2ToV3(file: any): any {
     return { ...item, equipped, armor };
   });
   const character = { ...c, inventory, acBonus: 0 };
-  if (typeof oldArmorClass === 'number') character.acBonus = oldArmorClass - armorClass(character as Character);
+  // `armorClass` lee las clases en el formato actual (v5) para la Defensa sin armadura.
+  const classes = [{ name: c.className ?? '', subclass: '', level: 1 }];
+  if (typeof oldArmorClass === 'number') character.acBonus = oldArmorClass - armorClass({ ...character, classes } as Character);
   return { ...file, schemaVersion: 3, character };
 }
 
@@ -110,16 +112,33 @@ function v3ToV4(file: any): any {
 const partialRecovery = new Set(featureCatalog.filter((f) => f.uses?.recovery === 'uno-corto').map((f) => f.name));
 
 /**
- * v4 → v5: recuperación parcial (`uno-corto`). Solo cambia los rasgos cuyo nombre coincide
- * exactamente con uno del listado que la usa y que siguen en descanso largo, que es como los
- * añadía el listado hasta ahora. Si alguien eligió otra recuperación a mano, se respeta.
+ * v4 → v5: recuperación parcial y multiclase.
+ * - Recuperación parcial (`uno-corto`): solo en los rasgos cuyo nombre coincide exactamente con
+ *   uno del listado que la usa y que siguen en descanso largo, que es como los añadía el listado.
+ *   Si alguien eligió otra recuperación a mano, se respeta.
+ * - `className`, `subclass` y `level` pasan a ser la única entrada de `classes`, y los dados de
+ *   golpe, la única entrada de `hitDice`.
+ * - Magia de pacto aparte: si la clase es de brujo, el nivel de espacios más alto (hasta 5) pasa
+ *   a `pactSlots`; los demás niveles, si los hubiera, se quedan como espacios normales.
  */
 function v4ToV5(file: any): any {
-  const c = file.character ?? {};
+  const { className = '', subclass = '', level = 1, ...c } = file.character ?? {};
   const features = (c.features ?? []).map((f: any) =>
     f.uses?.recovery === 'largo' && partialRecovery.has(f.name) ? { ...f, uses: { ...f.uses, recovery: 'uno-corto' } } : f,
   );
-  return { ...file, schemaVersion: 5, character: { ...c, features } };
+  const slots = { ...c.spellSlots };
+  let pactSlots = null;
+  const pactLevel = Math.max(0, ...Object.keys(slots).map(Number).filter((n) => n <= 5));
+  if (classInfo(className)?.caster === 'pacto' && pactLevel) {
+    pactSlots = { level: pactLevel, ...slots[pactLevel] };
+    delete slots[pactLevel];
+  }
+  return {
+    ...file,
+    schemaVersion: 5,
+    // Mismo orden de claves que antes, con `classes` tras la especie.
+    character: { name: c.name, species: c.species, classes: [{ name: className, subclass, level }], ...c, hitDice: [c.hitDice], spellSlots: slots, pactSlots, features },
+  };
 }
 
 const steps: Record<number, (file: any) => any> = { 1: v1ToV2, 2: v2ToV3, 3: v3ToV4, 4: v4ToV5 };

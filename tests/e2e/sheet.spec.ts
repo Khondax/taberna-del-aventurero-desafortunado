@@ -16,17 +16,17 @@ test('los campos se editan en el sitio, recalculan lo derivado y se guardan', as
   await expect(page.locator('[data-bind="skill-atletismo"]')).toHaveText('+3');
   await expect(page.locator('#weapons li').first()).toContainText('Ataque +6');
 
-  await page.fill('[data-path=level]', '25');
-  await page.press('[data-path=level]', 'Tab');
-  await expect(page.locator('[data-path=level]')).toHaveValue('20');
+  await page.fill('[data-path="classes.0.level"]', '25');
+  await page.press('[data-path="classes.0.level"]', 'Tab');
+  await expect(page.locator('[data-path="classes.0.level"]')).toHaveValue('20');
   await expect(page.locator('#openLevelUp')).toBeDisabled();
   await page.click('#undo');
-  await expect(page.locator('[data-path=level]')).toHaveValue('5');
+  await expect(page.locator('[data-path="classes.0.level"]')).toHaveValue('5');
 
   await page.fill('[data-path="hp.max"]', '30');
   await page.press('[data-path="hp.max"]', 'Tab');
   await saved(page);
-  expect(disk('ficha-campos').character).toMatchObject({ abilities: { fue: 16 }, level: 5, hp: { max: 30 } });
+  expect(disk('ficha-campos').character).toMatchObject({ abilities: { fue: 16 }, classes: [{ level: 5 }], hp: { max: 30 } });
 });
 
 test('las competencias alternan entre ninguna, competente y pericia', async ({ page }) => {
@@ -165,10 +165,10 @@ test('subida de nivel con espacios de lanzador completo', async ({ page }) => {
   await page.click('#stepNext');
   await expect(page.locator('#levelUpSummary')).toContainText('Espacios: 4 de nivel 1, 3 de nivel 2, 3 de nivel 3');
   await page.click('#stepNext');
-  await expect(page.locator('[data-path=level]')).toHaveValue('6');
+  await expect(page.locator('[data-path="classes.0.level"]')).toHaveValue('6');
   await saved(page);
   const file = disk('ficha-nivel');
-  expect(file).toMatchObject({ schemaVersion: 5, character: { level: 6, spellSlots: { 3: { max: 3 } } } });
+  expect(file).toMatchObject({ schemaVersion: 5, character: { classes: [{ name: 'Mago', level: 6 }], spellSlots: { 3: { max: 3 } } } });
 });
 
 test('importar un archivo v1 desde la mesa lo migra', async ({ page }) => {

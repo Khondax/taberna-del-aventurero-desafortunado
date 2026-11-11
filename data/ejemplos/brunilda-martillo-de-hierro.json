@@ -4,11 +4,15 @@
   "character": {
     "name": "Brunilda Martillo de Hierro",
     "species": "Enana",
-    "className": "Guerrera",
-    "subclass": "Campeona",
+    "classes": [
+      {
+        "name": "Guerrera",
+        "subclass": "Campeona",
+        "level": 5
+      }
+    ],
     "background": "Soldado",
     "alignment": "Legal neutral",
-    "level": 5,
     "xp": 8100,
     "abilities": {
       "fue": 18,
@@ -25,11 +29,13 @@
       "max": 49,
       "temp": 0
     },
-    "hitDice": {
-      "current": 4,
-      "max": 5,
-      "die": "d10"
-    },
+    "hitDice": [
+      {
+        "current": 4,
+        "max": 5,
+        "die": "d10"
+      }
+    ],
     "deathSaves": {
       "successes": 0,
       "failures": 0,
@@ -50,6 +56,7 @@
     },
     "spellcastingAbility": null,
     "spellSlots": {},
+    "pactSlots": null,
     "features": [
       {
         "name": "Ataque adicional",

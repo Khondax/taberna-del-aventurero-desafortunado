@@ -2,6 +2,7 @@
 // Resumen de una ficha para la vista del máster.
 import {
   armorClass,
+  characterLevel,
   classLine,
   conditions,
   deathSaveState,
@@ -25,7 +26,8 @@ const stats = [
   { label: 'CA', value: armorClass(c) },
   { label: 'Iniciativa', value: signed(initiative(c)) },
   { label: 'Perc. pasiva', value: passivePerception(c) },
-  { label: 'Dados de golpe', value: `${c.hitDice.current}/${c.hitDice.max}` },
+  // En multiclase, el total de todos los tipos de dado.
+  { label: 'Dados de golpe', value: `${c.hitDice.reduce((t, d) => t + d.current, 0)}/${c.hitDice.reduce((t, d) => t + d.max, 0)}` },
 ];
 const hpRatio = c.hp.max ? c.hp.current / c.hp.max : 0;
 // A 0 PG: las casillas de salvación contra la muerte, o «Estabilizado» o «Ha muerto».
@@ -48,7 +50,7 @@ const tags = [
       <div class="eyebrow">{classLine(c)}</div>
       <h2>{c.name}</h2>
     </div>
-    <div class="level-badge"><strong>{String(c.level).padStart(2, '0')}</strong><span>Nivel</span></div>
+    <div class="level-badge"><strong>{String(characterLevel(c)).padStart(2, '0')}</strong><span>Nivel</span></div>
   </div>
   <div class="bar-label">
     <span>Puntos de golpe{c.hp.current === 0 && ' · inconsciente'}</span>

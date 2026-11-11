@@ -1,0 +1,29 @@
+---
+// Dados de golpe de un tipo (d6, d8…): disponibles, máximo, dado, barra y botón para gastar
+// uno. En multiclase con clases de dados distintos hay una fila por tipo. Sin props sirve de
+// plantilla para el cliente (ver `fillHitDice` en scripts/sheet/main.ts).
+import { percent, type HitDice } from '../lib/sheet';
+
+interface Props {
+  pool?: HitDice;
+  index?: number;
+  /** Texto del botón, con el dado y el modificador de Constitución. */
+  spendLabel?: string;
+}
+const { pool, index, spendLabel = '' } = Astro.props;
+const path = (field: string) => (index === undefined ? undefined : `hitDice.${index}.${field}`);
+---
+<div class="hit-dice">
+  <div class="bar-label">
+    <span>Dados de golpe</span>
+    <span class="pair">
+      <input class="edit narrow" type="number" min="0" data-hit-field="current" data-path={path('current')} value={pool?.current} aria-label="Dados de golpe disponibles" /> /
+      <input class="edit narrow" type="number" min="1" max="20" data-hit-field="max" data-path={path('max')} value={pool?.max} aria-label="Dados de golpe máximos" /> ·
+      <select class="edit" data-hit-field="die" data-path={path('die')} aria-label="Dado de golpe">
+        {['d6', 'd8', 'd10', 'd12'].map((die) => <option selected={pool?.die === die}>{die}</option>)}
+      </select>
+    </span>
+  </div>
+  <div class="bar blue"><span data-field="bar" style={pool && `width:${percent(pool)}`}></span></div>
+  <button type="button" class="button ghost die-hint" data-spend-hit-die>{spendLabel}</button>
+</div>
