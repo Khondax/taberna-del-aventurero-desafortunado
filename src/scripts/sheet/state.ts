@@ -2,7 +2,7 @@
 // guarda una copia para deshacer, normaliza, vuelve a pintar y programa el guardado.
 import { actions, getActionPath } from 'astro:actions';
 import { currentSchemaVersion } from '../../lib/ids';
-import type { Character, Pool, SheetFile } from '../../lib/sheet';
+import { noDeathSaves, type Character, type Pool, type SheetFile } from '../../lib/sheet';
 
 export const $ = <T extends Element = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -100,7 +100,10 @@ window.addEventListener('beforeunload', (event) => {
 const undoStack: Character[] = [];
 export const canUndo = () => undoStack.length > 0;
 
-/** Mantiene los contadores dentro de sus límites y quita los niveles de espacio a 0. */
+/**
+ * Mantiene los contadores dentro de sus límites y quita los niveles de espacio a 0. Con PG,
+ * las salvaciones contra la muerte vuelven a cero (cubre también editar los PG a mano).
+ */
 function normalize() {
   const clampPool = (pool: Pool) => {
     pool.max = Math.max(0, pool.max);
@@ -108,6 +111,7 @@ function normalize() {
   };
   state.level = clamp(state.level, 1, 20);
   clampPool(state.hp);
+  if (state.hp.current > 0) state.deathSaves = noDeathSaves();
   clampPool(state.hitDice);
   for (const [level, slots] of Object.entries(state.spellSlots)) {
     if (slots.max <= 0) delete state.spellSlots[level];

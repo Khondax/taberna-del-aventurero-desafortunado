@@ -363,6 +363,13 @@ export function deathSave(c: Character, die: number): DeathSaveOutcome {
   return saves.failures === 3 ? 'muerte' : 'fallo';
 }
 
+/** Conjuros en los que puede concentrarse (los de concentración), más el actual si ya no está en el grimorio. */
+export function concentrationOptions(c: Character): string[] {
+  const names = new Set(c.spells.filter((spell) => spell.concentration).map((spell) => spell.name));
+  if (c.concentration) names.add(c.concentration);
+  return [...names];
+}
+
 /** Estado de las salvaciones contra la muerte en palabras, o cadena vacía si no hay nada que contar. */
 export function deathSaveState(c: Character): string {
   if (c.hp.current > 0) return '';

@@ -151,6 +151,23 @@ textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
 .bar.blue span { background: #4c677a; }
 .bar.gold span { background: var(--brass); }
 .bar.critical span { background: var(--danger); }
+/* PG temporales: tramo de latón a continuación de los actuales y su campo junto a la cifra. */
+.hp-bar { display: flex; }
+.hp-bar span { flex: none; }
+.bar .temp { background: var(--brass); border-radius: 0; }
+.temp-hp { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; color: var(--brass); font-weight: 600; }
+.stat-note { display: block; margin-top: 2px; color: var(--danger); font: 10px var(--font-mono); }
+.stat-note:empty { display: none; }
+/* Salvaciones contra la muerte: solo a 0 PG. */
+.death-saves { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--danger); border-radius: 5px; background: var(--garnet-soft); }
+.death-saves legend { display: flex; align-items: center; gap: 8px; padding: 0 4px; font: 600 16px var(--font-garamond); color: var(--garnet); }
+.death-row { display: flex; align-items: center; gap: 6px; font: 11px var(--font-mono); text-transform: uppercase; color: var(--muted); }
+.death-row span { min-width: 4.5em; }
+.death-row input { width: 18px; height: 18px; margin: 0; accent-color: var(--success); }
+.death-row input.failures { accent-color: var(--danger); }
+.death-saves .button { margin-left: auto; }
+.concentration-row { display: flex; align-items: flex-end; gap: 8px; }
+.concentration-row .stacked { flex: 1; }
 .inline-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 #spendHitDie { margin-top: 6px; }
 .section-heading { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--line); margin: 22px 0 10px; }
@@ -165,6 +182,7 @@ textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
 .dice-toast { position: fixed; right: 20px; bottom: 20px; z-index: 10; max-width: min(560px, calc(100vw - 40px)); background: var(--garnet); color: #fff; padding: 12px 12px 12px 16px; border-radius: 6px; display: flex; align-items: center; gap: 14px; font: 12px/1.4 var(--font-mono); box-shadow: 0 16px 32px -4px #23140a40; }
 .dice-toast strong { color: var(--brass-soft); font: 700 28px var(--font-mono); white-space: nowrap; }
 .dice-toast .icon-button { flex: none; background: transparent; border-color: #ffffff40; color: #fff; }
+.dice-toast .button { flex: none; padding: 7px 10px; }
 .feature-list { display: grid; gap: 9px; }
 .feature { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 11px 12px; background: var(--paper-low); border-left: 3px solid var(--brass); border-radius: 0 4px 4px 0; }
 .feature strong { display: block; font-family: var(--font-garamond); font-size: 17px; }

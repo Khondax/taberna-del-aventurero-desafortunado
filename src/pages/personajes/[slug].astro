@@ -9,6 +9,7 @@ import { readSheet } from '../../lib/store';
 import {
   abilities,
   abilityNames,
+  concentrationOptions,
   featureRow,
   historyRow,
   initials,
@@ -87,20 +88,38 @@ const identity = [
               <label class="ac-bonus">otros <input class="edit narrow" type="number" min="-10" max="20" data-path="acBonus" value={c.acBonus} aria-label="Otros bonificadores a la CA" /></label>
             </div>
             <div class="stat-box"><small>Iniciativa</small><strong data-bind="initiative">{text.initiative}</strong></div>
-            <label class="stat-box"><small>Velocidad</small><input class="edit" data-path="speed" value={c.speed} /></label>
+            <label class="stat-box"><small>Velocidad</small><input class="edit" data-path="speed" value={c.speed} /><span class="stat-note" data-bind="speedNote">{text.speedNote}</span></label>
             <div class="stat-box"><small>Percepción pasiva</small><strong data-bind="passivePerception">{text.passivePerception}</strong></div>
           </div>
 
           <div class="bar-label">
             <span>Puntos de golpe</span>
-            <span class="pair"><input class="edit narrow" type="number" min="0" data-path="hp.current" value={c.hp.current} aria-label="PG actuales" /> / <input class="edit narrow" type="number" min="1" data-path="hp.max" value={c.hp.max} aria-label="PG máximos" /></span>
+            <span class="pair">
+              <input class="edit narrow" type="number" min="0" data-path="hp.current" value={c.hp.current} aria-label="PG actuales" /> /
+              <input class="edit narrow" type="number" min="1" data-path="hp.max" value={c.hp.max} aria-label="PG máximos" />
+              <label class="temp-hp">+ <input class="edit narrow" type="number" min="0" data-path="hp.temp" value={c.hp.temp} aria-label="PG temporales" /> temp.</label>
+            </span>
           </div>
-          <div class="bar"><span data-bar="hp" style={`width:${bars.hp}`}></span></div>
-          <form class="inline-form" id="hpForm">
+          <div class="bar hp-bar"><span data-bar="hp" style={`width:${bars.hp}`}></span><span class="temp" data-bar="hpTemp" style={`width:${bars.hpTemp}`}></span></div>
+          <form class="inline-form hp-form" id="hpForm">
             <input class="field narrow" type="number" name="amount" min="1" step="1" value="1" required aria-label="Cantidad de PG" />
             <button class="button secondary" name="direction" value="-1">− Daño</button>
             <button class="button secondary" name="direction" value="1">＋ Curar</button>
+            <button class="button ghost" name="direction" value="temp" title="Los PG temporales no se acumulan: te quedas con el valor mayor">＋ PG temp.</button>
           </form>
+
+          <fieldset class="death-saves" id="deathSaves" hidden={c.hp.current > 0}>
+            <legend>Salvaciones contra la muerte <span class="tag" data-bind="deathState">{text.deathState}</span></legend>
+            {(['successes', 'failures'] as const).map((kind) => (
+              <div class="death-row">
+                <span>{kind === 'successes' ? 'Éxitos' : 'Fallos'}</span>
+                {[1, 2, 3].map((n) => (
+                  <input type="checkbox" class={kind} data-death={kind} data-n={n} checked={c.deathSaves[kind] >= n} aria-label={`${kind === 'successes' ? 'Éxito' : 'Fallo'} ${n}`} />
+                ))}
+              </div>
+            ))}
+            <button type="button" class="button secondary die-hint" id="rollDeathSave">Tirar salvación</button>
+          </fieldset>
 
           <div class="bar-label">
             <span>Dados de golpe</span>
@@ -164,6 +183,21 @@ const identity = [
       </div>
 
       <div class="column">
+        <aside class="panel" id="enPartida">
+          <div class="panel-header"><h2>Concentración y estados</h2></div>
+          <div class="panel-body">
+            <div class="concentration-row">
+              <label class="stacked">Concentración
+                <select class="field" data-path="concentration">
+                  <option value="">Ninguna</option>
+                  {concentrationOptions(c).map((name) => <option selected={c.concentration === name}>{name}</option>)}
+                </select>
+              </label>
+              <button type="button" class="button ghost" id="endConcentration" disabled={!c.concentration}>Terminar</button>
+            </div>
+          </div>
+        </aside>
+
         <aside class="panel">
           <div class="panel-header"><h2>Ataques</h2><button class="button ghost" data-pick="weapons">＋ Añadir arma</button></div>
           <div class="panel-body"><ul class="item-list" id="weapons" data-empty="Sin armas. Añade una del listado.">
@@ -267,6 +301,7 @@ const identity = [
 
   <output class="dice-toast" id="rollResult" aria-live="polite" hidden>
     <span id="rollLabel"></span><strong id="rollValue"></strong>
+    <button type="button" class="button secondary" id="rollAction" hidden></button>
     <button type="button" class="icon-button" id="closeRoll" aria-label="Cerrar resultado">×</button>
   </output>
   <div class="tooltip" id="tip" role="tooltip" popover="manual"></div>

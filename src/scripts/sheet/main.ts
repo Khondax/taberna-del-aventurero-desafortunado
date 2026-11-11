@@ -4,7 +4,12 @@
 import {
   abilityMod,
   abilityNames,
+  concentrationOptions,
+  deathSave,
+  exhaustionPenalty,
   featureRow,
+  gainTempHp,
+  heal,
   hasPactMagic,
   historyRow,
   initials,
@@ -27,10 +32,12 @@ import {
   spellcastingMod,
   spellRow,
   spellSaveDC,
+  takeDamage,
   weaponAttack,
   weaponDamageBonus,
   weaponRow,
   type Ability,
+  type DeathSaveOutcome,
   type Pool,
   type ResourceRow,
   type Row,
@@ -101,6 +108,13 @@ onRender(() => {
   renderList('history', 'plainTemplate', state.history.map(historyRow).reverse(), (row, data) => fillRow(row, data));
   filterInputs.forEach(applyFilter);
 
+  // Las opciones de concentración se rehacen solo si cambian, para no cerrar el desplegable.
+  const concentration = $<HTMLSelectElement>('[data-path="concentration"]');
+  const options = ['', ...concentrationOptions(state)];
+  if ([...concentration.options].map((option) => option.value).join('\n') !== options.join('\n')) {
+    concentration.replaceChildren(...options.map((name) => new Option(name || 'Ninguna', name)));
+  }
+
   const text = liveText(state);
   const bars = liveBars(state);
   document.querySelectorAll<HTMLElement>('[data-bind]').forEach((el) => {
@@ -118,6 +132,13 @@ onRender(() => {
     button.title = proficiencyLabels[level];
     button.setAttribute('aria-pressed', String(level > 0));
   });
+
+  $('#deathSaves').hidden = state.hp.current > 0;
+  document.querySelectorAll<HTMLInputElement>('[data-death]').forEach((box) => {
+    box.checked = state.deathSaves[box.dataset.death as 'successes' | 'failures'] >= Number(box.dataset.n);
+  });
+  $<HTMLButtonElement>('#rollDeathSave').disabled = state.deathSaves.stable || state.deathSaves.failures >= 3;
+  $<HTMLButtonElement>('#endConcentration').disabled = !state.concentration;
 
   $<HTMLButtonElement>('#undo').disabled = !canUndo();
   $<HTMLButtonElement>('#spendHitDie').disabled = state.hitDice.current === 0 || state.hp.current === state.hp.max;
@@ -208,17 +229,29 @@ filterInputs.forEach((input) => input.addEventListener('input', () => applyFilte
 // --- Tiradas ---------------------------------------------------------------------------
 
 const toast = $('#rollResult');
-function showResult(label: string, value: string) {
+const toastAction = $<HTMLButtonElement>('#rollAction');
+let runToastAction: (() => void) | null = null;
+/** Muestra un resultado. `action` añade un botón para el siguiente paso (p. ej. la salvación de concentración). */
+function showResult(label: string, value: string, action?: { label: string; run: () => void }) {
   $('#rollLabel').textContent = label;
   $('#rollValue').textContent = value;
+  toastAction.hidden = !action;
+  toastAction.textContent = action?.label ?? '';
+  runToastAction = action?.run ?? null;
   toast.hidden = false;
 }
+toastAction.addEventListener('click', () => runToastAction?.());
 $('#closeRoll').addEventListener('click', () => (toast.hidden = true));
 
 const d20 = () => rollExpression('1d20')!.total;
+/** Texto del agotamiento para las tiradas d20, que ya lo restan en `bonus`. */
+const exhaustionText = () => (state.exhaustion ? ` (agotamiento −${exhaustionPenalty(state)})` : '');
+/** Prueba d20 + `bonus` − agotamiento. Devuelve el total. */
 const check = (label: string, bonus: number) => {
   const die = d20();
-  showResult(`${label} · d20 [${die}] ${signed(bonus)}${die === 20 ? ' · ¡20 natural!' : die === 1 ? ' · 1 natural' : ''}`, String(die + bonus));
+  const total = bonus - exhaustionPenalty(state);
+  showResult(`${label} · d20 [${die}] ${signed(total)}${exhaustionText()}${die === 20 ? ' · ¡20 natural!' : die === 1 ? ' · 1 natural' : ''}`, String(die + total));
+  return die + total;
 };
 /** Tira daño; en un crítico se duplican los dados (no el modificador). */
 function rollDamage(dice: string, bonus: number, critical: boolean) {
@@ -235,10 +268,10 @@ function rollEntry(key: string) {
   if (kind === 'weapons') {
     const weapon = state.weapons[Number(id)];
     const die = d20();
-    const attack = die + weaponAttack(state, weapon);
+    const bonus = weaponAttack(state, weapon) - exhaustionPenalty(state);
     const damage = rollDamage(weapon.damage, weaponDamageBonus(state, weapon), die === 20);
     return showResult(
-      `${weapon.name} · ataque d20 [${die}] ${signed(weaponAttack(state, weapon))} = ${attack}${die === 20 ? ' · ¡crítico!' : ''} · daño ${damage?.text ?? weapon.damage}`,
+      `${weapon.name} · ataque d20 [${die}] ${signed(bonus)}${exhaustionText()} = ${die + bonus}${die === 20 ? ' · ¡crítico!' : ''} · daño ${damage?.text ?? weapon.damage}`,
       `${damage?.total ?? '?'} ${weapon.damageType}`.trim(),
     );
   }
@@ -248,12 +281,18 @@ function rollEntry(key: string) {
     let critical = false;
     if (spell.attack) {
       const die = d20();
+      const bonus = spellAttackBonus(state) - exhaustionPenalty(state);
       critical = die === 20;
-      parts.push(`ataque d20 [${die}] ${signed(spellAttackBonus(state))} = ${die + spellAttackBonus(state)}${critical ? ' · ¡crítico!' : ''}`);
+      parts.push(`ataque d20 [${die}] ${signed(bonus)}${exhaustionText()} = ${die + bonus}${critical ? ' · ¡crítico!' : ''}`);
     }
     if (spell.save) parts.push(`salvación de ${abilityNames[spell.save]} CD ${spellSaveDC(state)}`);
     const effect = spell.effect ? rollDamage(spellDice(state, spell), spell.effect.addModifier ? spellcastingMod(state) : 0, critical) : null;
     if (effect) parts.push(effect.text);
+    // Lanzar un conjuro de concentración sustituye al anterior.
+    if (spell.concentration && state.concentration !== spell.name) {
+      parts.push(state.concentration ? `concentración (sustituye a ${state.concentration})` : 'concentración');
+      update(() => (state.concentration = spell.name));
+    }
     return showResult(parts.join(' · '), effect ? `${effect.total} ${spell.effect!.type}` : '—');
   }
 }
@@ -266,13 +305,69 @@ root.addEventListener('click', (event) => {
 
 // --- Puntos de golpe, recursos y descansos -------------------------------------------------
 
-$<HTMLFormElement>('#hpForm').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const amount = Number(new FormData(event.currentTarget as HTMLFormElement).get('amount'));
-  const direction = Number((event.submitter as HTMLButtonElement | null)?.value ?? -1);
-  update(() => (state.hp.current = clamp(state.hp.current + direction * amount, 0, state.hp.max)));
-  showResult(`${direction < 0 ? 'Daño' : 'Curación'} · ${amount}`, `${state.hp.current} PG`);
+const hpText = () => `${state.hp.current} PG${state.hp.temp ? ` + ${state.hp.temp} temp.` : ''}`;
+
+/** Salvación de Constitución para mantener la concentración; si falla, la pierde. */
+function rollConcentration(dc: number) {
+  const spell = state.concentration;
+  if (!spell) return;
+  const total = check(`Concentración en ${spell} · salvación de Constitución CD ${dc}`, saveBonus(state, 'con'));
+  if (total < dc) {
+    update(() => (state.concentration = null));
+    $('#rollLabel').textContent += ` · pierdes la concentración`;
+  } else $('#rollLabel').textContent += ` · mantienes la concentración`;
+}
+
+/** Daño, curación o PG temporales desde los formularios de PG (`.hp-form`). */
+function applyHp(direction: string, amount: number) {
+  if (direction === 'temp') {
+    update(() => gainTempHp(state, amount));
+    return showResult(`PG temporales · ${amount} (no se acumulan: queda el mayor)`, hpText());
+  }
+  if (direction === '1') {
+    update(() => heal(state, amount));
+    return showResult(`Curación · ${amount}`, hpText());
+  }
+  const wasDown = state.hp.current === 0;
+  const failures = state.deathSaves.failures;
+  let dc = null as number | null;
+  update(() => (dc = takeDamage(state, amount)));
+  const parts = [`Daño · ${amount}`];
+  if (wasDown && state.deathSaves.failures > failures) parts.push('fallo de salvación contra la muerte');
+  else if (state.hp.current === 0) parts.push('inconsciente');
+  if (dc === null) return showResult(parts.join(' · '), hpText());
+  const save = dc;
+  parts.push(`concentración en ${state.concentration}: salvación de Constitución CD ${save}`);
+  showResult(parts.join(' · '), hpText(), { label: `Tirar salvación (CD ${save})`, run: () => rollConcentration(save) });
+}
+
+document.querySelectorAll<HTMLFormElement>('.hp-form').forEach((form) =>
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const amount = Number(new FormData(form).get('amount'));
+    applyHp((event.submitter as HTMLButtonElement | null)?.value ?? '-1', amount);
+  }),
+);
+
+// Casillas de salvación contra la muerte: marcar la n.ª deja n; desmarcarla, n − 1.
+root.addEventListener('change', (event) => {
+  const box = event.target as HTMLInputElement;
+  const kind = box.dataset.death as 'successes' | 'failures' | undefined;
+  if (!kind) return;
+  update(() => (state.deathSaves[kind] = Number(box.dataset.n) - (box.checked ? 0 : 1)));
 });
+
+const deathSaveText: Record<DeathSaveOutcome, string> = { recupera: '¡20 natural! Recuperas 1 PG', exito: 'éxito', estable: 'tres éxitos: estabilizado', fallo: 'fallo', muerte: 'tres fallos: ha muerto' };
+$('#rollDeathSave').addEventListener('click', () => {
+  const die = d20();
+  let outcome = 'fallo' as DeathSaveOutcome;
+  update(() => (outcome = deathSave(state, die)));
+  const penalty = state.exhaustion ? ` ${signed(-exhaustionPenalty(state))}${exhaustionText()}` : '';
+  const result = die === 1 ? '1 natural: dos fallos' : deathSaveText[outcome];
+  showResult(`Salvación contra la muerte · d20 [${die}]${penalty} · ${result}`, outcome === 'recupera' ? '1 PG' : String(die - exhaustionPenalty(state)));
+});
+
+$('#endConcentration').addEventListener('click', () => update(() => (state.concentration = null)));
 
 $('#spendHitDie').addEventListener('click', () => {
   const die = rollExpression(`1${state.hitDice.die}`)!.total;
@@ -339,10 +434,13 @@ $('#shortRest').addEventListener('click', () => {
 $('#longRest').addEventListener('click', () => {
   update(() => {
     state.hp.current = state.hp.max;
+    state.hp.temp = 0;
     state.hitDice.current = state.hitDice.max;
     Object.values(state.spellSlots).forEach((slots) => (slots.current = slots.max));
     usesEntries().forEach((entry) => entry.uses!.recovery !== 'ninguna' && (entry.uses!.current = entry.uses!.max));
-    log('Descanso largo', 'PG, dados de golpe, espacios y usos restaurados');
+    const exhausted = state.exhaustion > 0;
+    if (exhausted) state.exhaustion -= 1;
+    log('Descanso largo', `PG, dados de golpe, espacios y usos restaurados${exhausted ? ' · agotamiento −1' : ''}`);
   });
   showResult('Descanso largo · todo restaurado', '✓');
 });
