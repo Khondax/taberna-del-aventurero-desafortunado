@@ -18,16 +18,16 @@ No hay cuentas ni permisos: cualquiera con acceso a la red puede ver y editar to
 ## Desarrollo
 
 ```bash
-npm install
-npm run dev      # http://localhost:4321 y en la IP de la máquina
-npm run check    # tipos
-npm run build
+pnpm install
+pnpm dev         # http://localhost:4321 y en la IP de la máquina
+pnpm check       # tipos
+pnpm build
 ```
 
 En mint-node, el servidor de desarrollo corre como unidad transitoria de systemd de usuario, para que no dependa de la terminal ni de la sesión del agente que lo lanzó. No sobrevive a un reinicio.
 
 ```bash
-systemd-run --user --unit=taberna-dev --working-directory="$PWD" --setenv=PATH="$PATH" npm run dev -- --port 4321
+systemd-run --user --unit=taberna-dev --working-directory="$PWD" --setenv=PATH="$PATH" pnpm dev --port 4321
 systemctl --user status taberna-dev    # estado
 journalctl --user -u taberna-dev -f    # logs
 systemctl --user stop taberna-dev      # parar
@@ -36,9 +36,9 @@ systemctl --user stop taberna-dev      # parar
 ## Producción (mint-node)
 
 ```bash
-npm ci
-npm run build
-HOST=0.0.0.0 PORT=4321 DATA_DIR=/ruta/a/fichas npm start
+pnpm install --frozen-lockfile
+pnpm build
+HOST=0.0.0.0 PORT=4321 DATA_DIR=/ruta/a/fichas pnpm start
 ```
 
 - `DATA_DIR` es la carpeta de las fichas. Por defecto, `data/personajes` relativo al directorio de arranque. Está fuera de git, así que no aparece entre los cambios del repositorio.
