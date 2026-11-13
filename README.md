@@ -44,14 +44,7 @@ pnpm build
 
 Las fuentes (EB Garamond, Hanken Grotesk y JetBrains Mono) se configuran en `astro.config.mjs` con la API de fuentes de Astro. Se descargan de Google Fonts la primera vez que se compila o se arranca `pnpm dev`, quedan en caché (`node_modules/.astro/` y `.astro/`) y la app las sirve desde `/_astro/fonts/`, así que en la mesa no hace falta internet. En CSS se usan con `var(--font-garamond)`, `var(--font-hanken)` y `var(--font-mono)`.
 
-En mint-node, el servidor de desarrollo corre como unidad transitoria de systemd de usuario, para que no dependa de la terminal ni de la sesión del agente que lo lanzó. No sobrevive a un reinicio.
-
-```bash
-systemd-run --user --unit=taberna-dev --working-directory="$PWD" --setenv=PATH="$PATH" pnpm dev --port 4321
-systemctl --user status taberna-dev    # estado
-journalctl --user -u taberna-dev -f    # logs
-systemctl --user stop taberna-dev      # parar
-```
+En mint-node, el servidor de desarrollo del checkout principal se arranca y se para desde el [dashboard de mint-node](http://mint-node), en el puerto 5040 (ver [En mint-node](#en-mint-node)).
 
 ## Tests
 
@@ -78,36 +71,17 @@ HOST=0.0.0.0 PORT=4321 DATA_DIR=/ruta/a/fichas pnpm start
 - Para hacer copia de seguridad, basta con copiar esa carpeta.
 - Las copias automáticas y la papelera se guardan dentro de ella (ver [Copias de seguridad](#copias-de-seguridad)).
 
-### Servicio permanente
+### En mint-node
 
-En mint-node, el build se sirve con la unidad de systemd de usuario `deploy/taberna.service`. Arranca con el sistema y se reinicia si falla. Sirve el checkout principal en el puerto 4321 y guarda las fichas en `~/.local/share/taberna/personajes`.
+El [dashboard de mint-node](http://mint-node) arranca y para el checkout principal. Su código está en `~/Projects/Coding projects/mint-node-dashboard`. Nada arranca solo con el sistema.
 
-La unidad usa la ruta absoluta de Node (`~/.nvm/versions/node/v26.12.0/bin/node`). Si cambias de versión de Node, actualiza `ExecStart` y vuelve a instalarla.
+- **Producción** (puerto 5041): instala dependencias, compila y sirve el build con `DATA_DIR=~/.local/share/taberna/personajes`. Si el checkout avanza mientras corre, el panel avisa de que el build está desactualizado y lo recompila al reiniciarlo.
+- **Desarrollo** (puerto 5040): `pnpm dev` con las fichas de `data/personajes`.
+- **Rama**: desde el panel se ve la rama del checkout principal, se cambia y se traen cambios. Producción compila la rama que esté activa.
 
-Instalar y activar (desde el checkout principal):
+Cada modo es una unidad transitoria de systemd de usuario (`dash-taberna-prod`, `dash-taberna-dev`), con sus logs en el panel o en `journalctl --user -u dash-taberna-prod`.
 
-```bash
-pnpm install --frozen-lockfile && pnpm build
-systemctl --user stop taberna-dev                # libera el puerto 4321 si corre el servidor de desarrollo
-mkdir -p ~/.local/share/taberna
-cp -a data/personajes ~/.local/share/taberna/    # migra las fichas actuales ANTES del primer arranque
-cp deploy/taberna.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable --now taberna
-loginctl enable-linger "$USER"                   # para que arranque sin iniciar sesión (basta una vez)
-```
-
-Si `~/.local/share/taberna/personajes` no existe al arrancar, el servidor la crea con las fichas de ejemplo. Por eso hay que copiar las fichas reales antes de activarlo.
-
-Actualizar a una versión nueva:
-
-```bash
-git pull
-pnpm install --frozen-lockfile && pnpm build
-systemctl --user restart taberna
-```
-
-Estado y logs: `systemctl --user status taberna` y `journalctl --user -u taberna -f`. Si cambias la plantilla, vuelve a copiarla y ejecuta `systemctl --user daemon-reload` antes de reiniciar.
+Si `~/.local/share/taberna/personajes` no existe al arrancar producción, el servidor la crea con las fichas de ejemplo.
 
 ## Datos
 
@@ -162,7 +136,6 @@ Las pestañas que tuvieran la ficha abierta detectan el cambio de versión al gu
   - `tooltip.ts` y `level-up.ts`: el tooltip y el asistente de subida de nivel (con la clase en la que se sube).
   - `manage.ts`: pestaña Gestión (exportar, importar y eliminar).
 - `tests/`: tests unitarios (`unit/`), de extremo a extremo (`e2e/`) y archivos de prueba (`fixtures/`).
-- `deploy/taberna.service`: unidad de systemd de usuario del servicio de producción.
 - `stitch_gestor_de_rol_medieval/`: referencia visual (capturas, HTML y `tome_grimoire/DESIGN.md`).
 
 ## Forma de trabajar (personas y agentes)

@@ -50,7 +50,7 @@ Antes de migrar conviene tener unos tests end-to-end de la ficha (tiradas, edici
 - CA calculada desde la armadura y el escudo equipados, con Defensa sin armadura de bárbaro y monje.
 - Espacios al subir de nivel con las tablas de lanzador completo, medio (paladín, explorador) y magia de pacto (brujo, que los recupera en descanso corto).
 - Multiclase: clases con subclase y nivel, nivel total, salvaciones de la primera clase, dados de golpe por tipo, espacios con el nivel de lanzador combinado, magia de pacto aparte (`pactSlots`), CD y ataque por clase si las aptitudes difieren, y subida de nivel que pregunta en qué clase se sube.
-- Servicio permanente de producción en mint-node con una unidad de systemd de usuario (`deploy/taberna.service`).
+- Producción y desarrollo en mint-node gestionados desde el dashboard de mint-node (`mint-node-dashboard`).
 - Copias automáticas de cada ficha al guardar (`.historial/`, una cada 10 minutos como mucho, las 30 últimas) y papelera para las fichas eliminadas.
 - Tests en el repositorio: unitarios con Vitest (`pnpm test`) y de extremo a extremo con Playwright (`pnpm test:e2e`).
 - Trasfondos y especies del SRD 5.2 con sus datos en la creación (`src/data/origins.ts`): habilidades, bonificador limitado y dote de origen del trasfondo; velocidad y rasgos de la especie. Los caseros siguen siendo texto libre.
